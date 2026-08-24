@@ -66,8 +66,8 @@ export function TabBar() {
           >
             <MealPrepIcon size={23} />
           </motion.button>
-          <span className="mt-2.5 text-caption font-semibold text-primary-700 leading-none text-center">
-            Cosa mangiamo?
+          <span className="mt-2.5 text-caption font-semibold text-primary-700 leading-none text-center whitespace-nowrap">
+            Nuovo piano
           </span>
         </li>
 
