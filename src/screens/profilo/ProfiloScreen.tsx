@@ -12,16 +12,18 @@ import {
   Upload,
   Trash2,
 } from "lucide-react";
-import { PageHeader } from "../../components/PageHeader";
 import { SettingsSection } from "../../components/SettingsSection";
 import { SettingsRow } from "../../components/SettingsRow";
 import { Switch } from "../../components/Switch";
 import { BottomSheet } from "../../components/BottomSheet";
 import { Button } from "../../components/Button";
+import { ProfileAvatar } from "../../components/ProfileAvatar";
+import { AVATAR_OPZIONI, AvatarGlyph } from "../../components/AvatarGlyph";
 import { useProfileStore } from "../../store/profileStore";
 import { useUiStore } from "../../store/uiStore";
 import { useToastStore } from "../../store/toastStore";
 import type { Profilo } from "../../types";
+import { cn } from "../../lib/cn";
 import { AnagraficaStep } from "../onboarding/steps/AnagraficaStep";
 import { NucleoStep } from "../onboarding/steps/NucleoStep";
 import { TempoStep } from "../onboarding/steps/TempoStep";
@@ -79,6 +81,7 @@ export function ProfiloScreen() {
   const [editing, setEditing] = useState<Sezione>(null);
   const [draft, setDraft] = useState<Profilo>(profilo);
   const [confermaReset, setConfermaReset] = useState(false);
+  const [avatarSheetOpen, setAvatarSheetOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openSheet = (sezione: Exclude<Sezione, null>) => {
@@ -123,9 +126,34 @@ export function ProfiloScreen() {
     window.location.reload();
   };
 
+  const nomeCompleto = `${profilo.nome} ${profilo.cognome}`.trim();
+
   return (
     <div className="pb-8">
-      <PageHeader title="Profilo" />
+      <div className="flex flex-col items-center text-center pt-9 pb-6 px-4">
+        <ProfileAvatar
+          avatarId={profilo.avatarId}
+          nome={profilo.nome}
+          cognome={profilo.cognome}
+          onClick={() => setAvatarSheetOpen(true)}
+        />
+        <button
+          onClick={() => setAvatarSheetOpen(true)}
+          className="mt-2.5 text-caption font-semibold text-accent-600"
+        >
+          Cambia avatar
+        </button>
+        <h1 className="mt-3 text-display-sm font-display font-semibold text-paper-900">
+          {nomeCompleto || "Il tuo profilo"}
+        </h1>
+        {(profilo.eta > 0 || profilo.residenza) && (
+          <p className="text-body-sm text-paper-500 mt-1">
+            {[profilo.eta > 0 ? `${profilo.eta} anni` : null, profilo.residenza || null]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        )}
+      </div>
 
       <div className="px-4">
         <SettingsSection title="Dati personali">
@@ -236,6 +264,49 @@ export function ProfiloScreen() {
             </Button>
           </div>
         )}
+      </BottomSheet>
+
+      <BottomSheet open={avatarSheetOpen} onClose={() => setAvatarSheetOpen(false)} title="Scegli il tuo avatar">
+        <div className="grid grid-cols-4 gap-3.5 pt-1">
+          <button
+            onClick={() => {
+              updateProfilo({ avatarId: null });
+              setAvatarSheetOpen(false);
+            }}
+            className="flex flex-col items-center gap-1.5"
+          >
+            <span
+              className={cn(
+                "h-14 w-14 rounded-full bg-primary-600 flex items-center justify-center text-paper-50 font-display font-semibold",
+                profilo.avatarId === null && "ring-2 ring-accent-500 ring-offset-2 ring-offset-paper-0",
+              )}
+            >
+              {`${profilo.nome.trim().charAt(0)}${profilo.cognome.trim().charAt(0)}`.toUpperCase() || "🙂"}
+            </span>
+            <span className="text-caption text-paper-500">Iniziali</span>
+          </button>
+          {AVATAR_OPZIONI.map((opzione) => (
+            <button
+              key={opzione.id}
+              onClick={() => {
+                updateProfilo({ avatarId: opzione.id });
+                setAvatarSheetOpen(false);
+              }}
+              className="flex flex-col items-center gap-1.5"
+            >
+              <span
+                className={cn(
+                  "h-14 w-14 rounded-full flex items-center justify-center text-primary-900",
+                  opzione.bg,
+                  profilo.avatarId === opzione.id && "ring-2 ring-accent-500 ring-offset-2 ring-offset-paper-0",
+                )}
+              >
+                <AvatarGlyph id={opzione.id} size={28} />
+              </span>
+              <span className="text-caption text-paper-500 text-center leading-tight">{opzione.label}</span>
+            </button>
+          ))}
+        </div>
       </BottomSheet>
     </div>
   );

@@ -32,11 +32,22 @@ export type Reparto =
 
 export type IncisivitaVoti = "off" | "preferisci-ben-votate" | "solo-minimo";
 
+export type AvatarId =
+  | "chef"
+  | "fornaio"
+  | "contadina"
+  | "pizzaiolo"
+  | "nonna"
+  | "barista"
+  | "pescivendolo"
+  | "macellaio";
+
 export type Profilo = {
   nome: string;
   cognome: string;
   eta: number;
   residenza: string;
+  avatarId: AvatarId | null;
   nucleo: {
     persone: number;
     tipo: TipoNucleo;

@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
-@import "@fontsource/fraunces/400.css";
-@import "@fontsource/fraunces/500.css";
-@import "@fontsource/fraunces/600.css";
-@import "@fontsource/fraunces/700.css";
-@import "@fontsource/fraunces/400-italic.css";
-@import "@fontsource/plus-jakarta-sans/400.css";
-@import "@fontsource/plus-jakarta-sans/500.css";
-@import "@fontsource/plus-jakarta-sans/600.css";
-@import "@fontsource/plus-jakarta-sans/700.css";
-@import "@fontsource/plus-jakarta-sans/800.css";
+@import "@fontsource/lora/400.css";
+@import "@fontsource/lora/500.css";
+@import "@fontsource/lora/600.css";
+@import "@fontsource/lora/700.css";
+@import "@fontsource/lora/400-italic.css";
+@import "@fontsource/lora/600-italic.css";
+@import "@fontsource/figtree/400.css";
+@import "@fontsource/figtree/500.css";
+@import "@fontsource/figtree/600.css";
+@import "@fontsource/figtree/700.css";
+@import "@fontsource/figtree/800.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -17,8 +18,8 @@
 /* Design system tokens — la fonte unica di verità per ogni componente */
 /* ------------------------------------------------------------------ */
 @theme {
-  --font-display: "Fraunces", ui-serif, serif;
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Lora", ui-serif, serif;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
 
   /* Primario — verde profondo "bosco" */
   --color-primary-50: #eef4f0;
@@ -33,17 +34,29 @@
   --color-primary-900: #12271c;
   --color-primary-950: #0b1a12;
 
-  /* Accento — tangerine vivo */
-  --color-accent-50: #fff3ea;
-  --color-accent-100: #ffe0c7;
-  --color-accent-200: #ffc08c;
-  --color-accent-300: #ff9f57;
-  --color-accent-400: #ff8330;
-  --color-accent-500: #f9691a;
-  --color-accent-600: #d6520f;
-  --color-accent-700: #a83f0d;
-  --color-accent-800: #782d0a;
-  --color-accent-900: #4d1c07;
+  /* Accento — terracotta caldo, non più tangerine acceso */
+  --color-accent-50: #fdf0e6;
+  --color-accent-100: #fbdec2;
+  --color-accent-200: #f5bb8a;
+  --color-accent-300: #ec9459;
+  --color-accent-400: #dd7638;
+  --color-accent-500: #cf6127;
+  --color-accent-600: #b04f1d;
+  --color-accent-700: #8a3f18;
+  --color-accent-800: #653013;
+  --color-accent-900: #42200d;
+
+  /* Salvia/oliva — superfici secondarie calde, tono su tono col verde primario */
+  --color-sage-50: #f3f3e7;
+  --color-sage-100: #e6e7cc;
+  --color-sage-200: #d0d3a4;
+  --color-sage-300: #b7bc7c;
+  --color-sage-400: #9da45f;
+  --color-sage-500: #838a4c;
+  --color-sage-600: #676d3b;
+  --color-sage-700: #4f542e;
+  --color-sage-800: #383c20;
+  --color-sage-900: #242714;
 
   /* Pop — accenti "cartoon" decorativi, usati con parsimonia */
   --color-pop-yellow-300: #ffe07a;
@@ -59,8 +72,8 @@
   --color-pop-sky-400: #74c8d6;
   --color-pop-sky-500: #45aebd;
 
-  /* Neutri "carta" — caldi, non grigio puro */
-  --color-paper-0: #ffffff;
+  /* Neutri "carta" — caldi, non grigio puro (né bianco puro) */
+  --color-paper-0: #fffbf3;
   --color-paper-50: #fbf8f2;
   --color-paper-100: #f4eee2;
   --color-paper-200: #e7dcc8;
@@ -86,10 +99,10 @@
   --radius-xl: 28px;
   --radius-2xl: 36px;
 
-  /* Ombre — tinta calda, mai nero puro */
-  --shadow-card: 0 1px 2px rgb(34 28 22 / 0.06), 0 4px 14px -4px rgb(34 28 22 / 0.10);
-  --shadow-elevated: 0 8px 16px -4px rgb(34 28 22 / 0.14), 0 20px 40px -12px rgb(34 28 22 / 0.20);
-  --shadow-sheet: 0 -8px 30px -6px rgb(34 28 22 / 0.24);
+  /* Ombre — tinta calda, mai nero puro, sempre diffuse */
+  --shadow-card: 0 2px 6px rgb(34 28 22 / 0.05), 0 10px 26px -10px rgb(34 28 22 / 0.12);
+  --shadow-elevated: 0 10px 24px -6px rgb(34 28 22 / 0.14), 0 30px 60px -18px rgb(34 28 22 / 0.22);
+  --shadow-sheet: 0 -10px 34px -8px rgb(34 28 22 / 0.22);
 
   /* Type scale semantica (font-size + line-height accoppiati) */
   --text-display-lg: 2.5rem;
@@ -183,10 +196,10 @@
   }
   .app-shell {
     @apply relative overflow-hidden bg-paper-50 shadow-elevated rounded-2xl;
-    --shell-margin-x: 14px;
-    --shell-margin-top: max(16px, env(safe-area-inset-top) + 6px);
-    --shell-margin-bottom: max(16px, env(safe-area-inset-bottom) + 6px);
-    width: min(440px, calc(100vw - var(--shell-margin-x) * 2));
+    --shell-margin-x: 8px;
+    --shell-margin-top: max(12px, env(safe-area-inset-top) + 4px);
+    --shell-margin-bottom: max(12px, env(safe-area-inset-bottom) + 4px);
+    width: min(460px, calc(100vw - var(--shell-margin-x) * 2));
     height: calc(100dvh - var(--shell-margin-top) - var(--shell-margin-bottom));
     margin: var(--shell-margin-top) auto var(--shell-margin-bottom);
   }

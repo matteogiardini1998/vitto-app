@@ -12,7 +12,8 @@ export type TagPreferenza =
   | "proteica"
   | "gut-friendly"
   | "ipocalorica"
-  | "vegetariana";
+  | "vegetariana"
+  | "vegana";
 
 export const TAG_PREFERENZA_LABEL: Record<TagPreferenza, string> = {
   veloce: "Veloci",
@@ -20,11 +21,12 @@ export const TAG_PREFERENZA_LABEL: Record<TagPreferenza, string> = {
   leggera: "Leggeri",
   estiva: "Estivi",
   invernale: "Invernali",
-  comfort: "Comfort-pesanti",
+  comfort: "Comfort",
   proteica: "Proteici-atletici",
   "gut-friendly": "Gut-friendly",
   ipocalorica: "Ipocalorici e a basso zucchero",
   vegetariana: "Vegetariani (anche se non sei vegetariano)",
+  vegana: "Vegani (anche se non sei vegano)",
 };
 
 export type TipoVincolo = "almeno" | "massimo" | "poco" | "molto";
@@ -93,6 +95,7 @@ function punteggioPreferenze(ricetta: Ricetta, preferenze: PreferenzeGenerazione
     if (tag === "veloce") s += ricetta.stile === "veloce" ? 2 : 0;
     else if (tag === "ricercata") s += ricetta.stile === "ricercata" ? 2 : 0;
     else if (tag === "vegetariana") s += ricetta.dieta === "vegetariana" || ricetta.dieta === "vegana" ? 2 : 0;
+    else if (tag === "vegana") s += ricetta.dieta === "vegana" ? 2 : 0;
     else s += ricetta.tags.includes(tag) ? 2 : 0;
   }
   for (const v of preferenze.vincoli) {

@@ -41,6 +41,7 @@ export function RicettarioScreen() {
     <div className="pb-8">
       <PageHeader
         title="Ricettario"
+        subtitle="La tua dispensa di ricette"
         action={
           <>
             <button

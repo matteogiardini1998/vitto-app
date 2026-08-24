@@ -24,7 +24,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
             onClick={onClose}
           />
           <motion.div
-            className="relative w-full max-w-[440px] max-h-[85dvh] bg-paper-0 rounded-t-xl shadow-sheet flex flex-col safe-bottom"
+            className="relative w-full max-w-[440px] max-h-[85dvh] bg-paper-0 rounded-t-2xl shadow-sheet flex flex-col safe-bottom"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}

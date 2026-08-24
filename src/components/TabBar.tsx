@@ -1,7 +1,8 @@
-import { CalendarDays, ShoppingBasket, BookOpen, UserRound, Sparkles, type LucideIcon } from "lucide-react";
+import { CalendarDays, ShoppingBasket, BookOpen, UserRound, type LucideIcon } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "../lib/cn";
+import { MealPrepIcon } from "./MealPrepIcon";
 
 const TABS_LEFT = [
   { to: "/meal-prep", label: "Piano Pasti", icon: CalendarDays },
@@ -44,28 +45,29 @@ export function TabBar() {
 
   return (
     <nav
-      className="relative z-30 bg-paper-0/95 backdrop-blur border-t border-paper-200"
+      className="relative z-30 bg-paper-0/95 backdrop-blur border-t border-paper-200 safe-bottom"
       aria-label="Navigazione principale"
     >
-      <ul className="grid grid-cols-5">
+      <ul className="grid grid-cols-5 px-3">
         {TABS_LEFT.map((t) => (
           <li key={t.to}>
             <TabItem {...t} />
           </li>
         ))}
 
-        <li className="relative flex flex-col items-center justify-end h-16 pb-1.5">
+        <li className="relative flex flex-col items-center justify-end h-16 pb-1">
           <motion.button
             onClick={() => navigate("/meal-prep/genera")}
             whileTap={{ scale: 0.87, borderRadius: "38%" }}
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
-            className="absolute -top-6 h-14 w-14 rounded-full bg-primary-700 text-paper-50 flex items-center justify-center shadow-elevated border-[3px] border-paper-0"
-            aria-label="Genera il tuo piano pasti"
+            className="absolute -top-7 h-14 w-14 rounded-full bg-primary-700 text-paper-50 flex items-center justify-center border-[3px] border-paper-0"
+            style={{ boxShadow: "0 6px 14px -4px rgb(34 28 22 / 0.32)" }}
+            aria-label="Cosa si mangia questa settimana?"
           >
-            <Sparkles size={23} />
+            <MealPrepIcon size={23} />
           </motion.button>
-          <span className="text-caption font-semibold text-primary-700 leading-none text-center">
-            Genera piano
+          <span className="mt-2.5 text-caption font-semibold text-primary-700 leading-none text-center">
+            Cosa mangiamo?
           </span>
         </li>
 

@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
-import { RotateCcw, ShoppingBasket, Plus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { RotateCcw, ShoppingBasket, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
 import { EmptyState } from "../../components/EmptyState";
 import { Card } from "../../components/Card";
 import { useShoppingStore } from "../../store/shoppingStore";
+import { useToastStore } from "../../store/toastStore";
 import { REPARTI, type VoceSpesa } from "../../types";
 import { VoceRow } from "./components/VoceRow";
 import { UsataDaSheet } from "./components/UsataDaSheet";
@@ -17,13 +18,35 @@ export function SpesaScreen() {
   const voci = useShoppingStore((s) => s.voci);
   const aggiungiManuale = useShoppingStore((s) => s.aggiungiManuale);
   const azzeraSpunte = useShoppingStore((s) => s.azzeraSpunte);
+  const svuotaTutto = useShoppingStore((s) => s.svuotaTutto);
+  const showToast = useToastStore((s) => s.show);
 
   const [nuovaVoce, setNuovaVoce] = useState("");
   const [voceUsataDa, setVoceUsataDa] = useState<VoceSpesa | null>(null);
   const [voceModifica, setVoceModifica] = useState<VoceSpesa | null>(null);
   const [vista, setVista] = useState<Vista>("reparto");
+  const [confermaSvuota, setConfermaSvuota] = useState(false);
 
   const prese = voci.filter((v) => v.presa).length;
+  const completata = voci.length > 0 && prese === voci.length;
+  const eraCompletataRef = useRef(false);
+
+  useEffect(() => {
+    if (completata && !eraCompletataRef.current) {
+      showToast("Fatto! Spesa completata 🎉");
+    }
+    eraCompletataRef.current = completata;
+  }, [completata, showToast]);
+
+  const handleSvuota = () => {
+    if (!confermaSvuota) {
+      setConfermaSvuota(true);
+      return;
+    }
+    svuotaTutto();
+    setConfermaSvuota(false);
+    showToast("Lista svuotata");
+  };
 
   const gruppi = useMemo(() => {
     return REPARTI.map((r) => ({
@@ -133,6 +156,23 @@ export function SpesaScreen() {
               </Card>
             </div>
           ))}
+        </div>
+      )}
+
+      {voci.length > 0 && (
+        <div className="px-4 mt-6">
+          <button
+            onClick={handleSvuota}
+            className={cn(
+              "w-full flex items-center justify-center gap-2 h-12 rounded-xl text-body-md font-semibold transition-colors",
+              confermaSvuota
+                ? "bg-danger-500 text-paper-50"
+                : "bg-danger-500/10 text-danger-500 active:bg-danger-500/15",
+            )}
+          >
+            <Trash2 size={17} />
+            {confermaSvuota ? "Tocca di nuovo per confermare" : "Svuota spesa"}
+          </button>
         </div>
       )}
 

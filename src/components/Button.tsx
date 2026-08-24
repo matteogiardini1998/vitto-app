@@ -16,15 +16,15 @@ const variantClasses: Record<Variant, string> = {
   primary:
     "bg-primary-700 text-paper-50 shadow-card active:bg-primary-800 disabled:bg-paper-300 disabled:text-paper-500",
   secondary:
-    "bg-paper-100 text-primary-800 border border-paper-200 active:bg-paper-200 disabled:text-paper-400",
+    "bg-sage-100 text-sage-800 border border-sage-200 active:bg-sage-200 disabled:bg-paper-100 disabled:text-paper-400 disabled:border-paper-200",
   ghost: "bg-transparent text-primary-700 active:bg-primary-50 disabled:text-paper-400",
   danger: "bg-transparent text-danger-500 active:bg-danger-500/10",
 };
 
 const sizeClasses: Record<Size, string> = {
-  md: "h-11 px-4 text-body-md rounded-md gap-2",
-  lg: "h-[52px] px-6 text-body-lg rounded-lg gap-2",
-  icon: "h-11 w-11 rounded-md",
+  md: "h-11 px-4 text-body-md rounded-lg gap-2",
+  lg: "h-[52px] px-6 text-body-lg rounded-xl gap-2",
+  icon: "h-11 w-11 rounded-lg",
 };
 
 export function Button({

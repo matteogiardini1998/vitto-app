@@ -1,5 +1,5 @@
-import { ChefHat } from "lucide-react";
 import { motion } from "framer-motion";
+import { MealPrepIcon } from "../../../components/MealPrepIcon";
 
 export function WelcomeStep() {
   return (
@@ -21,7 +21,7 @@ export function WelcomeStep() {
           className="absolute -bottom-1 -left-3 h-5 w-5 rounded-full bg-pop-berry-400"
         />
         <div className="h-20 w-20 rounded-2xl bg-primary-700 text-paper-50 flex items-center justify-center shadow-elevated">
-          <ChefHat size={36} strokeWidth={1.6} />
+          <MealPrepIcon size={40} />
         </div>
       </motion.div>
       <div>

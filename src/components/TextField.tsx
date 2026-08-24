@@ -15,7 +15,7 @@ export function TextField({ label, className, id, ...props }: TextFieldProps) {
       <input
         id={inputId}
         className={cn(
-          "h-[52px] rounded-md border border-paper-200 bg-paper-0 px-4 text-body-lg text-paper-900",
+          "h-[52px] rounded-lg border border-paper-200 bg-paper-0 px-4 text-body-lg text-paper-900",
           "placeholder:text-paper-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100",
           className,
         )}

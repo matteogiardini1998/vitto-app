@@ -25,7 +25,7 @@ export function SelectableCard({
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.12 }}
       className={cn(
-        "w-full flex items-center gap-3.5 rounded-lg border-2 p-4 text-left transition-colors",
+        "w-full flex items-center gap-3.5 rounded-xl border-2 p-4 text-left transition-colors",
         selected
           ? "border-primary-600 bg-primary-50"
           : "border-paper-200 bg-paper-0 active:bg-paper-100",
@@ -34,7 +34,7 @@ export function SelectableCard({
       {Icon && (
         <div
           className={cn(
-            "h-11 w-11 shrink-0 rounded-md flex items-center justify-center",
+            "h-11 w-11 shrink-0 rounded-lg flex items-center justify-center",
             selected ? "bg-primary-700 text-paper-50" : "bg-paper-100 text-paper-600",
           )}
         >

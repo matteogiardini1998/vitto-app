@@ -11,6 +11,7 @@ type ShoppingState = {
   toggleVoce: (id: string) => void;
   rimuoviVoce: (id: string) => void;
   azzeraSpunte: () => void;
+  svuotaTutto: () => void;
 };
 
 export const useShoppingStore = create<ShoppingState>()(
@@ -40,6 +41,7 @@ export const useShoppingStore = create<ShoppingState>()(
         set((s) => ({ voci: s.voci.map((v) => (v.id === id ? { ...v, presa: !v.presa } : v)) })),
       rimuoviVoce: (id) => set((s) => ({ voci: s.voci.filter((v) => v.id !== id) })),
       azzeraSpunte: () => set((s) => ({ voci: s.voci.map((v) => ({ ...v, presa: false })) })),
+      svuotaTutto: () => set({ voci: [] }),
     }),
     { name: "mealprep-spesa" },
   ),

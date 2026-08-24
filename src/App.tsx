@@ -12,6 +12,7 @@ import { RicettaFormScreen } from "./screens/ricettario/RicettaFormScreen";
 import { GeneraWizardScreen } from "./screens/mealprep/genera/GeneraWizardScreen";
 import { useProfileStore } from "./store/profileStore";
 import { useUiStore } from "./store/uiStore";
+import { PatternBackground } from "./components/PatternBackground";
 
 export function App() {
   const onboardingCompletato = useProfileStore((s) => s.profilo.onboardingCompletato);
@@ -21,33 +22,34 @@ export function App() {
     document.documentElement.classList.toggle("dark", tema === "scuro");
   }, [tema]);
 
-  if (!onboardingCompletato) {
-    return (
-      <Routes>
-        <Route element={<OnboardingLayout />}>
-          <Route path="*" element={<OnboardingScreen />} />
-        </Route>
-      </Routes>
-    );
-  }
-
   return (
-    <Routes>
-      <Route element={<OnboardingLayout />}>
-        <Route path="/onboarding" element={<OnboardingScreen />} />
-        <Route path="/ricettario/nuova" element={<RicettaFormScreen />} />
-        <Route path="/ricettario/:id" element={<RicettaDetailScreen />} />
-        <Route path="/ricettario/:id/modifica" element={<RicettaFormScreen />} />
-        <Route path="/meal-prep/genera" element={<GeneraWizardScreen />} />
-      </Route>
-      <Route element={<AppLayout />}>
-        <Route index element={<Navigate to="/meal-prep" replace />} />
-        <Route path="/meal-prep" element={<MealPrepScreen />} />
-        <Route path="/ricettario" element={<RicettarioScreen />} />
-        <Route path="/spesa" element={<SpesaScreen />} />
-        <Route path="/profilo" element={<ProfiloScreen />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/meal-prep" replace />} />
-    </Routes>
+    <>
+      <PatternBackground />
+      {!onboardingCompletato ? (
+        <Routes>
+          <Route element={<OnboardingLayout />}>
+            <Route path="*" element={<OnboardingScreen />} />
+          </Route>
+        </Routes>
+      ) : (
+        <Routes>
+          <Route element={<OnboardingLayout />}>
+            <Route path="/onboarding" element={<OnboardingScreen />} />
+            <Route path="/ricettario/nuova" element={<RicettaFormScreen />} />
+            <Route path="/ricettario/:id" element={<RicettaDetailScreen />} />
+            <Route path="/ricettario/:id/modifica" element={<RicettaFormScreen />} />
+            <Route path="/meal-prep/genera" element={<GeneraWizardScreen />} />
+          </Route>
+          <Route element={<AppLayout />}>
+            <Route index element={<Navigate to="/meal-prep" replace />} />
+            <Route path="/meal-prep" element={<MealPrepScreen />} />
+            <Route path="/ricettario" element={<RicettarioScreen />} />
+            <Route path="/spesa" element={<SpesaScreen />} />
+            <Route path="/profilo" element={<ProfiloScreen />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/meal-prep" replace />} />
+        </Routes>
+      )}
+    </>
   );
 }

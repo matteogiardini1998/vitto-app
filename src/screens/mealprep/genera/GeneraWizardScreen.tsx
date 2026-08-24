@@ -64,7 +64,7 @@ export function GeneraWizardScreen() {
     if (!risultato) return;
     applyPiano(risultato.piano);
     navigate("/meal-prep", { replace: true });
-    showToast("Piano pasti accettato!");
+    showToast("Fatto! Il tuo piano è pronto 🎉");
   };
 
   const titoli: Record<number, { title: string; subtitle?: string }> = {
