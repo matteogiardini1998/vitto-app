@@ -108,6 +108,28 @@ export type VoceSpesa = {
   usataDa?: { ricettaNome: string; chiaveSlot: string }[];
 };
 
+export type IconaDispensa = "credenza" | "frigo" | "casa" | "valigia" | "ufficio";
+
+export type VoceDispensa = {
+  id: string;
+  nome: string;
+  qta: number | null;
+  unita: string | null;
+  categoria: Reparto;
+  deperibile: boolean;
+  daConsumarePresto: boolean;
+  aggiuntaIl: string;
+  // TODO: scadenza?: string — data di scadenza opzionale, non ancora in UI.
+};
+
+export type Dispensa = {
+  id: string;
+  nome: string;
+  icona: IconaDispensa;
+  voci: VoceDispensa[];
+  creataIl: string;
+};
+
 export const GIORNI = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"] as const;
 export type Giorno = (typeof GIORNI)[number];
 
