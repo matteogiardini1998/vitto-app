@@ -4,6 +4,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { PAGE_ACCENT } from "../../components/WheelNav";
 import { Button } from "../../components/Button";
 import { DaySection } from "./components/DaySection";
+import { EquilibrioBadge } from "./components/EquilibrioBadge";
 import { AssignRecipeSheet } from "./components/AssignRecipeSheet";
 import { SlotActionsSheet } from "./components/SlotActionsSheet";
 import { MoveSlotSheet } from "./components/MoveSlotSheet";
@@ -70,13 +71,14 @@ export function MealPrepScreen() {
       <PageHeader title="Piano Pasti" accent={PAGE_ACCENT[0]} />
 
       {!pianoVuoto && (
-        <div className="px-4 mb-2 flex justify-center">
+        <div className="px-4 mb-3 flex items-center justify-between gap-2">
+          <EquilibrioBadge piano={piano} ricette={ricette} />
           <button
             onClick={handleSvuota}
-            className="flex items-center gap-1.5 text-body-sm font-medium text-paper-500 active:text-danger-500"
+            className="flex items-center gap-1.5 text-body-sm font-medium text-paper-500 active:text-danger-500 shrink-0"
           >
             <Trash2 size={14} />
-            {confermaSvuota ? "Tocca di nuovo per confermare" : "Svuota piano pasti"}
+            {confermaSvuota ? "Conferma" : "Svuota"}
           </button>
         </div>
       )}

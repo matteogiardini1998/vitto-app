@@ -13,6 +13,7 @@ import {
   Download,
   Upload,
   Trash2,
+  Info,
 } from "lucide-react";
 import { SettingsSection } from "../../components/SettingsSection";
 import { SettingsRow } from "../../components/SettingsRow";
@@ -85,6 +86,7 @@ export function ProfiloScreen() {
   const [draft, setDraft] = useState<Profilo>(profilo);
   const [confermaReset, setConfermaReset] = useState(false);
   const [avatarSheetOpen, setAvatarSheetOpen] = useState(false);
+  const [infoNutrizioneAperta, setInfoNutrizioneAperta] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openSheet = (sezione: Exclude<Sezione, null>) => {
@@ -234,6 +236,12 @@ export function ProfiloScreen() {
             />
           </div>
           <SettingsRow
+            label="Come calcoliamo equilibrio e valori"
+            value="Da dove vengono le stime nutrizionali"
+            icon={<Info size={20} className="text-primary-600" />}
+            onClick={() => setInfoNutrizioneAperta(true)}
+          />
+          <SettingsRow
             label="Esporta backup"
             value="Salva tutti i tuoi dati in un file JSON"
             icon={<Download size={20} className="text-primary-600" />}
@@ -319,6 +327,31 @@ export function ProfiloScreen() {
               <span className="text-caption text-paper-500 text-center leading-tight">{opzione.label}</span>
             </button>
           ))}
+        </div>
+      </BottomSheet>
+
+      <BottomSheet
+        open={infoNutrizioneAperta}
+        onClose={() => setInfoNutrizioneAperta(false)}
+        title="Come calcoliamo equilibrio e valori"
+      >
+        <div className="flex flex-col gap-3 text-body-md text-paper-700 pb-2">
+          <p>
+            I valori nutrizionali che vedi nelle ricette sono <strong>stime</strong>, calcolate dagli
+            ingredienti usando tabelle di composizione standard per alimenti generici. Non pesiamo il
+            tuo piatto: usiamo medie di letteratura, buone per farsi un'idea in cucina, non per un
+            referto di laboratorio.
+          </p>
+          <p>
+            Il punteggio "Equilibrio" nasconde regole ispirate alle linee guida italiane per una sana
+            alimentazione: un po' di pesce, un po' di legumi, tanta verdura, cereali vari, senza
+            esagerare con carne rossa o uova. Sono un consiglio di buon senso, non un obiettivo da
+            rincorrere a ogni costo.
+          </p>
+          <p className="text-body-sm text-paper-500">
+            MealPrep dà indicazioni generali di buon senso alimentare, non consigli medici o dietetici
+            personalizzati. Per esigenze di salute specifiche, parlane con un professionista.
+          </p>
         </div>
       </BottomSheet>
     </div>
