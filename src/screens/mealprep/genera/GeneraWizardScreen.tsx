@@ -14,6 +14,7 @@ import { RisultatoStep } from "./steps/RisultatoStep";
 import { useProfileStore } from "../../../store/profileStore";
 import { useRecipeStore } from "../../../store/recipeStore";
 import { usePlanStore } from "../../../store/planStore";
+import { useDispensaStore } from "../../../store/dispensaStore";
 import { useToastStore } from "../../../store/toastStore";
 import { generaPiano, type PreferenzeGenerazione, type RisultatoGenerazione } from "../../../lib/generator";
 
@@ -25,6 +26,7 @@ export function GeneraWizardScreen() {
   const ricette = useRecipeStore((s) => s.ricette);
   const pianoAttuale = usePlanStore((s) => s.piano);
   const applyPiano = usePlanStore((s) => s.applyPiano);
+  const dispensaAttiva = useDispensaStore((s) => s.dispense.find((d) => d.id === s.dispensaAttivaId) ?? s.dispense[0]);
   const showToast = useToastStore((s) => s.show);
 
   const [step, setStep] = useState(0);
@@ -39,7 +41,7 @@ export function GeneraWizardScreen() {
   const [risultato, setRisultato] = useState<RisultatoGenerazione | null>(null);
 
   const genera = () => {
-    const r = generaPiano({ ricette, profilo, pianoAttuale, preferenze, slotSelezionati });
+    const r = generaPiano({ ricette, profilo, pianoAttuale, preferenze, slotSelezionati, dispensa: dispensaAttiva });
     setRisultato(r);
   };
 
@@ -140,6 +142,7 @@ export function GeneraWizardScreen() {
           piano={risultato.piano}
           ricette={ricette}
           spesaStimata={risultato.spesaStimata}
+          risparmioDispensa={risultato.risparmioDispensa}
           budgetTarget={preferenze.budgetTotale}
         />
       )}

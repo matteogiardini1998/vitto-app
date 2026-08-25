@@ -1,8 +1,9 @@
-import type { Piano, Profilo, Ricetta } from "../types";
+import type { Dispensa, Piano, Profilo, Ricetta } from "../types";
 import { GIORNI, PASTI, chiaveSlot } from "../types";
 import { dietaCompatibile } from "./recipeDisplay";
 import { tagNutrizionaliCalcolati } from "./nutrizione";
 import { punteggioBilanciamento, registraPasto, statoRegoleVuoto, type StatoRegoleSettimana } from "./bilanciamento";
+import { trovaCorrispondenzaDispensa } from "./dispensaMatch";
 
 export type TagPreferenza =
   | "veloce"
@@ -57,7 +58,10 @@ export type PreferenzeGenerazione = {
 
 export type RisultatoGenerazione = {
   piano: Piano;
+  /** Stima netta: già scontata di quanto risparmiato grazie a ciò che è già in dispensa. */
   spesaStimata: number;
+  /** Quanto di quella stima è "gratis" perché lo hai già in dispensa. */
+  risparmioDispensa: number;
 };
 
 function testoCorrisponde(ricetta: Ricetta, testo: string): boolean {
@@ -71,11 +75,13 @@ function testoCorrisponde(ricetta: Ricetta, testo: string): boolean {
  * negoziabile): 1) esclusioni assolute, 2) dieta, 3) attrezzatura in cucina,
  * 4) esclusioni temporanee, 5) vincoli "voglio che ci sia", 6) budget,
  * 7) tempo, 8) sfavorite escluse, 9) bilanciamento settimanale,
- * 10) preferenze/tag del wizard e rating, 11) varietà.
+ * 10) favorire ciò che è già in dispensa (specie il deperibile da finire),
+ * 11) preferenze/tag del wizard e rating, 12) varietà.
  *
  * Le prime otto sono filtri duri (qui sotto e nei due cicli di
- * `generaPiano`); bilanciamento, preferenze e varietà sono invece punteggi
- * morbidi in `scegliCandidato`, che si sommano e si bilanciano fra loro.
+ * `generaPiano`); bilanciamento, dispensa, preferenze e varietà sono invece
+ * punteggi morbidi in `scegliCandidato`, che si sommano e si bilanciano fra
+ * loro.
  *
  * Il punto 3 (attrezzatura in cucina) non ha ancora un filtro dedicato:
  * arriverà quando Profilo avrà `elettrodomestici` e Ricetta `attrezzatura`.
@@ -131,6 +137,19 @@ function punteggioPreferenze(ricetta: Ricetta, preferenze: PreferenzeGenerazione
   return s;
 }
 
+/** Priorità 10: premia le ricette che usano cose già in dispensa, di più se da consumare presto. */
+function punteggioDispensa(ricetta: Ricetta, dispensa: Dispensa | undefined): number {
+  if (!dispensa) return 0;
+  let s = 0;
+  for (const ing of ricetta.ingredienti) {
+    const voce = trovaCorrispondenzaDispensa(ing.nome, dispensa);
+    if (!voce) continue;
+    if (voce.daConsumarePresto) s += 3;
+    else if (voce.deperibile) s += 1;
+  }
+  return s;
+}
+
 function scegliCandidato(
   candidati: Ricetta[],
   pasto: (typeof PASTI)[number],
@@ -138,10 +157,11 @@ function scegliCandidato(
   profilo: Profilo,
   usoRicetta: Map<string, number>,
   statoRegole: StatoRegoleSettimana,
+  dispensa: Dispensa | undefined,
   budgetCtx?: { budgetRimanente: number; slotsRimasti: number },
 ): Ricetta {
   const scored = candidati.map((r) => {
-    // Priorità 10 (preferenze/tag/rating) e 11 (varietà, penalità ripetizione):
+    // Priorità 11 (preferenze/tag/rating) e 12 (varietà, penalità ripetizione):
     let s = punteggioPreferenze(r, preferenze, profilo.incisivitaVoti);
     s -= (usoRicetta.get(r.id) ?? 0) * 4;
     // Priorità 6 (budget):
@@ -155,6 +175,8 @@ function scegliCandidato(
     // premia chi copre regole ancora scoperte, prima delle pure preferenze.
     const bilancio = punteggioBilanciamento(r, pasto, statoRegole);
     s += bilancio;
+    // Priorità 10 (favorire la dispensa): fra bilanciamento e preferenze.
+    s += punteggioDispensa(r, dispensa);
     return { r, s, bilancio };
   });
   scored.sort((a, b) => b.s - a.s);
@@ -173,14 +195,22 @@ function scegliCandidato(
   return top[0].r;
 }
 
+/** Quanto di questa ricetta è già in dispensa, in euro: una stima onesta, non un conteggio esatto ingrediente per ingrediente. */
+function risparmioRicetta(ricetta: Ricetta, porzioni: number, dispensa: Dispensa | undefined): number {
+  if (!dispensa || ricetta.ingredienti.length === 0) return 0;
+  const inDispensa = ricetta.ingredienti.filter((i) => trovaCorrispondenzaDispensa(i.nome, dispensa)).length;
+  return ricetta.costoStimatoPorzione * porzioni * (inDispensa / ricetta.ingredienti.length);
+}
+
 export function generaPiano(params: {
   ricette: Ricetta[];
   profilo: Profilo;
   pianoAttuale: Piano;
   preferenze: PreferenzeGenerazione;
   slotSelezionati: string[];
+  dispensa?: Dispensa;
 }): RisultatoGenerazione {
-  const { ricette, profilo, pianoAttuale, preferenze, slotSelezionati } = params;
+  const { ricette, profilo, pianoAttuale, preferenze, slotSelezionati, dispensa } = params;
 
   const tutteChiavi = GIORNI.flatMap((giorno) =>
     PASTI.map((pasto) => ({ chiave: chiaveSlot(giorno, pasto), giorno, pasto })),
@@ -197,6 +227,7 @@ export function generaPiano(params: {
   const conteggiVincoli = new Map<string, number>();
   const statoRegole = statoRegoleVuoto();
   let spesaAccumulata = 0;
+  let risparmioAccumulato = 0;
 
   // Conta anche i pasti già presenti e non selezionati per la rigenerazione: restano nel piano
   // finale, quindi devono comunque pesare su varietà, vincoli, budget e bilanciamento.
@@ -208,6 +239,7 @@ export function generaPiano(params: {
     if (!r) continue;
     usoRicetta.set(r.id, (usoRicetta.get(r.id) ?? 0) + 1);
     spesaAccumulata += r.costoStimatoPorzione * slot.porzioni;
+    risparmioAccumulato += risparmioRicetta(r, slot.porzioni, dispensa);
     registraPasto(statoRegole, r, pasto);
     for (const v of preferenze.vincoli) {
       if (testoCorrisponde(r, v.testo)) conteggiVincoli.set(v.id, (conteggiVincoli.get(v.id) ?? 0) + 1);
@@ -227,10 +259,11 @@ export function generaPiano(params: {
         (r) => ricettaEleggibile(r, slotInfo.pasto, profilo, preferenze) && testoCorrisponde(r, v.testo),
       );
       if (candidati.length === 0) continue;
-      const scelta = scegliCandidato(candidati, slotInfo.pasto, preferenze, profilo, usoRicetta, statoRegole);
+      const scelta = scegliCandidato(candidati, slotInfo.pasto, preferenze, profilo, usoRicetta, statoRegole, dispensa);
       nuovoPiano[slotInfo.chiave] = { ricettaId: scelta.id, porzioni: porzioniDefault, lockata: false };
       usoRicetta.set(scelta.id, (usoRicetta.get(scelta.id) ?? 0) + 1);
       spesaAccumulata += scelta.costoStimatoPorzione * porzioniDefault;
+      risparmioAccumulato += risparmioRicetta(scelta, porzioniDefault, dispensa);
       registraPasto(statoRegole, scelta, slotInfo.pasto);
       attuale++;
       conteggiVincoli.set(v.id, attuale);
@@ -252,13 +285,14 @@ export function generaPiano(params: {
     slotsRimasti--;
     if (candidati.length === 0) continue;
 
-    const scelta = scegliCandidato(candidati, slotInfo.pasto, preferenze, profilo, usoRicetta, statoRegole, {
+    const scelta = scegliCandidato(candidati, slotInfo.pasto, preferenze, profilo, usoRicetta, statoRegole, dispensa, {
       budgetRimanente: preferenze.budgetTotale - spesaAccumulata,
       slotsRimasti: slotsRimasti + 1,
     });
     nuovoPiano[slotInfo.chiave] = { ricettaId: scelta.id, porzioni: porzioniDefault, lockata: false };
     usoRicetta.set(scelta.id, (usoRicetta.get(scelta.id) ?? 0) + 1);
     spesaAccumulata += scelta.costoStimatoPorzione * porzioniDefault;
+    risparmioAccumulato += risparmioRicetta(scelta, porzioniDefault, dispensa);
     registraPasto(statoRegole, scelta, slotInfo.pasto);
     for (const v of preferenze.vincoli) {
       if (v.tipo === "massimo" && testoCorrisponde(scelta, v.testo)) {
@@ -267,5 +301,9 @@ export function generaPiano(params: {
     }
   }
 
-  return { piano: nuovoPiano, spesaStimata: spesaAccumulata };
+  return {
+    piano: nuovoPiano,
+    spesaStimata: Math.max(0, spesaAccumulata - risparmioAccumulato),
+    risparmioDispensa: risparmioAccumulato,
+  };
 }

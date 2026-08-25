@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { Lock, Sprout } from "lucide-react";
 import { Card } from "../../../../components/Card";
 import { GIORNI, PASTI, chiaveSlot, type Piano, type Ricetta } from "../../../../types";
 import { GIORNO_LABEL_FULL } from "../../../../lib/date";
@@ -9,10 +9,11 @@ type RisultatoStepProps = {
   piano: Piano;
   ricette: Ricetta[];
   spesaStimata: number;
+  risparmioDispensa: number;
   budgetTarget: number;
 };
 
-export function RisultatoStep({ piano, ricette, spesaStimata, budgetTarget }: RisultatoStepProps) {
+export function RisultatoStep({ piano, ricette, spesaStimata, risparmioDispensa, budgetTarget }: RisultatoStepProps) {
   const entroBudget = spesaStimata <= budgetTarget;
   const pct = Math.min(100, (spesaStimata / budgetTarget) * 100);
   const slotsVuoti = GIORNI.flatMap((g) => PASTI.map((p) => chiaveSlot(g, p))).filter((c) => !piano[c]).length;
@@ -33,6 +34,11 @@ export function RisultatoStep({ piano, ricette, spesaStimata, budgetTarget }: Ri
             style={{ width: `${pct}%` }}
           />
         </div>
+        {risparmioDispensa >= 1 && (
+          <p className="flex items-center gap-1.5 text-caption text-primary-700 mt-2">
+            <Sprout size={13} /> € {risparmioDispensa.toFixed(0)} risparmiati grazie a quello che hai già in dispensa
+          </p>
+        )}
         {!entroBudget && (
           <p className="text-caption text-danger-500 mt-2">
             La spesa stimata supera il budget richiesto. Prova a rigenerare o ad alzare il budget.
