@@ -37,19 +37,18 @@ type WheelNavProps = {
  * genitore. Isolato: non conosce il router, espone solo `onSettle(index)`.
  */
 export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap }: WheelNavProps) {
+  // Lo stato attivo (e la navigazione) si aggiornano SUBITO al tap/rilascio:
+  // la molla su `angle` è solo l'estetica che rincorre, non una condizione
+  // per considerare la pagina "arrivata". Così un'animazione interrotta o
+  // rallentata non può mai lasciare la ruota disallineata dalla pagina reale.
   const goToIndex = (index: number, useShortestPath: boolean) => {
     const current = angle.get();
     let target = index * WHEEL_STEP;
     if (useShortestPath) {
       target += Math.round((current - target) / 360) * 360;
     }
-    animate(angle, target, {
-      type: "spring",
-      stiffness: 260,
-      damping: 28,
-      mass: 0.9,
-      onComplete: () => onSettle(index),
-    });
+    onSettle(index);
+    animate(angle, target, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
   };
 
   const handlePan = (_event: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
@@ -62,13 +61,8 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap }: Whee
     const projected = angle.get() - inertiaDeg;
     const nearestIndex = Math.round(projected / WHEEL_STEP);
     const wrapped = ((nearestIndex % pages.length) + pages.length) % pages.length;
-    animate(angle, nearestIndex * WHEEL_STEP, {
-      type: "spring",
-      stiffness: 260,
-      damping: 28,
-      mass: 0.9,
-      onComplete: () => onSettle(wrapped),
-    });
+    onSettle(wrapped);
+    animate(angle, nearestIndex * WHEEL_STEP, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
   };
 
   return (

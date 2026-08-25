@@ -41,7 +41,9 @@ export function App() {
             <Route path="/meal-prep/genera" element={<GeneraWizardScreen />} />
           </Route>
           <Route element={<WheelLayout />}>
-            <Route index element={<Navigate to="/meal-prep" replace />} />
+            {/* WheelLayout non usa <Outlet/>: "/" ricade sul catch-all *
+                in fondo, che reindirizza a /meal-prep. Qui bastano i 4 path
+                reali, solo per far combaciare la route con l'URL corrente. */}
             <Route path="/meal-prep" element={null} />
             <Route path="/ricettario" element={null} />
             <Route path="/spesa" element={null} />

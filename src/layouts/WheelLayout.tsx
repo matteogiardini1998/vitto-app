@@ -65,14 +65,21 @@ export function WheelLayout() {
     }
   };
 
-  // Se l'URL cambia da fuori (link diretto, back del browser), riallinea la ruota.
+  // Se l'URL cambia da fuori (link diretto, back del browser, o un path non
+  // riconosciuto come "/") riallinea la ruota. WheelLayout non passa mai da
+  // <Outlet/>, quindi è l'unico punto che può normalizzare l'URL sulla prima
+  // pagina quando non combacia con nessuna delle 4.
   useEffect(() => {
     if (skipNextSync.current) {
       skipNextSync.current = false;
       return;
     }
     const idx = PAGES.findIndex((p) => p.path === location.pathname);
-    if (idx !== -1 && idx !== activeIndex) {
+    if (idx === -1) {
+      navigate(PAGES[0].path, { replace: true });
+      return;
+    }
+    if (idx !== activeIndex) {
       setActiveIndex(idx);
       angle.set(idx * WHEEL_STEP);
     }
@@ -96,14 +103,13 @@ export function WheelLayout() {
       </button>
 
       <div className="flex-1 overflow-hidden relative" style={{ paddingBottom: WHEEL_CONTAINER_HEIGHT }} ref={trackWidth}>
-        <motion.div className="flex h-full" style={{ x: trackX }}>
+        <motion.div className="flex h-full transform-gpu" style={{ x: trackX, willChange: "transform" }}>
           {SCREENS.map((Screen, i) => (
             <div
               key={PAGES[i].path}
               className="w-full h-full shrink-0 overflow-y-auto no-scrollbar"
-              style={{ width: pageWidth || "100%" }}
+              style={{ width: pageWidth || "100%", WebkitOverflowScrolling: "touch" }}
               aria-hidden={i !== activeIndex}
-              inert={i !== activeIndex}
             >
               <Screen />
             </div>
