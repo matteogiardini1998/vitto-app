@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Dispensa, VoceDispensa, IconaDispensa, Reparto } from "../types";
+import type { Dispensa, VoceDispensa, IconaDispensa, NutrizionePer100g, Reparto } from "../types";
 import { generaId } from "../lib/id";
 import { deperibilePropostoPer } from "../lib/dispensa";
 
@@ -17,6 +17,9 @@ type NuovaVoceInput = {
   categoria?: Reparto;
   deperibile?: boolean;
   daConsumarePresto?: boolean;
+  barcode?: string | null;
+  marca?: string | null;
+  nutrizionePer100g?: NutrizionePer100g | null;
 };
 
 type DispensaState = {
@@ -86,6 +89,9 @@ export const useDispensaStore = create<DispensaState>()(
           deperibile: voce.deperibile ?? deperibilePropostoPer(categoria),
           daConsumarePresto: voce.daConsumarePresto ?? false,
           aggiuntaIl: new Date().toISOString(),
+          barcode: voce.barcode ?? null,
+          marca: voce.marca ?? null,
+          nutrizionePer100g: voce.nutrizionePer100g ?? null,
         };
         set((s) => ({
           dispense: s.dispense.map((d) => (d.id !== dispensaId ? d : { ...d, voci: [...d.voci, nuova] })),

@@ -112,6 +112,18 @@ export type VoceSpesa = {
 
 export type IconaDispensa = "credenza" | "frigo" | "casa" | "valigia" | "ufficio";
 
+/** Valori nutrizionali per 100g da Open Food Facts: quando presenti, più precisi delle stime del dizionario ingredienti. */
+export type NutrizionePer100g = {
+  kcal?: number;
+  proteine?: number;
+  carboidrati?: number;
+  zuccheri?: number;
+  grassi?: number;
+  grassiSaturi?: number;
+  fibre?: number;
+  sale?: number;
+};
+
 export type VoceDispensa = {
   id: string;
   nome: string;
@@ -121,6 +133,10 @@ export type VoceDispensa = {
   deperibile: boolean;
   daConsumarePresto: boolean;
   aggiuntaIl: string;
+  /** Presente solo per le voci aggiunte con lo scanner: permette di riconoscerle di nuovo all'istante. */
+  barcode?: string | null;
+  marca?: string | null;
+  nutrizionePer100g?: NutrizionePer100g | null;
   // TODO: scadenza?: string — data di scadenza opzionale, non ancora in UI.
 };
 

@@ -352,6 +352,19 @@ export function ProfiloScreen() {
             MealPrep dà indicazioni generali di buon senso alimentare, non consigli medici o dietetici
             personalizzati. Per esigenze di salute specifiche, parlane con un professionista.
           </p>
+          <p className="text-body-sm text-paper-500">
+            I nomi, i marchi e i valori nutrizionali dei prodotti riconosciuti con lo scanner arrivano
+            da{" "}
+            <a
+              href="https://it.openfoodfacts.org"
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary-700 underline"
+            >
+              Open Food Facts
+            </a>
+            , una banca dati libera e collaborativa distribuita con licenza Open Database License (ODbL).
+          </p>
         </div>
       </BottomSheet>
     </div>

@@ -1,48 +1,131 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera, Flashlight, FlashlightOff, ScanBarcode, Settings, WifiOff, X } from "lucide-react";
+import { Camera, Flashlight, FlashlightOff, Loader2, ScanBarcode, Settings, WifiOff, X } from "lucide-react";
 import { useBarcodeScanner } from "../../hooks/useBarcodeScanner";
 import { useBarcodeStore } from "../../store/barcodeStore";
+import { useBarcodeCacheStore, type ProdottoBarcode } from "../../store/barcodeCacheStore";
 import { feedbackLettura } from "../../lib/barcode/feedback";
+import { riconosciProdotto, ritentaCodaDaRiconoscere } from "../../lib/barcode/riconoscimento";
+import { impareCategoria } from "../../lib/smistamento";
 import type { BarcodeHit } from "../../lib/barcode/types";
+import type { NutrizionePer100g, Reparto } from "../../types";
 import { Button } from "../Button";
+import { TextField } from "../TextField";
+import { ScaffaleChipRow } from "../ScaffaleChipRow";
 
-type VoceSessione = { codice: string; formato: string; quantita: number; il: number };
+type Bozza = { nome: string; marca: string | null; formato: string | null; nutrizionePer100g: NutrizionePer100g | null; suggerimento: Reparto | null };
+
+type VoceSessione = {
+  codice: string;
+  formato: string;
+  quantita: number;
+  il: number;
+  stato: "cercando" | "risolto" | "da-completare";
+  prodotto?: ProdottoBarcode;
+  bozza?: Bozza;
+};
 
 const FINESTRA_INCREMENTO_MS = 4000;
 
 type BarcodeScannerOverlayProps = {
   open: boolean;
   onClose: () => void;
-  onHit?: (hit: BarcodeHit) => void;
+  onRisolto?: (prodotto: ProdottoBarcode) => void;
 };
 
-export function BarcodeScannerOverlay({ open, onClose, onHit }: BarcodeScannerOverlayProps) {
+export function BarcodeScannerOverlay({ open, onClose, onRisolto }: BarcodeScannerOverlayProps) {
   return createPortal(
-    <AnimatePresence>{open && <Contenuto onClose={onClose} onHit={onHit} />}</AnimatePresence>,
+    <AnimatePresence>{open && <Contenuto onClose={onClose} onRisolto={onRisolto} />}</AnimatePresence>,
     document.body,
   );
 }
 
-function Contenuto({ onClose, onHit }: { onClose: () => void; onHit?: (hit: BarcodeHit) => void }) {
+function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (prodotto: ProdottoBarcode) => void }) {
   const spiegazioneVista = useBarcodeStore((s) => s.spiegazioneVista);
   const segnaSpiegazioneVista = useBarcodeStore((s) => s.segnaSpiegazioneVista);
   const [spiegazioneAccettata, setSpiegazioneAccettata] = useState(spiegazioneVista);
   const [pila, setPila] = useState<VoceSessione[]>([]);
   const [tentativo, setTentativo] = useState(0);
+  const risoltiRef = useRef(new Map<string, ProdottoBarcode>());
+  const inCorsoRef = useRef(new Set<string>());
+
+  useEffect(() => {
+    if (navigator.onLine) ritentaCodaDaRiconoscere();
+  }, []);
+
+  const aggiornaVoce = (codice: string, patch: Partial<VoceSessione>) => {
+    setPila((prec) => prec.map((v) => (v.codice === codice ? { ...v, ...patch } : v)));
+  };
 
   const gestisciHit = (hit: BarcodeHit) => {
     feedbackLettura(true);
+    const ora = Date.now();
+
     setPila((prec) => {
-      const ora = Date.now();
       const [primo, ...resto] = prec;
       if (primo && primo.codice === hit.codice && ora - primo.il < FINESTRA_INCREMENTO_MS) {
         return [{ ...primo, quantita: primo.quantita + 1, il: ora }, ...resto];
       }
-      return [{ codice: hit.codice, formato: hit.formato, quantita: 1, il: ora }, ...prec];
+      const prodottoNoto = risoltiRef.current.get(hit.codice);
+      return [
+        {
+          codice: hit.codice,
+          formato: hit.formato,
+          quantita: 1,
+          il: ora,
+          stato: prodottoNoto ? "risolto" : "cercando",
+          prodotto: prodottoNoto,
+        },
+        ...prec,
+      ];
     });
-    onHit?.(hit);
+
+    const prodottoNoto = risoltiRef.current.get(hit.codice);
+    if (prodottoNoto) {
+      onRisolto?.(prodottoNoto);
+      return;
+    }
+    if (inCorsoRef.current.has(hit.codice)) return;
+    inCorsoRef.current.add(hit.codice);
+
+    riconosciProdotto(hit.codice).then((esito) => {
+      inCorsoRef.current.delete(hit.codice);
+      if (esito.tipo === "risolto") {
+        risoltiRef.current.set(hit.codice, esito.prodotto);
+        aggiornaVoce(hit.codice, { stato: "risolto", prodotto: esito.prodotto });
+        onRisolto?.(esito.prodotto);
+      } else if (esito.tipo === "incerto") {
+        aggiornaVoce(hit.codice, {
+          stato: "da-completare",
+          bozza: { nome: esito.nome, marca: esito.marca, formato: esito.formato, nutrizionePer100g: esito.nutrizionePer100g, suggerimento: esito.suggerimento },
+        });
+      } else {
+        aggiornaVoce(hit.codice, {
+          stato: "da-completare",
+          bozza: { nome: "", marca: null, formato: null, nutrizionePer100g: null, suggerimento: null },
+        });
+      }
+    });
+  };
+
+  const completaVoce = (codice: string, nome: string, categoria: Reparto, bozza: Bozza) => {
+    const nomeFinale = nome.trim();
+    if (!nomeFinale) return;
+    impareCategoria(nomeFinale, categoria);
+    const prodotto: ProdottoBarcode = {
+      barcode: codice,
+      nome: nomeFinale,
+      marca: bozza.marca,
+      formato: bozza.formato,
+      scaffale: categoria,
+      nutrizionePer100g: bozza.nutrizionePer100g,
+      fonte: "manuale",
+    };
+    useBarcodeCacheStore.getState().salva(prodotto);
+    risoltiRef.current.set(codice, prodotto);
+    aggiornaVoce(codice, { stato: "risolto", prodotto });
+    onRisolto?.(prodotto);
   };
 
   const attivaFotocamera = () => {
@@ -108,33 +191,104 @@ function Contenuto({ onClose, onHit }: { onClose: () => void; onHit?: (hit: Barc
             {pila.length === 0 ? (
               <p className="text-body-sm text-paper-0/50">Inquadra un codice a barre per iniziare.</p>
             ) : (
-              <div className="flex flex-col gap-2 max-h-[30dvh] overflow-y-auto">
-                {pila.map((v) => (
-                  <button
-                    key={v.il}
-                    type="button"
-                    onClick={() => rimuoviDallaPila(v.il)}
-                    className="flex items-center gap-3 rounded-xl bg-paper-0/10 px-3.5 py-2.5 text-left active:bg-paper-0/15"
-                  >
-                    <span className="h-8 w-8 shrink-0 rounded-full bg-paper-0/15 flex items-center justify-center">
-                      <ScanBarcode size={15} />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-body-sm font-medium text-paper-0 truncate font-mono">{v.codice}</span>
-                      <span className="block text-caption text-paper-0/50 uppercase">{v.formato.replace(/_/g, " ")}</span>
-                    </span>
-                    {v.quantita > 1 && (
-                      <span className="text-caption font-semibold text-paper-0 bg-primary-600 rounded-full h-6 min-w-6 px-1.5 flex items-center justify-center">
-                        ×{v.quantita}
-                      </span>
-                    )}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-2 max-h-[38dvh] overflow-y-auto">
+                {pila.map((v) =>
+                  v.stato === "da-completare" && v.bozza ? (
+                    <RigaDaCompletare
+                      key={v.il}
+                      bozza={v.bozza}
+                      onCompleta={(nome, categoria) => completaVoce(v.codice, nome, categoria, v.bozza!)}
+                      onRimuovi={() => rimuoviDallaPila(v.il)}
+                    />
+                  ) : (
+                    <RigaVoce key={v.il} voce={v} onRimuovi={() => rimuoviDallaPila(v.il)} />
+                  ),
+                )}
               </div>
             )}
           </div>
         )}
       </motion.div>
+    </div>
+  );
+}
+
+function RigaVoce({ voce, onRimuovi }: { voce: VoceSessione; onRimuovi: () => void }) {
+  const titolo =
+    voce.stato === "risolto" && voce.prodotto
+      ? [voce.prodotto.nome, voce.prodotto.marca].filter(Boolean).join(" · ")
+      : voce.codice;
+  const sottotitolo =
+    voce.stato === "risolto" && voce.prodotto
+      ? voce.prodotto.formato ?? voce.codice
+      : voce.stato === "cercando"
+        ? "Sto cercando..."
+        : voce.formato.replace(/_/g, " ");
+
+  return (
+    <button
+      type="button"
+      onClick={onRimuovi}
+      className="flex items-center gap-3 rounded-xl bg-paper-0/10 px-3.5 py-2.5 text-left active:bg-paper-0/15"
+    >
+      <span className="h-8 w-8 shrink-0 rounded-full bg-paper-0/15 flex items-center justify-center">
+        {voce.stato === "cercando" ? <Loader2 size={15} className="animate-spin" /> : <ScanBarcode size={15} />}
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-body-sm font-medium text-paper-0 truncate">{titolo}</span>
+        <span className="block text-caption text-paper-0/50 truncate">{sottotitolo}</span>
+      </span>
+      {voce.quantita > 1 && (
+        <span className="text-caption font-semibold text-paper-0 bg-primary-600 rounded-full h-6 min-w-6 px-1.5 flex items-center justify-center">
+          ×{voce.quantita}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function RigaDaCompletare({
+  bozza,
+  onCompleta,
+  onRimuovi,
+}: {
+  bozza: Bozza;
+  onCompleta: (nome: string, categoria: Reparto) => void;
+  onRimuovi: () => void;
+}) {
+  const [nome, setNome] = useState(bozza.nome);
+
+  return (
+    <div className="rounded-xl bg-paper-0 px-3.5 py-3 flex flex-col gap-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-body-sm font-medium text-paper-800">
+          {bozza.nome ? "Dove lo metto?" : "Questo non lo conosco ancora — come si chiama?"}
+        </p>
+        <button
+          type="button"
+          onClick={onRimuovi}
+          aria-label="Rimuovi"
+          className="h-7 w-7 shrink-0 flex items-center justify-center rounded-full bg-paper-100 text-paper-500"
+        >
+          <X size={14} />
+        </button>
+      </div>
+      {!bozza.nome && (
+        <TextField
+          label="Nome prodotto"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+          placeholder="Es. Detersivo piatti"
+          autoFocus
+        />
+      )}
+      <ScaffaleChipRow
+        suggerito={bozza.suggerimento}
+        onScegli={(categoria) => {
+          if (!nome.trim()) return;
+          onCompleta(nome, categoria);
+        }}
+      />
     </div>
   );
 }

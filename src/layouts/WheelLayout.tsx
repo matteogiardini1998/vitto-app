@@ -11,6 +11,10 @@ import { RicettarioScreen } from "../screens/ricettario/RicettarioScreen";
 import { SpesaScreen } from "../screens/spesa/SpesaScreen";
 import { DispensaScreen } from "../screens/dispensa/DispensaScreen";
 import { useProfileStore } from "../store/profileStore";
+import { useDispensaStore } from "../store/dispensaStore";
+import { useToastStore } from "../store/toastStore";
+import { ritentaCodaDaRiconoscere } from "../lib/barcode/riconoscimento";
+import type { ProdottoBarcode } from "../store/barcodeCacheStore";
 
 const PAGES: WheelPageDef[] = [
   { path: "/meal-prep", label: "Meal Prep", icon: CalendarDays },
@@ -56,6 +60,38 @@ export function WheelLayout() {
 
   const [scannerAperto, setScannerAperto] = useState(false);
   const paginaConScanner = location.pathname === "/dispensa" || location.pathname === "/spesa";
+
+  const dispense = useDispensaStore((s) => s.dispense);
+  const dispensaAttivaId = useDispensaStore((s) => s.dispensaAttivaId);
+  const aggiungiVoceDispensa = useDispensaStore((s) => s.aggiungiVoce);
+  const aggiornaVoceDispensa = useDispensaStore((s) => s.aggiornaVoce);
+  const showToast = useToastStore((s) => s.show);
+
+  useEffect(() => {
+    const ritenta = () => ritentaCodaDaRiconoscere();
+    window.addEventListener("online", ritenta);
+    return () => window.removeEventListener("online", ritenta);
+  }, []);
+
+  const handleRisoltoDispensa = (prodotto: ProdottoBarcode) => {
+    const dispensa = dispense.find((d) => d.id === dispensaAttivaId) ?? dispense[0];
+    const esistente = dispensa.voci.find((v) => v.barcode === prodotto.barcode);
+    if (esistente) {
+      aggiornaVoceDispensa(dispensa.id, esistente.id, { qta: (esistente.qta ?? 1) + 1 });
+    } else {
+      const nome = [prodotto.nome, prodotto.marca].filter(Boolean).join(" · ") + (prodotto.formato ? ` (${prodotto.formato})` : "");
+      aggiungiVoceDispensa(dispensa.id, {
+        nome,
+        qta: 1,
+        unita: "pz",
+        categoria: prodotto.scaffale,
+        barcode: prodotto.barcode,
+        marca: prodotto.marca,
+        nutrizionePer100g: prodotto.nutrizionePer100g,
+      });
+    }
+    showToast(`Aggiunto: ${prodotto.nome} ✓`);
+  };
 
   const handlePageScroll = (index: number, scrollTop: number) => {
     const last = lastScrollTops.current[index];
@@ -144,7 +180,11 @@ export function WheelLayout() {
       </div>
 
       {paginaConScanner && <BarcodeScanButton onClick={() => setScannerAperto(true)} />}
-      <BarcodeScannerOverlay open={scannerAperto} onClose={() => setScannerAperto(false)} />
+      <BarcodeScannerOverlay
+        open={scannerAperto}
+        onClose={() => setScannerAperto(false)}
+        onRisolto={location.pathname === "/dispensa" ? handleRisoltoDispensa : undefined}
+      />
 
       <WheelNav
         pages={PAGES}
