@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Plus, SlidersHorizontal, Star } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
-import { PAGE_ACCENT } from "../../components/WheelNav";
+import { PAGE_ACCENT, PAGE_BLOB } from "../../components/WheelNav";
 import { EmptyState } from "../../components/EmptyState";
 import { SearchInput } from "../../components/SearchInput";
 import { Chip } from "../../components/Chip";
@@ -78,6 +78,7 @@ export function RicettarioScreen() {
       {risultati.length === 0 ? (
         <EmptyState
           icon={BookOpen}
+          blobColor={PAGE_BLOB[1]}
           title="Nessuna ricetta trovata"
           description="Prova a modificare la ricerca o i filtri, oppure crea una nuova ricetta."
           action={

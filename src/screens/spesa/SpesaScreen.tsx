@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw, ShoppingBasket, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
-import { PAGE_ACCENT } from "../../components/WheelNav";
+import { PAGE_ACCENT, PAGE_BLOB } from "../../components/WheelNav";
 import { EmptyState } from "../../components/EmptyState";
 import { Card } from "../../components/Card";
 import { useShoppingStore } from "../../store/shoppingStore";
@@ -140,6 +140,7 @@ export function SpesaScreen() {
       ) : voci.length === 0 ? (
         <EmptyState
           icon={ShoppingBasket}
+          blobColor={PAGE_BLOB[2]}
           title="Nessuna voce ancora"
           description="Aggiorna la lista dal piano pasti o aggiungi una voce manuale per iniziare."
         />

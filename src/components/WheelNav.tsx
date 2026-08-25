@@ -29,14 +29,17 @@ function angularDistance(deg: number) {
  * ruota non è mai un'informazione isolata.
  */
 export const GLAZE = [
-  { pale: "bg-pop-yellow-300/50 text-primary-800", vivid: "bg-pop-yellow-500 text-primary-900" },
   { pale: "bg-sage-100 text-sage-700", vivid: "bg-sage-500 text-paper-50" },
+  { pale: "bg-pop-yellow-300/50 text-primary-800", vivid: "bg-pop-yellow-500 text-primary-900" },
   { pale: "bg-pop-sky-300/40 text-primary-700", vivid: "bg-pop-sky-500 text-paper-50" },
   { pale: "bg-pop-berry-300/40 text-primary-700", vivid: "bg-pop-berry-500 text-paper-50" },
 ];
 
 /** Solo il colore pieno, per il dettaglio-eco nell'header della pagina reale. */
-export const PAGE_ACCENT = ["bg-pop-yellow-500", "bg-sage-500", "bg-pop-sky-500", "bg-pop-berry-500"];
+export const PAGE_ACCENT = ["bg-sage-500", "bg-pop-yellow-500", "bg-pop-sky-500", "bg-pop-berry-500"];
+
+/** Stesso colore, tono chiaro da "macchia" per lo stato vuoto della pagina. */
+export const PAGE_BLOB = ["bg-sage-300", "bg-pop-yellow-300", "bg-pop-sky-300", "bg-pop-berry-300"];
 
 type WheelNavProps = {
   pages: WheelPageDef[];
@@ -124,12 +127,13 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap }: Whee
 }
 
 function HubGlow() {
-  const size = HUB_SIZE * 2.5;
+  // Solo una sottile aureola aderente al bottone, non una nuvola diffusa.
+  const size = HUB_SIZE * 1.28;
   return (
     <motion.div
       className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none bg-primary-500"
-      style={{ top: WHEEL_CONTAINER_HEIGHT, width: size, height: size, filter: "blur(14px)" }}
-      animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.62, 0.4] }}
+      style={{ top: WHEEL_CONTAINER_HEIGHT, width: size, height: size, filter: "blur(6px)" }}
+      animate={{ scale: [1, 1.08, 1], opacity: [0.45, 0.7, 0.45] }}
       transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
       aria-hidden="true"
     />
