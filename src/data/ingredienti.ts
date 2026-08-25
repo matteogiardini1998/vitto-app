@@ -142,6 +142,14 @@ export const INGREDIENTI: IngredienteBase[] = [
     per100g: { kcal: 380, proteine: 12, carboidrati: 71, zuccheri: 4, grassi: 5, fibre: 3.5 },
   },
   {
+    id: "fette-biscottate",
+    nome: "Fette biscottate",
+    sinonimi: [],
+    reparto: "dispensa", gruppo: "cereali",
+    per100g: { kcal: 408, proteine: 10, carboidrati: 76, zuccheri: 6, grassi: 7, fibre: 3.5 },
+    pesoMedioPz: 8,
+  },
+  {
     id: "patate",
     nome: "Patate",
     sinonimi: ["patata"],
@@ -993,6 +1001,14 @@ export const INGREDIENTI: IngredienteBase[] = [
     per100g: { kcal: 260, proteine: 0, carboidrati: 67, zuccheri: 60, grassi: 0, fibre: 0 },
     gPerCucchiaio: 20,
   },
+  {
+    id: "marmellata",
+    nome: "Marmellata",
+    sinonimi: ["confettura"],
+    reparto: "dispensa", gruppo: "zuccheri-dolci",
+    per100g: { kcal: 250, proteine: 0.3, carboidrati: 62, zuccheri: 55, grassi: 0.1, fibre: 1 },
+    gPerCucchiaio: 20,
+  },
 
   // ---- ALTRO ----
   {
@@ -1009,7 +1025,7 @@ export const INGREDIENTI: IngredienteBase[] = [
       "sale", "pepe", "peperoncino", "peperoncino fresco", "basilico", "basilico fresco",
       "prezzemolo", "rosmarino", "salvia", "alloro", "cannella", "cumino", "curry in polvere",
       "lievito per dolci", "noce moscata", "origano", "timo", "paprika", "zafferano",
-      "vaniglia", "aneto", "erba cipollina", "maggiorana", "zenzero",
+      "vaniglia", "aneto", "erba cipollina", "maggiorana", "zenzero", "menta", "aceto", "acqua",
     ],
     reparto: "condimenti-spezie", gruppo: "altro",
     per100g: { kcal: 0, proteine: 0, carboidrati: 0, zuccheri: 0, grassi: 0, fibre: 0 },
