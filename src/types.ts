@@ -106,6 +106,8 @@ export type VoceSpesa = {
   presa: boolean;
   manuale: boolean;
   usataDa?: { ricettaNome: string; chiaveSlot: string }[];
+  /** L'utente ha scelto "Compro comunque" sul badge "già in dispensa": non riproporglielo per questa voce. */
+  giaInDispensaIgnorato?: boolean;
 };
 
 export type IconaDispensa = "credenza" | "frigo" | "casa" | "valigia" | "ufficio";

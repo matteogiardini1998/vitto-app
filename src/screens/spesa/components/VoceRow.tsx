@@ -1,6 +1,6 @@
 import { animate, motion, useMotionValue } from "framer-motion";
-import { Check, Trash2 } from "lucide-react";
-import type { VoceSpesa } from "../../../types";
+import { Check, PackageCheck, Trash2 } from "lucide-react";
+import type { VoceDispensa, VoceSpesa } from "../../../types";
 import { formattaQuantita } from "../../../lib/format";
 import { cn } from "../../../lib/cn";
 import { useShoppingStore } from "../../../store/shoppingStore";
@@ -8,11 +8,13 @@ import { useShoppingStore } from "../../../store/shoppingStore";
 type VoceRowProps = {
   voce: VoceSpesa;
   onTapTesto: () => void;
+  corrispondenza?: VoceDispensa | null;
 };
 
-export function VoceRow({ voce, onTapTesto }: VoceRowProps) {
+export function VoceRow({ voce, onTapTesto, corrispondenza }: VoceRowProps) {
   const toggleVoce = useShoppingStore((s) => s.toggleVoce);
   const rimuoviVoce = useShoppingStore((s) => s.rimuoviVoce);
+  const aggiornaVoce = useShoppingStore((s) => s.aggiornaVoce);
   const x = useMotionValue(0);
 
   const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
@@ -22,6 +24,8 @@ export function VoceRow({ voce, onTapTesto }: VoceRowProps) {
       animate(x, 0, { type: "spring", stiffness: 500, damping: 40 });
     }
   };
+
+  const mostraBadge = corrispondenza && !voce.presa && !voce.giaInDispensaIgnorato;
 
   return (
     <div className="relative overflow-hidden">
@@ -67,6 +71,34 @@ export function VoceRow({ voce, onTapTesto }: VoceRowProps) {
           </span>
         )}
       </motion.div>
+
+      {mostraBadge && (
+        <div className="relative flex items-center justify-between gap-2 flex-wrap px-4 pb-3 -mt-1 bg-paper-0">
+          <span className="inline-flex items-center gap-1.5 text-caption font-medium text-primary-700 bg-primary-50 rounded-full px-2.5 py-1">
+            <PackageCheck size={13} />
+            Già in dispensa
+            {corrispondenza.qta != null
+              ? ` · ${formattaQuantita(corrispondenza.qta)} ${corrispondenza.unita ?? ""}`
+              : ""}
+          </span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => rimuoviVoce(voce.id)}
+              className="text-caption font-semibold text-primary-700"
+            >
+              Ce l'ho, togli dalla lista
+            </button>
+            <button
+              type="button"
+              onClick={() => aggiornaVoce(voce.id, { giaInDispensaIgnorato: true })}
+              className="text-caption font-semibold text-paper-400"
+            >
+              Compro comunque
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

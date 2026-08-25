@@ -6,9 +6,11 @@ import { EmptyState } from "../../components/EmptyState";
 import { Card } from "../../components/Card";
 import { ScaffaleChipRow } from "../../components/ScaffaleChipRow";
 import { useShoppingStore } from "../../store/shoppingStore";
+import { useDispensaStore } from "../../store/dispensaStore";
 import { useToastStore } from "../../store/toastStore";
 import { REPARTI, type Reparto, type VoceSpesa } from "../../types";
 import { risolviCategoria, impareCategoria, indizioCategoria, ORDINE_SCAFFALI } from "../../lib/smistamento";
+import { trovaCorrispondenzaDispensa } from "../../lib/dispensaMatch";
 import { VoceRow } from "./components/VoceRow";
 import { UsataDaSheet } from "./components/UsataDaSheet";
 import { EditVoceSheet } from "./components/EditVoceSheet";
@@ -26,6 +28,7 @@ export function SpesaScreen() {
   const aggiungiManuale = useShoppingStore((s) => s.aggiungiManuale);
   const azzeraSpunte = useShoppingStore((s) => s.azzeraSpunte);
   const svuotaTutto = useShoppingStore((s) => s.svuotaTutto);
+  const dispensaAttiva = useDispensaStore((s) => s.dispense.find((d) => d.id === s.dispensaAttivaId) ?? s.dispense[0]);
   const showToast = useToastStore((s) => s.show);
 
   const [nuovaVoce, setNuovaVoce] = useState("");
@@ -190,7 +193,12 @@ export function SpesaScreen() {
               </h3>
               <Card padded={false} className="divide-y divide-paper-100 overflow-hidden">
                 {vociReparto.map((voce) => (
-                  <VoceRow key={voce.id} voce={voce} onTapTesto={() => handleTapTesto(voce)} />
+                  <VoceRow
+                    key={voce.id}
+                    voce={voce}
+                    onTapTesto={() => handleTapTesto(voce)}
+                    corrispondenza={trovaCorrispondenzaDispensa(voce.nome, dispensaAttiva)}
+                  />
                 ))}
               </Card>
             </div>
