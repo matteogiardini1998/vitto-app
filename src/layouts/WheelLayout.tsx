@@ -15,7 +15,7 @@ import { useDispensaStore } from "../store/dispensaStore";
 import { useShoppingStore } from "../store/shoppingStore";
 import { useToastStore } from "../store/toastStore";
 import { ritentaCodaDaRiconoscere } from "../lib/barcode/riconoscimento";
-import { trovaVoceSpesaCorrispondente } from "../lib/dispensaMatch";
+import { trovaVoceListaCorrispondente, impareAssociazioneLista } from "../lib/smistamento";
 import type { ProdottoBarcode } from "../store/barcodeCacheStore";
 import type { RisultatoAzione } from "../lib/barcode/types";
 
@@ -141,45 +141,58 @@ export function WheelLayout() {
     };
   };
 
+  /** Prodotto non associato a nessuna voce: lo scanner presume che sia nel carrello e lo aggiunge già preso. */
+  const aggiungiGiaBarrata = (prodotto: ProdottoBarcode): string => {
+    const id = aggiungiManualeSpesa(prodotto.nome, prodotto.scaffale, true);
+    showToast(`Aggiunto: ${prodotto.nome} ✓`);
+    return id;
+  };
+
   const handleRisoltoSpesa = (prodotto: ProdottoBarcode): RisultatoAzione => {
     const barcode = prodotto.barcode;
     if (sessioneSpesaRef.current.has(barcode)) return { tipo: "fatto" };
     sessioneSpesaRef.current.add(barcode);
 
     const vociNonPrese = useShoppingStore.getState().voci.filter((v) => !v.presa);
-    const match = trovaVoceSpesaCorrispondente(prodotto.nome, vociNonPrese);
+    const esito = trovaVoceListaCorrispondente(prodotto, vociNonPrese);
 
-    if (match) {
-      toggleVoceSpesa(match.id);
-      showToast(`Spuntato: ${match.nome} ✓`);
+    if (esito.tipo === "match") {
+      toggleVoceSpesa(esito.voce.id);
+      showToast(`Spuntato: ${esito.voce.nome} ✓`);
       return {
         tipo: "fatto",
         annulla: () => {
-          toggleVoceSpesa(match.id);
+          toggleVoceSpesa(esito.voce.id);
           sessioneSpesaRef.current.delete(barcode);
         },
       };
     }
 
+    if (esito.tipo === "conferma") {
+      return {
+        tipo: "scelta",
+        domanda: `È la tua «${esito.voce.nome}» in lista?`,
+        opzioni: [
+          {
+            label: "Sì",
+            onScegli: () => {
+              toggleVoceSpesa(esito.voce.id);
+              impareAssociazioneLista(barcode, esito.voce.nome);
+              showToast(`Spuntato: ${esito.voce.nome} ✓`);
+            },
+          },
+          { label: "No", onScegli: () => aggiungiGiaBarrata(prodotto) },
+        ],
+      };
+    }
+
+    const nuovoId = aggiungiGiaBarrata(prodotto);
     return {
-      tipo: "scelta",
-      domanda: "Non è nella lista: cosa faccio?",
-      opzioni: [
-        {
-          label: "Aggiungi alla lista",
-          onScegli: () => {
-            aggiungiManualeSpesa(prodotto.nome, prodotto.scaffale);
-            showToast(`Aggiunto alla lista: ${prodotto.nome} ✓`);
-          },
-        },
-        {
-          label: "Metti direttamente in dispensa",
-          onScegli: () => {
-            handleRisoltoDispensa(prodotto);
-          },
-        },
-        { label: "Ignora", onScegli: () => {} },
-      ],
+      tipo: "fatto",
+      annulla: () => {
+        useShoppingStore.getState().rimuoviVoce(nuovoId);
+        sessioneSpesaRef.current.delete(barcode);
+      },
     };
   };
 

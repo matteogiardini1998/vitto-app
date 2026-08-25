@@ -1,4 +1,4 @@
-import type { Dispensa, VoceDispensa, VoceSpesa } from "../types";
+import type { Dispensa, VoceDispensa } from "../types";
 import { risolviIngrediente, normalizza } from "./nutrizione";
 
 export function canonicalizza(nome: string): string {
@@ -30,11 +30,4 @@ export function trovaCorrispondenzaDispensa(nome: string, dispensa: Dispensa | u
   const chiave = canonicalizza(nome);
   if (!chiave) return null;
   return dispensa.voci.find((v) => corrispondonoApprossimativamente(chiave, canonicalizza(v.nome))) ?? null;
-}
-
-/** Stesso matching tollerante, verso le voci della lista della spesa (per lo scanner: "questo prodotto è già in lista?"). */
-export function trovaVoceSpesaCorrispondente(nome: string, voci: VoceSpesa[]): VoceSpesa | null {
-  const chiave = canonicalizza(nome);
-  if (!chiave) return null;
-  return voci.find((v) => corrispondonoApprossimativamente(chiave, canonicalizza(v.nome))) ?? null;
 }

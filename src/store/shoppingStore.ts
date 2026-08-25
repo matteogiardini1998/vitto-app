@@ -6,7 +6,7 @@ import { generaId } from "../lib/id";
 type ShoppingState = {
   voci: VoceSpesa[];
   generaAutomatiche: (voci: VoceSpesa[]) => void;
-  aggiungiManuale: (nome: string, reparto?: Reparto) => void;
+  aggiungiManuale: (nome: string, reparto?: Reparto, presa?: boolean) => string;
   aggiornaVoce: (id: string, patch: Partial<VoceSpesa>) => void;
   toggleVoce: (id: string) => void;
   rimuoviVoce: (id: string) => void;
@@ -20,21 +20,24 @@ export const useShoppingStore = create<ShoppingState>()(
       voci: [],
       generaAutomatiche: (nuoveVoci) =>
         set((s) => ({ voci: [...s.voci.filter((v) => v.manuale), ...nuoveVoci] })),
-      aggiungiManuale: (nome, reparto = "altro") =>
+      aggiungiManuale: (nome, reparto = "altro", presa = false) => {
+        const id = generaId();
         set((s) => ({
           voci: [
             ...s.voci,
             {
-              id: generaId(),
+              id,
               nome,
               qta: null,
               unita: "",
               reparto,
-              presa: false,
+              presa,
               manuale: true,
             },
           ],
-        })),
+        }));
+        return id;
+      },
       aggiornaVoce: (id, patch) =>
         set((s) => ({ voci: s.voci.map((v) => (v.id === id ? { ...v, ...patch } : v)) })),
       toggleVoce: (id) =>

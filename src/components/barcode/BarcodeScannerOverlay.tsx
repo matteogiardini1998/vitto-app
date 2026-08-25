@@ -263,11 +263,13 @@ function RigaVoce({ voce, onTap }: { voce: VoceSessione; onTap: () => void }) {
         ? "Sto cercando..."
         : voce.formato.replace(/_/g, " ");
 
+  const Contenitore = voce.annulla ? "div" : "button";
+
   return (
-    <button
-      type="button"
-      onClick={onTap}
-      className="flex items-center gap-3 rounded-xl bg-paper-0/10 px-3.5 py-2.5 text-left active:bg-paper-0/15"
+    <Contenitore
+      type={voce.annulla ? undefined : "button"}
+      onClick={voce.annulla ? undefined : onTap}
+      className="flex items-center gap-3 rounded-xl bg-paper-0/10 px-3.5 py-2.5 text-left"
     >
       <span className="h-8 w-8 shrink-0 rounded-full bg-paper-0/15 flex items-center justify-center">
         {voce.stato === "cercando" ? <Loader2 size={15} className="animate-spin" /> : <ScanBarcode size={15} />}
@@ -281,7 +283,12 @@ function RigaVoce({ voce, onTap }: { voce: VoceSessione; onTap: () => void }) {
           ×{voce.quantita}
         </span>
       )}
-    </button>
+      {voce.annulla && (
+        <button type="button" onClick={onTap} className="text-caption font-semibold text-paper-0/70 shrink-0 px-1">
+          Annulla
+        </button>
+      )}
+    </Contenitore>
   );
 }
 
