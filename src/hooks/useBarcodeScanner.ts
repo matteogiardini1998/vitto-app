@@ -1,26 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 import { supportoNativo } from "../lib/barcode/support";
 import { creaMotoreNativo } from "../lib/barcode/nativeDetector";
+import { creaFiltroLetture, type FeedbackLettura } from "../lib/barcode/filtroLetture";
 import type { BarcodeHit, MotoreBarcode } from "../lib/barcode/types";
 
 export type StatoScanner = "inattivo" | "avvio" | "attivo" | "permesso-negato" | "errore";
+export type { FeedbackLettura };
 
-/** Non riemette lo stesso codice più di una volta ogni ~700ms: il loop di rilevamento gira a piena frequenza. */
-const FINESTRA_ANTIFLOOD_MS = 700;
+/** Se un codice non si vede da così tanto, il mirino torna neutro: si assume sia uscito dall'inquadratura. */
+const SILENZIO_RESET_MS = 500;
+/** Quanto resta acceso il flash verde di conferma prima di tornare neutro (o "cooldown", se il codice è ancora lì). */
+const DURATA_FLASH_MS = 450;
 
 export function useBarcodeScanner(attivo: boolean, onHit: (hit: BarcodeHit) => void) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [stato, setStato] = useState<StatoScanner>("inattivo");
+  const [feedback, setFeedback] = useState<FeedbackLettura>("neutro");
   const [torciaDisponibile, setTorciaDisponibile] = useState(false);
   const [torciaAccesa, setTorciaAccesa] = useState(false);
   const trackRef = useRef<MediaStreamTrack | null>(null);
-  const ultimoEmessoRef = useRef<{ codice: string; il: number } | null>(null);
   const onHitRef = useRef(onHit);
   onHitRef.current = onHit;
 
   useEffect(() => {
     if (!attivo) {
       setStato("inattivo");
+      setFeedback("neutro");
       setTorciaDisponibile(false);
       setTorciaAccesa(false);
       return;
@@ -29,12 +34,23 @@ export function useBarcodeScanner(attivo: boolean, onHit: (hit: BarcodeHit) => v
     let cancellato = false;
     let stream: MediaStream | null = null;
     let motore: MotoreBarcode | null = null;
+    const filtro = creaFiltroLetture();
+    let resetSilenzioTimeout = 0;
+    let fineFlashTimeout = 0;
 
-    const gestisciHit = (hit: BarcodeHit) => {
-      const ora = Date.now();
-      const ultimo = ultimoEmessoRef.current;
-      if (ultimo && ultimo.codice === hit.codice && ora - ultimo.il < FINESTRA_ANTIFLOOD_MS) return;
-      ultimoEmessoRef.current = { codice: hit.codice, il: ora };
+    const gestisciLetturaGrezza = (hit: BarcodeHit) => {
+      window.clearTimeout(resetSilenzioTimeout);
+      resetSilenzioTimeout = window.setTimeout(() => {
+        filtro.silenzio();
+        setFeedback((f) => (f === "cooldown" ? "neutro" : f));
+      }, SILENZIO_RESET_MS);
+
+      const esito = filtro.elabora(hit, Date.now());
+      if (esito.feedback) setFeedback(esito.feedback);
+      if (!esito.accettata) return;
+
+      window.clearTimeout(fineFlashTimeout);
+      fineFlashTimeout = window.setTimeout(() => setFeedback("neutro"), DURATA_FLASH_MS);
       onHitRef.current(hit);
     };
 
@@ -78,7 +94,7 @@ export function useBarcodeScanner(attivo: boolean, onHit: (hit: BarcodeHit) => v
         : await import("../lib/barcode/zxingDetector").then((mod) => mod.creaMotoreZXing());
       if (cancellato) return;
       motore = m;
-      m.avvia(video, stream, gestisciHit);
+      m.avvia(video, stream, gestisciLetturaGrezza);
       setStato("attivo");
     }
 
@@ -89,7 +105,8 @@ export function useBarcodeScanner(attivo: boolean, onHit: (hit: BarcodeHit) => v
       motore?.ferma();
       stream?.getTracks().forEach((t) => t.stop());
       trackRef.current = null;
-      ultimoEmessoRef.current = null;
+      window.clearTimeout(resetSilenzioTimeout);
+      window.clearTimeout(fineFlashTimeout);
     };
   }, [attivo]);
 
@@ -106,5 +123,5 @@ export function useBarcodeScanner(attivo: boolean, onHit: (hit: BarcodeHit) => v
     }
   };
 
-  return { videoRef, stato, torciaDisponibile, torciaAccesa, toggleTorcia };
+  return { videoRef, stato, feedback, torciaDisponibile, torciaAccesa, toggleTorcia };
 }

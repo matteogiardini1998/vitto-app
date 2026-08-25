@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera, Flashlight, FlashlightOff, Loader2, ScanBarcode, Settings, WifiOff, X } from "lucide-react";
-import { useBarcodeScanner } from "../../hooks/useBarcodeScanner";
+import { Camera, Check, Flashlight, FlashlightOff, Loader2, ScanBarcode, Settings, WifiOff, X } from "lucide-react";
+import { useBarcodeScanner, type FeedbackLettura } from "../../hooks/useBarcodeScanner";
 import { useBarcodeStore } from "../../store/barcodeStore";
 import { useBarcodeCacheStore, type ProdottoBarcode } from "../../store/barcodeCacheStore";
 import { feedbackLettura } from "../../lib/barcode/feedback";
@@ -29,7 +29,14 @@ type VoceSessione = {
   annulla?: () => void;
 };
 
-const FINESTRA_INCREMENTO_MS = 4000;
+/**
+ * Solo cosmetico: raggruppa in una riga con ×N i bip ravvicinati dello
+ * stesso codice invece di mostrare tante card separate. Deve stare comodo
+ * sopra il minimo possibile fra due bip legittimi dello stesso codice
+ * (COOLDOWN_STESSO_CODICE_MS nell'hook, 3s), altrimenti un doppione voluto
+ * finirebbe in due righe invece di una a ×2.
+ */
+const FINESTRA_RAGGRUPPAMENTO_PILA_MS = 6000;
 
 type BarcodeScannerOverlayProps = {
   open: boolean;
@@ -76,7 +83,7 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
 
     setPila((prec) => {
       const [primo, ...resto] = prec;
-      if (primo && primo.codice === hit.codice && ora - primo.il < FINESTRA_INCREMENTO_MS) {
+      if (primo && primo.codice === hit.codice && ora - primo.il < FINESTRA_RAGGRUPPAMENTO_PILA_MS) {
         return [{ ...primo, quantita: primo.quantita + 1, il: ora }, ...resto];
       }
       const prodottoNoto = risoltiRef.current.get(hit.codice);
@@ -368,7 +375,7 @@ function RigaScelta({
 }
 
 function Fotocamera({ onHit, onRetry }: { onHit: (hit: BarcodeHit) => void; onRetry: () => void }) {
-  const { videoRef, stato, torciaDisponibile, torciaAccesa, toggleTorcia } = useBarcodeScanner(true, onHit);
+  const { videoRef, stato, feedback, torciaDisponibile, torciaAccesa, toggleTorcia } = useBarcodeScanner(true, onHit);
 
   return (
     <>
@@ -385,7 +392,7 @@ function Fotocamera({ onHit, onRetry }: { onHit: (hit: BarcodeHit) => void; onRe
         </button>
       )}
 
-      {stato === "attivo" && <Mirino />}
+      {stato === "attivo" && <Mirino feedback={feedback} />}
 
       {stato === "avvio" && <StatoMessaggio icon={Camera} messaggio="Sto aprendo la fotocamera..." />}
 
@@ -414,20 +421,58 @@ function Fotocamera({ onHit, onRetry }: { onHit: (hit: BarcodeHit) => void; onRe
   );
 }
 
-function Mirino() {
+function Mirino({ feedback }: { feedback: FeedbackLettura }) {
+  const quieto = feedback !== "neutro";
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
       <div className="relative w-[78%] max-w-[340px] aspect-[8/5]">
-        <div className="absolute inset-0 rounded-2xl border border-paper-0/25" />
-        <span className="absolute top-0 left-0 h-7 w-7 border-t-[3px] border-l-[3px] border-primary-400 rounded-tl-xl" />
-        <span className="absolute top-0 right-0 h-7 w-7 border-t-[3px] border-r-[3px] border-primary-400 rounded-tr-xl" />
-        <span className="absolute bottom-0 left-0 h-7 w-7 border-b-[3px] border-l-[3px] border-primary-400 rounded-bl-xl" />
-        <span className="absolute bottom-0 right-0 h-7 w-7 border-b-[3px] border-r-[3px] border-primary-400 rounded-br-xl" />
         <motion.div
-          className="absolute left-2 right-2 h-[2px] bg-primary-400/90 rounded-full shadow-[0_0_8px_rgba(74,138,104,0.8)]"
-          animate={{ top: ["8%", "88%", "8%"] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 rounded-2xl border"
+          animate={{
+            borderColor: feedback === "accettata" ? "rgba(74,138,104,0.9)" : "rgba(255,255,255,0.25)",
+          }}
+          transition={{ duration: 0.15 }}
         />
+        {(
+          [
+            ["top-0 left-0", "border-t-[3px] border-l-[3px] rounded-tl-xl"],
+            ["top-0 right-0", "border-t-[3px] border-r-[3px] rounded-tr-xl"],
+            ["bottom-0 left-0", "border-b-[3px] border-l-[3px] rounded-bl-xl"],
+            ["bottom-0 right-0", "border-b-[3px] border-r-[3px] rounded-br-xl"],
+          ] as const
+        ).map(([pos, bordi]) => (
+          <span
+            key={pos}
+            className={`absolute ${pos} h-7 w-7 ${bordi} ${quieto ? "border-primary-300" : "border-primary-400"}`}
+          />
+        ))}
+        {feedback === "neutro" && (
+          <motion.div
+            className="absolute left-2 right-2 h-[2px] bg-primary-400/90 rounded-full shadow-[0_0_8px_rgba(74,138,104,0.8)]"
+            animate={{ top: ["8%", "88%", "8%"] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+        <AnimatePresence>
+          {quieto && (
+            <motion.div
+              key="check"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 22 }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <span
+                className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                  feedback === "accettata" ? "bg-primary-500" : "bg-primary-500/60"
+                }`}
+              >
+                <Check size={22} className="text-paper-0" strokeWidth={3} />
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <p className="mt-5 text-body-sm text-paper-0/80 font-medium">Inquadra il codice a barre</p>
     </div>
