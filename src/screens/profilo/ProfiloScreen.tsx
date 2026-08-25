@@ -133,7 +133,7 @@ export function ProfiloScreen() {
 
   return (
     <div className="pb-8">
-      <div className="safe-top px-4 pt-4">
+      <div className="safe-top px-4 pt-7">
         <button
           type="button"
           onClick={() => navigate(-1)}

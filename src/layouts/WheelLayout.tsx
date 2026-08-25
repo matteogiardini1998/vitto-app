@@ -45,6 +45,27 @@ export function WheelLayout() {
   const trackWidth = useRef<HTMLDivElement>(null);
   const [pageWidth, setPageWidth] = useState(0);
 
+  // La ruota si nasconde scorrendo verso il basso (si legge senza distrazioni)
+  // e riappare scorrendo verso l'alto. Ogni pagina ha il suo scroll, quindi
+  // teniamo l'ultimo scrollTop di ciascuna e reagiamo solo a quello della
+  // pagina davvero attiva.
+  const [wheelHidden, setWheelHidden] = useState(false);
+  const lastScrollTops = useRef<number[]>(PAGES.map(() => 0));
+
+  const handlePageScroll = (index: number, scrollTop: number) => {
+    const last = lastScrollTops.current[index];
+    const delta = scrollTop - last;
+    lastScrollTops.current[index] = scrollTop;
+    if (index !== activeIndex) return;
+    if (scrollTop <= 4) {
+      setWheelHidden(false);
+    } else if (delta > 6) {
+      setWheelHidden(true);
+    } else if (delta < -6) {
+      setWheelHidden(false);
+    }
+  };
+
   useLayoutEffect(() => {
     const el = trackWidth.current;
     if (!el) return;
@@ -57,6 +78,7 @@ export function WheelLayout() {
 
   const handleSettle = (index: number) => {
     setActiveIndex(index);
+    setWheelHidden(false);
     if (PAGES[index].path !== location.pathname) {
       skipNextSync.current = true;
       navigate(PAGES[index].path);
@@ -102,7 +124,15 @@ export function WheelLayout() {
 
       <div className="flex-1 overflow-hidden relative" style={{ paddingBottom: WHEEL_CONTAINER_HEIGHT }} ref={trackWidth}>
         {SCREENS.map((Screen, i) => (
-          <PageSlot key={PAGES[i].path} index={i} count={PAGES.length} angle={angle} pageWidth={pageWidth} ariaHidden={i !== activeIndex}>
+          <PageSlot
+            key={PAGES[i].path}
+            index={i}
+            count={PAGES.length}
+            angle={angle}
+            pageWidth={pageWidth}
+            ariaHidden={i !== activeIndex}
+            onScroll={handlePageScroll}
+          >
             <Screen />
           </PageSlot>
         ))}
@@ -114,6 +144,7 @@ export function WheelLayout() {
         activeIndex={activeIndex}
         onSettle={handleSettle}
         onHubTap={() => navigate("/meal-prep/genera")}
+        hidden={wheelHidden}
       />
     </div>
   );
@@ -134,6 +165,7 @@ function PageSlot({
   angle,
   pageWidth,
   ariaHidden,
+  onScroll,
   children,
 }: {
   index: number;
@@ -141,6 +173,7 @@ function PageSlot({
   angle: MotionValue<number>;
   pageWidth: number;
   ariaHidden: boolean;
+  onScroll: (index: number, scrollTop: number) => void;
   children: ReactNode;
 }) {
   const x = useTransform(angle, (a) => {
@@ -151,7 +184,11 @@ function PageSlot({
 
   return (
     <motion.div className="absolute inset-0 transform-gpu" style={{ x, willChange: "transform" }} aria-hidden={ariaHidden}>
-      <div className="h-full overflow-y-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
+      <div
+        className="h-full overflow-y-auto no-scrollbar"
+        style={{ WebkitOverflowScrolling: "touch" }}
+        onScroll={(e) => onScroll(index, e.currentTarget.scrollTop)}
+      >
         {children}
       </div>
     </motion.div>

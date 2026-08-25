@@ -47,6 +47,8 @@ type WheelNavProps = {
   activeIndex: number;
   onSettle: (index: number) => void;
   onHubTap: () => void;
+  /** Vero mentre l'utente scorre la pagina verso il basso: la ruota si fa da parte. */
+  hidden: boolean;
 };
 
 /**
@@ -55,7 +57,7 @@ type WheelNavProps = {
  * MotionValue `angle` — trascina in sincrono lo strip di pagine nel layout
  * genitore. Isolato: non conosce il router, espone solo `onSettle(index)`.
  */
-export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap }: WheelNavProps) {
+export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden }: WheelNavProps) {
   // Lo stato attivo (e la navigazione) si aggiornano SUBITO al tap/rilascio:
   // la molla su `angle` è solo l'estetica che rincorre, non una condizione
   // per considerare la pagina "arrivata".
@@ -84,7 +86,12 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap }: Whee
   };
 
   return (
-    <div className="absolute inset-x-0 bottom-0 z-30" style={{ height: WHEEL_CONTAINER_HEIGHT }}>
+    <motion.div
+      className="absolute inset-x-0 bottom-0 z-30"
+      style={{ height: WHEEL_CONTAINER_HEIGHT, pointerEvents: hidden ? "none" : "auto" }}
+      animate={{ y: hidden ? WHEEL_CONTAINER_HEIGHT * 0.65 : 0, opacity: hidden ? 0 : 1 }}
+      transition={{ duration: 0.26, ease: [0.4, 0, 0.2, 1] }}
+    >
       <motion.div
         className="absolute inset-0 touch-none select-none"
         onPan={handlePan}
@@ -122,7 +129,7 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap }: Whee
 
       <HubGlow />
       <HubButton onClick={onHubTap} />
-    </div>
+    </motion.div>
   );
 }
 
