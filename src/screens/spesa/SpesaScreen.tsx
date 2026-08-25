@@ -4,14 +4,20 @@ import { PageHeader } from "../../components/PageHeader";
 import { PAGE_ACCENT, PAGE_BLOB } from "../../components/WheelNav";
 import { EmptyState } from "../../components/EmptyState";
 import { Card } from "../../components/Card";
+import { ScaffaleChipRow } from "../../components/ScaffaleChipRow";
 import { useShoppingStore } from "../../store/shoppingStore";
 import { useToastStore } from "../../store/toastStore";
-import { REPARTI, type VoceSpesa } from "../../types";
+import { REPARTI, type Reparto, type VoceSpesa } from "../../types";
+import { risolviCategoria, impareCategoria, indizioCategoria, ORDINE_SCAFFALI } from "../../lib/smistamento";
 import { VoceRow } from "./components/VoceRow";
 import { UsataDaSheet } from "./components/UsataDaSheet";
 import { EditVoceSheet } from "./components/EditVoceSheet";
 import { PerPastoView } from "./components/PerPastoView";
 import { cn } from "../../lib/cn";
+
+function labelReparto(categoria: Reparto): string {
+  return ORDINE_SCAFFALI.find((r) => r.value === categoria)?.label ?? categoria;
+}
 
 type Vista = "reparto" | "pasto";
 
@@ -23,6 +29,8 @@ export function SpesaScreen() {
   const showToast = useToastStore((s) => s.show);
 
   const [nuovaVoce, setNuovaVoce] = useState("");
+  const [nomeInAttesa, setNomeInAttesa] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [voceUsataDa, setVoceUsataDa] = useState<VoceSpesa | null>(null);
   const [voceModifica, setVoceModifica] = useState<VoceSpesa | null>(null);
   const [vista, setVista] = useState<Vista>("reparto");
@@ -61,8 +69,26 @@ export function SpesaScreen() {
   const handleAggiungi = () => {
     const nome = nuovaVoce.trim();
     if (!nome) return;
-    aggiungiManuale(nome);
+    const esito = risolviCategoria(nome);
+    if (esito.trovato) {
+      aggiungiManuale(nome, esito.categoria);
+      showToast(`Messo in ${labelReparto(esito.categoria)} ✓`);
+      setNuovaVoce("");
+      setNomeInAttesa(null);
+      inputRef.current?.focus();
+    } else {
+      setNomeInAttesa(nome);
+    }
+  };
+
+  const handleSceltaChip = (categoria: Reparto) => {
+    if (!nomeInAttesa) return;
+    aggiungiManuale(nomeInAttesa, categoria);
+    impareCategoria(nomeInAttesa, categoria);
+    showToast(`Messo in ${labelReparto(categoria)} ✓`);
     setNuovaVoce("");
+    setNomeInAttesa(null);
+    inputRef.current?.focus();
   };
 
   const handleTapTesto = (voce: VoceSpesa) => {
@@ -77,8 +103,12 @@ export function SpesaScreen() {
       <div className="px-4 flex flex-col gap-4">
         <div className="flex gap-2">
           <input
+            ref={inputRef}
             value={nuovaVoce}
-            onChange={(e) => setNuovaVoce(e.target.value)}
+            onChange={(e) => {
+              setNuovaVoce(e.target.value);
+              if (nomeInAttesa) setNomeInAttesa(null);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -97,6 +127,13 @@ export function SpesaScreen() {
             <Plus size={20} />
           </button>
         </div>
+
+        {nomeInAttesa && (
+          <div className="flex flex-col gap-1.5 -mt-2">
+            <p className="text-caption text-paper-500 px-1">Dove lo metto?</p>
+            <ScaffaleChipRow suggerito={indizioCategoria(nomeInAttesa)} onScegli={handleSceltaChip} />
+          </div>
+        )}
 
         <div className="flex items-center justify-between gap-3">
           <div className="inline-flex p-0.5 rounded-full bg-paper-100 shrink-0">

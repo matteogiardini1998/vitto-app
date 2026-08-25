@@ -4,7 +4,7 @@ import type { Ricetta } from "../types";
 
 const STOPWORD = new Set(["di", "d", "a", "al", "allo", "alla", "ai", "agli", "alle", "del", "della", "dei", "delle", "e", "con", "da"]);
 
-function normalizza(s: string): string {
+export function normalizza(s: string): string {
   return s
     .toLowerCase()
     .normalize("NFD")

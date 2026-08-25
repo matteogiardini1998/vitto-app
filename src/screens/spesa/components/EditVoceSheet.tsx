@@ -4,6 +4,7 @@ import { BottomSheet } from "../../../components/BottomSheet";
 import { TextField } from "../../../components/TextField";
 import { Button } from "../../../components/Button";
 import { REPARTI, type Reparto, type VoceSpesa } from "../../../types";
+import { impareCategoria } from "../../../lib/smistamento";
 import { useShoppingStore } from "../../../store/shoppingStore";
 
 type EditVoceSheetProps = {
@@ -30,12 +31,14 @@ function EditVoceForm({ voce, onClose }: { voce: VoceSpesa; onClose: () => void 
   const [reparto, setReparto] = useState<Reparto>(voce.reparto);
 
   const salva = () => {
+    const nomeFinale = nome.trim() || voce.nome;
     aggiornaVoce(voce.id, {
-      nome: nome.trim() || voce.nome,
+      nome: nomeFinale,
       qta: qta.trim() === "" ? null : Number(qta),
       unita: unita.trim(),
       reparto,
     });
+    if (reparto !== voce.reparto) impareCategoria(nomeFinale, reparto);
     onClose();
   };
 

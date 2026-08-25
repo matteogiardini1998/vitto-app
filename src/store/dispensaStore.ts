@@ -31,7 +31,7 @@ type DispensaState = {
   svuotaDispensa: (id: string) => void;
   eliminaDispensa: (id: string) => void;
 
-  aggiungiVoce: (dispensaId: string, voce: NuovaVoceInput) => void;
+  aggiungiVoce: (dispensaId: string, voce: NuovaVoceInput) => string;
   aggiornaVoce: (dispensaId: string, voceId: string, patch: Partial<VoceDispensa>) => void;
   rimuoviVoce: (dispensaId: string, voceId: string) => void;
   spostaVoce: (voceId: string, daDispensaId: string, aDispensaId: string) => void;
@@ -75,24 +75,23 @@ export const useDispensaStore = create<DispensaState>()(
           return { dispense: restanti, dispensaAttivaId: attivaId };
         }),
 
-      aggiungiVoce: (dispensaId, voce) =>
+      aggiungiVoce: (dispensaId, voce) => {
+        const categoria = voce.categoria ?? "altro";
+        const nuova: VoceDispensa = {
+          id: generaId(),
+          nome: voce.nome.trim(),
+          qta: voce.qta ?? null,
+          unita: voce.unita ?? null,
+          categoria,
+          deperibile: voce.deperibile ?? deperibilePropostoPer(categoria),
+          daConsumarePresto: voce.daConsumarePresto ?? false,
+          aggiuntaIl: new Date().toISOString(),
+        };
         set((s) => ({
-          dispense: s.dispense.map((d) => {
-            if (d.id !== dispensaId) return d;
-            const categoria = voce.categoria ?? "altro";
-            const nuova: VoceDispensa = {
-              id: generaId(),
-              nome: voce.nome.trim(),
-              qta: voce.qta ?? null,
-              unita: voce.unita ?? null,
-              categoria,
-              deperibile: voce.deperibile ?? deperibilePropostoPer(categoria),
-              daConsumarePresto: voce.daConsumarePresto ?? false,
-              aggiuntaIl: new Date().toISOString(),
-            };
-            return { ...d, voci: [...d.voci, nuova] };
-          }),
-        })),
+          dispense: s.dispense.map((d) => (d.id !== dispensaId ? d : { ...d, voci: [...d.voci, nuova] })),
+        }));
+        return nuova.id;
+      },
 
       aggiornaVoce: (dispensaId, voceId, patch) =>
         set((s) => ({

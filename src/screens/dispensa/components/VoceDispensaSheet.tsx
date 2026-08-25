@@ -4,8 +4,9 @@ import { BottomSheet } from "../../../components/BottomSheet";
 import { TextField } from "../../../components/TextField";
 import { Chip } from "../../../components/Chip";
 import { Switch } from "../../../components/Switch";
-import { REPARTI, type Dispensa, type VoceDispensa } from "../../../types";
+import type { Dispensa, VoceDispensa } from "../../../types";
 import { deperibilePropostoPer } from "../../../lib/dispensa";
+import { ORDINE_SCAFFALI, impareCategoria } from "../../../lib/smistamento";
 import { useDispensaStore } from "../../../store/dispensaStore";
 
 type VoceDispensaSheetProps = {
@@ -79,13 +80,16 @@ export function VoceDispensaSheet({ open, onClose, dispensaId, voce, altreDispen
         </div>
 
         <div>
-          <p className="text-body-sm font-medium text-paper-600 mb-1.5">Categoria</p>
+          <p className="text-body-sm font-medium text-paper-600 mb-1.5">Sposta in un altro scaffale</p>
           <div className="flex flex-wrap gap-2">
-            {REPARTI.map((r) => (
+            {ORDINE_SCAFFALI.map((r) => (
               <Chip
                 key={r.value}
                 selected={draft.categoria === r.value}
-                onClick={() => salva({ categoria: r.value, deperibile: deperibilePropostoPer(r.value) })}
+                onClick={() => {
+                  salva({ categoria: r.value, deperibile: deperibilePropostoPer(r.value) });
+                  impareCategoria(draft.nome, r.value);
+                }}
               >
                 {r.label}
               </Chip>
