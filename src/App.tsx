@@ -1,9 +1,7 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./layouts/AppLayout";
-import { MealPrepScreen } from "./screens/mealprep/MealPrepScreen";
-import { RicettarioScreen } from "./screens/ricettario/RicettarioScreen";
-import { SpesaScreen } from "./screens/spesa/SpesaScreen";
+import { WheelLayout } from "./layouts/WheelLayout";
 import { ProfiloScreen } from "./screens/profilo/ProfiloScreen";
 import { OnboardingScreen } from "./screens/onboarding/OnboardingScreen";
 import { OnboardingLayout } from "./layouts/OnboardingLayout";
@@ -13,6 +11,7 @@ import { GeneraWizardScreen } from "./screens/mealprep/genera/GeneraWizardScreen
 import { useProfileStore } from "./store/profileStore";
 import { useUiStore } from "./store/uiStore";
 import { PatternBackground } from "./components/PatternBackground";
+import { ToastHost } from "./components/ToastHost";
 
 export function App() {
   const onboardingCompletato = useProfileStore((s) => s.profilo.onboardingCompletato);
@@ -25,6 +24,7 @@ export function App() {
   return (
     <>
       <PatternBackground />
+      <ToastHost />
       {!onboardingCompletato ? (
         <Routes>
           <Route element={<OnboardingLayout />}>
@@ -40,11 +40,14 @@ export function App() {
             <Route path="/ricettario/:id/modifica" element={<RicettaFormScreen />} />
             <Route path="/meal-prep/genera" element={<GeneraWizardScreen />} />
           </Route>
-          <Route element={<AppLayout />}>
+          <Route element={<WheelLayout />}>
             <Route index element={<Navigate to="/meal-prep" replace />} />
-            <Route path="/meal-prep" element={<MealPrepScreen />} />
-            <Route path="/ricettario" element={<RicettarioScreen />} />
-            <Route path="/spesa" element={<SpesaScreen />} />
+            <Route path="/meal-prep" element={null} />
+            <Route path="/ricettario" element={null} />
+            <Route path="/spesa" element={null} />
+            <Route path="/dispensa" element={null} />
+          </Route>
+          <Route element={<AppLayout />}>
             <Route path="/profilo" element={<ProfiloScreen />} />
           </Route>
           <Route path="*" element={<Navigate to="/meal-prep" replace />} />

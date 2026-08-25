@@ -1,8 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { TabBar } from "../components/TabBar";
-import { ToastHost } from "../components/ToastHost";
 
+/** Layout semplice (senza ruota/tab bar), usato per il Profilo raggiunto a parte. */
 export function AppLayout() {
   const location = useLocation();
 
@@ -21,8 +20,6 @@ export function AppLayout() {
           </motion.div>
         </AnimatePresence>
       </div>
-      <TabBar />
-      <ToastHost />
     </div>
   );
 }

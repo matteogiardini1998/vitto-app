@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
+  ArrowLeft,
   UserRound,
   Users,
   Clock3,
@@ -71,6 +73,7 @@ const DIETA_LABEL: Record<Profilo["dieta"], string> = {
 };
 
 export function ProfiloScreen() {
+  const navigate = useNavigate();
   const profilo = useProfileStore((s) => s.profilo);
   const updateProfilo = useProfileStore((s) => s.updateProfilo);
   const resetProfilo = useProfileStore((s) => s.resetProfilo);
@@ -130,7 +133,17 @@ export function ProfiloScreen() {
 
   return (
     <div className="pb-8">
-      <div className="flex flex-col items-center text-center pt-9 pb-6 px-4">
+      <div className="safe-top px-4 pt-4">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          aria-label="Torna indietro"
+          className="h-10 w-10 rounded-full bg-paper-100 text-paper-600 flex items-center justify-center active:bg-paper-200"
+        >
+          <ArrowLeft size={19} />
+        </button>
+      </div>
+      <div className="flex flex-col items-center text-center pt-2 pb-6 px-4">
         <ProfileAvatar
           avatarId={profilo.avatarId}
           nome={profilo.nome}

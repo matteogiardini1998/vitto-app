@@ -29,7 +29,7 @@ export function SpesaScreen() {
 
   const prese = voci.filter((v) => v.presa).length;
   const completata = voci.length > 0 && prese === voci.length;
-  const eraCompletataRef = useRef(false);
+  const eraCompletataRef = useRef(completata);
 
   useEffect(() => {
     if (completata && !eraCompletataRef.current) {
