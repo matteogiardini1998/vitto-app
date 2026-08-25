@@ -9,6 +9,14 @@ import { RicettarioScreen } from "../screens/ricettario/RicettarioScreen";
 import { SpesaScreen } from "../screens/spesa/SpesaScreen";
 import { DispensaScreen } from "../screens/dispensa/DispensaScreen";
 import { useProfileStore } from "../store/profileStore";
+import { useUiStore, type WheelVariant } from "../store/uiStore";
+import { cn } from "../lib/cn";
+
+const VARIANTI: { id: WheelVariant; label: string }[] = [
+  { id: "legno", label: "A" },
+  { id: "ceramica", label: "B" },
+  { id: "quadrante", label: "C" },
+];
 
 const PAGES: WheelPageDef[] = [
   { path: "/meal-prep", label: "Meal Prep", icon: CalendarDays },
@@ -33,6 +41,8 @@ export function WheelLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const profilo = useProfileStore((s) => s.profilo);
+  const wheelVariant = useUiStore((s) => s.wheelVariant);
+  const setWheelVariant = useUiStore((s) => s.setWheelVariant);
 
   const initialIndex = Math.max(
     0,
@@ -86,6 +96,23 @@ export function WheelLayout() {
 
   return (
     <div className="app-shell flex flex-col">
+      {/* Temporaneo, solo per la prova delle 3 varianti — via una volta scelta quella definitiva. */}
+      <div className="absolute left-4 top-4 z-40 flex rounded-full bg-paper-0 border border-paper-200 shadow-card overflow-hidden">
+        {VARIANTI.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            onClick={() => setWheelVariant(v.id)}
+            className={cn(
+              "h-8 w-8 flex items-center justify-center text-caption font-bold",
+              wheelVariant === v.id ? "bg-accent-500 text-paper-50" : "text-paper-500",
+            )}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
       <button
         type="button"
         onClick={() => navigate("/profilo")}
@@ -114,6 +141,7 @@ export function WheelLayout() {
         activeIndex={activeIndex}
         onSettle={handleSettle}
         onHubTap={() => navigate("/meal-prep/genera")}
+        variant={wheelVariant}
       />
     </div>
   );
