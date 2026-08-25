@@ -8,7 +8,7 @@ import { useBarcodeCacheStore, type ProdottoBarcode } from "../../store/barcodeC
 import { feedbackLettura } from "../../lib/barcode/feedback";
 import { riconosciProdotto, ritentaCodaDaRiconoscere } from "../../lib/barcode/riconoscimento";
 import { impareCategoria } from "../../lib/smistamento";
-import type { BarcodeHit } from "../../lib/barcode/types";
+import type { BarcodeHit, RisultatoAzione } from "../../lib/barcode/types";
 import type { NutrizionePer100g, Reparto } from "../../types";
 import { Button } from "../Button";
 import { TextField } from "../TextField";
@@ -24,6 +24,9 @@ type VoceSessione = {
   stato: "cercando" | "risolto" | "da-completare";
   prodotto?: ProdottoBarcode;
   bozza?: Bozza;
+  scelta?: Extract<RisultatoAzione, { tipo: "scelta" }>;
+  notaScelta?: string;
+  annulla?: () => void;
 };
 
 const FINESTRA_INCREMENTO_MS = 4000;
@@ -31,7 +34,7 @@ const FINESTRA_INCREMENTO_MS = 4000;
 type BarcodeScannerOverlayProps = {
   open: boolean;
   onClose: () => void;
-  onRisolto?: (prodotto: ProdottoBarcode) => void;
+  onRisolto?: (prodotto: ProdottoBarcode) => RisultatoAzione | void;
 };
 
 export function BarcodeScannerOverlay({ open, onClose, onRisolto }: BarcodeScannerOverlayProps) {
@@ -41,7 +44,7 @@ export function BarcodeScannerOverlay({ open, onClose, onRisolto }: BarcodeScann
   );
 }
 
-function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (prodotto: ProdottoBarcode) => void }) {
+function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (prodotto: ProdottoBarcode) => RisultatoAzione | void }) {
   const spiegazioneVista = useBarcodeStore((s) => s.spiegazioneVista);
   const segnaSpiegazioneVista = useBarcodeStore((s) => s.segnaSpiegazioneVista);
   const [spiegazioneAccettata, setSpiegazioneAccettata] = useState(spiegazioneVista);
@@ -56,6 +59,15 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
 
   const aggiornaVoce = (codice: string, patch: Partial<VoceSessione>) => {
     setPila((prec) => prec.map((v) => (v.codice === codice ? { ...v, ...patch } : v)));
+  };
+
+  const applicaAzione = (codice: string, prodotto: ProdottoBarcode) => {
+    const risultato = onRisolto?.(prodotto);
+    if (!risultato || risultato.tipo === "fatto") {
+      aggiornaVoce(codice, { annulla: risultato?.annulla, scelta: undefined });
+    } else {
+      aggiornaVoce(codice, { scelta: risultato, annulla: undefined });
+    }
   };
 
   const gestisciHit = (hit: BarcodeHit) => {
@@ -83,7 +95,7 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
 
     const prodottoNoto = risoltiRef.current.get(hit.codice);
     if (prodottoNoto) {
-      onRisolto?.(prodottoNoto);
+      applicaAzione(hit.codice, prodottoNoto);
       return;
     }
     if (inCorsoRef.current.has(hit.codice)) return;
@@ -94,7 +106,7 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
       if (esito.tipo === "risolto") {
         risoltiRef.current.set(hit.codice, esito.prodotto);
         aggiornaVoce(hit.codice, { stato: "risolto", prodotto: esito.prodotto });
-        onRisolto?.(esito.prodotto);
+        applicaAzione(hit.codice, esito.prodotto);
       } else if (esito.tipo === "incerto") {
         aggiornaVoce(hit.codice, {
           stato: "da-completare",
@@ -125,7 +137,12 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
     useBarcodeCacheStore.getState().salva(prodotto);
     risoltiRef.current.set(codice, prodotto);
     aggiornaVoce(codice, { stato: "risolto", prodotto });
-    onRisolto?.(prodotto);
+    applicaAzione(codice, prodotto);
+  };
+
+  const sceltaFatta = (codice: string, label: string, onScegli: () => void) => {
+    onScegli();
+    aggiornaVoce(codice, { scelta: undefined, notaScelta: label });
   };
 
   const attivaFotocamera = () => {
@@ -133,8 +150,9 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
     setSpiegazioneAccettata(true);
   };
 
-  const rimuoviDallaPila = (il: number) => {
-    setPila((prec) => prec.filter((v) => v.il !== il));
+  const rimuoviDallaPila = (voce: VoceSessione) => {
+    voce.annulla?.();
+    setPila((prec) => prec.filter((v) => v.il !== voce.il));
   };
 
   const totaleScansionati = pila.reduce((tot, v) => tot + v.quantita, 0);
@@ -192,18 +210,30 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
               <p className="text-body-sm text-paper-0/50">Inquadra un codice a barre per iniziare.</p>
             ) : (
               <div className="flex flex-col gap-2 max-h-[38dvh] overflow-y-auto">
-                {pila.map((v) =>
-                  v.stato === "da-completare" && v.bozza ? (
-                    <RigaDaCompletare
-                      key={v.il}
-                      bozza={v.bozza}
-                      onCompleta={(nome, categoria) => completaVoce(v.codice, nome, categoria, v.bozza!)}
-                      onRimuovi={() => rimuoviDallaPila(v.il)}
-                    />
-                  ) : (
-                    <RigaVoce key={v.il} voce={v} onRimuovi={() => rimuoviDallaPila(v.il)} />
-                  ),
-                )}
+                {pila.map((v) => {
+                  if (v.stato === "da-completare" && v.bozza) {
+                    return (
+                      <RigaDaCompletare
+                        key={v.il}
+                        bozza={v.bozza}
+                        onCompleta={(nome, categoria) => completaVoce(v.codice, nome, categoria, v.bozza!)}
+                        onRimuovi={() => rimuoviDallaPila(v)}
+                      />
+                    );
+                  }
+                  if (v.scelta) {
+                    return (
+                      <RigaScelta
+                        key={v.il}
+                        titolo={v.prodotto?.nome ?? v.codice}
+                        scelta={v.scelta}
+                        onScegli={(label, onScegli) => sceltaFatta(v.codice, label, onScegli)}
+                        onRimuovi={() => rimuoviDallaPila(v)}
+                      />
+                    );
+                  }
+                  return <RigaVoce key={v.il} voce={v} onTap={() => rimuoviDallaPila(v)} />;
+                })}
               </div>
             )}
           </div>
@@ -213,14 +243,15 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
   );
 }
 
-function RigaVoce({ voce, onRimuovi }: { voce: VoceSessione; onRimuovi: () => void }) {
+function RigaVoce({ voce, onTap }: { voce: VoceSessione; onTap: () => void }) {
   const titolo =
     voce.stato === "risolto" && voce.prodotto
       ? [voce.prodotto.nome, voce.prodotto.marca].filter(Boolean).join(" · ")
       : voce.codice;
-  const sottotitolo =
-    voce.stato === "risolto" && voce.prodotto
-      ? voce.prodotto.formato ?? voce.codice
+  const sottotitolo = voce.notaScelta
+    ? voce.notaScelta
+    : voce.stato === "risolto" && voce.prodotto
+      ? (voce.prodotto.formato ?? voce.codice)
       : voce.stato === "cercando"
         ? "Sto cercando..."
         : voce.formato.replace(/_/g, " ");
@@ -228,7 +259,7 @@ function RigaVoce({ voce, onRimuovi }: { voce: VoceSessione; onRimuovi: () => vo
   return (
     <button
       type="button"
-      onClick={onRimuovi}
+      onClick={onTap}
       className="flex items-center gap-3 rounded-xl bg-paper-0/10 px-3.5 py-2.5 text-left active:bg-paper-0/15"
     >
       <span className="h-8 w-8 shrink-0 rounded-full bg-paper-0/15 flex items-center justify-center">
@@ -289,6 +320,49 @@ function RigaDaCompletare({
           onCompleta(nome, categoria);
         }}
       />
+    </div>
+  );
+}
+
+function RigaScelta({
+  titolo,
+  scelta,
+  onScegli,
+  onRimuovi,
+}: {
+  titolo: string;
+  scelta: Extract<RisultatoAzione, { tipo: "scelta" }>;
+  onScegli: (label: string, onScegli: () => void) => void;
+  onRimuovi: () => void;
+}) {
+  return (
+    <div className="rounded-xl bg-paper-0 px-3.5 py-3 flex flex-col gap-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-body-sm font-semibold text-paper-900 truncate">{titolo}</p>
+          <p className="text-caption text-paper-500">{scelta.domanda}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onRimuovi}
+          aria-label="Chiudi"
+          className="h-7 w-7 shrink-0 flex items-center justify-center rounded-full bg-paper-100 text-paper-500"
+        >
+          <X size={14} />
+        </button>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {scelta.opzioni.map((op) => (
+          <button
+            key={op.label}
+            type="button"
+            onClick={() => onScegli(op.label, op.onScegli)}
+            className="h-10 rounded-lg bg-paper-100 text-body-sm font-semibold text-paper-800 active:bg-paper-200"
+          >
+            {op.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

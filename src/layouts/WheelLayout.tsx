@@ -12,9 +12,12 @@ import { SpesaScreen } from "../screens/spesa/SpesaScreen";
 import { DispensaScreen } from "../screens/dispensa/DispensaScreen";
 import { useProfileStore } from "../store/profileStore";
 import { useDispensaStore } from "../store/dispensaStore";
+import { useShoppingStore } from "../store/shoppingStore";
 import { useToastStore } from "../store/toastStore";
 import { ritentaCodaDaRiconoscere } from "../lib/barcode/riconoscimento";
+import { trovaVoceSpesaCorrispondente } from "../lib/dispensaMatch";
 import type { ProdottoBarcode } from "../store/barcodeCacheStore";
+import type { RisultatoAzione } from "../lib/barcode/types";
 
 const PAGES: WheelPageDef[] = [
   { path: "/meal-prep", label: "Meal Prep", icon: CalendarDays },
@@ -61,11 +64,19 @@ export function WheelLayout() {
   const [scannerAperto, setScannerAperto] = useState(false);
   const paginaConScanner = location.pathname === "/dispensa" || location.pathname === "/spesa";
 
-  const dispense = useDispensaStore((s) => s.dispense);
-  const dispensaAttivaId = useDispensaStore((s) => s.dispensaAttivaId);
   const aggiungiVoceDispensa = useDispensaStore((s) => s.aggiungiVoce);
   const aggiornaVoceDispensa = useDispensaStore((s) => s.aggiornaVoce);
+  const rimuoviVoceDispensa = useDispensaStore((s) => s.rimuoviVoce);
+  const aggiungiManualeSpesa = useShoppingStore((s) => s.aggiungiManuale);
+  const toggleVoceSpesa = useShoppingStore((s) => s.toggleVoce);
   const showToast = useToastStore((s) => s.show);
+
+  // Tracciano cosa ha già fatto QUESTA sessione di scanner per ogni barcode,
+  // per poter incrementare/annullare in modo coerente invece di ripetere
+  // l'azione a ogni singolo bip dello stesso prodotto. Si azzerano ad ogni
+  // apertura dello scanner.
+  const sessioneDispensaRef = useRef(new Map<string, { voceId: string; creataOra: boolean; deltaSessione: number }>());
+  const sessioneSpesaRef = useRef(new Set<string>());
 
   useEffect(() => {
     const ritenta = () => ritentaCodaDaRiconoscere();
@@ -73,24 +84,103 @@ export function WheelLayout() {
     return () => window.removeEventListener("online", ritenta);
   }, []);
 
-  const handleRisoltoDispensa = (prodotto: ProdottoBarcode) => {
-    const dispensa = dispense.find((d) => d.id === dispensaAttivaId) ?? dispense[0];
-    const esistente = dispensa.voci.find((v) => v.barcode === prodotto.barcode);
-    if (esistente) {
-      aggiornaVoceDispensa(dispensa.id, esistente.id, { qta: (esistente.qta ?? 1) + 1 });
+  const apriScanner = () => {
+    sessioneDispensaRef.current.clear();
+    sessioneSpesaRef.current.clear();
+    setScannerAperto(true);
+  };
+
+  const handleRisoltoDispensa = (prodotto: ProdottoBarcode): RisultatoAzione => {
+    const dispensaStore = useDispensaStore.getState();
+    const dispensa = dispensaStore.dispense.find((d) => d.id === dispensaStore.dispensaAttivaId) ?? dispensaStore.dispense[0];
+    const barcode = prodotto.barcode;
+    const traccia = sessioneDispensaRef.current.get(barcode);
+
+    if (traccia) {
+      const vAttuale = dispensa.voci.find((v) => v.id === traccia.voceId);
+      aggiornaVoceDispensa(dispensa.id, traccia.voceId, { qta: (vAttuale?.qta ?? 0) + 1 });
+      traccia.deltaSessione += 1;
     } else {
-      const nome = [prodotto.nome, prodotto.marca].filter(Boolean).join(" · ") + (prodotto.formato ? ` (${prodotto.formato})` : "");
-      aggiungiVoceDispensa(dispensa.id, {
-        nome,
-        qta: 1,
-        unita: "pz",
-        categoria: prodotto.scaffale,
-        barcode: prodotto.barcode,
-        marca: prodotto.marca,
-        nutrizionePer100g: prodotto.nutrizionePer100g,
-      });
+      const esistente = dispensa.voci.find((v) => v.barcode === barcode);
+      if (esistente) {
+        aggiornaVoceDispensa(dispensa.id, esistente.id, { qta: (esistente.qta ?? 1) + 1 });
+        sessioneDispensaRef.current.set(barcode, { voceId: esistente.id, creataOra: false, deltaSessione: 1 });
+      } else {
+        const nome = [prodotto.nome, prodotto.marca].filter(Boolean).join(" · ") + (prodotto.formato ? ` (${prodotto.formato})` : "");
+        const nuovoId = aggiungiVoceDispensa(dispensa.id, {
+          nome,
+          qta: 1,
+          unita: "pz",
+          categoria: prodotto.scaffale,
+          barcode,
+          marca: prodotto.marca,
+          nutrizionePer100g: prodotto.nutrizionePer100g,
+        });
+        sessioneDispensaRef.current.set(barcode, { voceId: nuovoId, creataOra: true, deltaSessione: 1 });
+      }
     }
+
     showToast(`Aggiunto: ${prodotto.nome} ✓`);
+
+    return {
+      tipo: "fatto",
+      annulla: () => {
+        const traccia2 = sessioneDispensaRef.current.get(barcode);
+        if (!traccia2) return;
+        const s = useDispensaStore.getState();
+        const d = s.dispense.find((dd) => dd.id === s.dispensaAttivaId) ?? s.dispense[0];
+        if (traccia2.creataOra) {
+          rimuoviVoceDispensa(d.id, traccia2.voceId);
+        } else {
+          const v = d.voci.find((vv) => vv.id === traccia2.voceId);
+          aggiornaVoceDispensa(d.id, traccia2.voceId, { qta: Math.max(0, (v?.qta ?? traccia2.deltaSessione) - traccia2.deltaSessione) });
+        }
+        sessioneDispensaRef.current.delete(barcode);
+        showToast("Annullato");
+      },
+    };
+  };
+
+  const handleRisoltoSpesa = (prodotto: ProdottoBarcode): RisultatoAzione => {
+    const barcode = prodotto.barcode;
+    if (sessioneSpesaRef.current.has(barcode)) return { tipo: "fatto" };
+    sessioneSpesaRef.current.add(barcode);
+
+    const vociNonPrese = useShoppingStore.getState().voci.filter((v) => !v.presa);
+    const match = trovaVoceSpesaCorrispondente(prodotto.nome, vociNonPrese);
+
+    if (match) {
+      toggleVoceSpesa(match.id);
+      showToast(`Spuntato: ${match.nome} ✓`);
+      return {
+        tipo: "fatto",
+        annulla: () => {
+          toggleVoceSpesa(match.id);
+          sessioneSpesaRef.current.delete(barcode);
+        },
+      };
+    }
+
+    return {
+      tipo: "scelta",
+      domanda: "Non è nella lista: cosa faccio?",
+      opzioni: [
+        {
+          label: "Aggiungi alla lista",
+          onScegli: () => {
+            aggiungiManualeSpesa(prodotto.nome, prodotto.scaffale);
+            showToast(`Aggiunto alla lista: ${prodotto.nome} ✓`);
+          },
+        },
+        {
+          label: "Metti direttamente in dispensa",
+          onScegli: () => {
+            handleRisoltoDispensa(prodotto);
+          },
+        },
+        { label: "Ignora", onScegli: () => {} },
+      ],
+    };
   };
 
   const handlePageScroll = (index: number, scrollTop: number) => {
@@ -179,11 +269,17 @@ export function WheelLayout() {
         ))}
       </div>
 
-      {paginaConScanner && <BarcodeScanButton onClick={() => setScannerAperto(true)} />}
+      {paginaConScanner && <BarcodeScanButton onClick={apriScanner} />}
       <BarcodeScannerOverlay
         open={scannerAperto}
         onClose={() => setScannerAperto(false)}
-        onRisolto={location.pathname === "/dispensa" ? handleRisoltoDispensa : undefined}
+        onRisolto={
+          location.pathname === "/dispensa"
+            ? handleRisoltoDispensa
+            : location.pathname === "/spesa"
+              ? handleRisoltoSpesa
+              : undefined
+        }
       />
 
       <WheelNav
