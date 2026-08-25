@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw, ShoppingBasket, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
+import { PAGE_ACCENT } from "../../components/WheelNav";
 import { EmptyState } from "../../components/EmptyState";
 import { Card } from "../../components/Card";
 import { useShoppingStore } from "../../store/shoppingStore";
@@ -71,7 +72,7 @@ export function SpesaScreen() {
 
   return (
     <div className="pb-8">
-      <PageHeader title="Lista della spesa" />
+      <PageHeader title="Lista della spesa" accent={PAGE_ACCENT[2]} />
 
       <div className="px-4 flex flex-col gap-4">
         <div className="flex gap-2">

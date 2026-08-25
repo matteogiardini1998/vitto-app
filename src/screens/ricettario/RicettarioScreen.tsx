@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Plus, SlidersHorizontal, Star } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
+import { PAGE_ACCENT } from "../../components/WheelNav";
 import { EmptyState } from "../../components/EmptyState";
 import { SearchInput } from "../../components/SearchInput";
 import { Chip } from "../../components/Chip";
@@ -39,7 +40,7 @@ export function RicettarioScreen() {
 
   return (
     <div className="pb-8">
-      <PageHeader title="Ricettario" subtitle="La tua dispensa di ricette" />
+      <PageHeader title="Ricettario" subtitle="La tua dispensa di ricette" accent={PAGE_ACCENT[1]} />
 
       <div className="px-4 flex flex-col gap-3 mb-4">
         <div className="flex items-center gap-2">

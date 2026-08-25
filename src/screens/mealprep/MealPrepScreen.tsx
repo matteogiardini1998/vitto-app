@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ShoppingBasket, Trash2 } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
+import { PAGE_ACCENT } from "../../components/WheelNav";
 import { Button } from "../../components/Button";
 import { DaySection } from "./components/DaySection";
 import { AssignRecipeSheet } from "./components/AssignRecipeSheet";
@@ -66,7 +67,7 @@ export function MealPrepScreen() {
 
   return (
     <div className="pb-8">
-      <PageHeader title="Piano Pasti" />
+      <PageHeader title="Piano Pasti" accent={PAGE_ACCENT[0]} />
 
       {!pianoVuoto && (
         <div className="px-4 mb-2 flex justify-center">
