@@ -4,6 +4,8 @@ import { motion, useTransform, useMotionValue, type MotionValue } from "framer-m
 import { CalendarDays, BookOpen, ShoppingBasket, Archive } from "lucide-react";
 import { WheelNav, WHEEL_CONTAINER_HEIGHT, WHEEL_STEP, type WheelPageDef } from "../components/WheelNav";
 import { ProfileAvatar } from "../components/ProfileAvatar";
+import { BarcodeScanButton } from "../components/barcode/BarcodeScanButton";
+import { BarcodeScannerOverlay } from "../components/barcode/BarcodeScannerOverlay";
 import { MealPrepScreen } from "../screens/mealprep/MealPrepScreen";
 import { RicettarioScreen } from "../screens/ricettario/RicettarioScreen";
 import { SpesaScreen } from "../screens/spesa/SpesaScreen";
@@ -51,6 +53,9 @@ export function WheelLayout() {
   // pagina davvero attiva.
   const [wheelHidden, setWheelHidden] = useState(false);
   const lastScrollTops = useRef<number[]>(PAGES.map(() => 0));
+
+  const [scannerAperto, setScannerAperto] = useState(false);
+  const paginaConScanner = location.pathname === "/dispensa" || location.pathname === "/spesa";
 
   const handlePageScroll = (index: number, scrollTop: number) => {
     const last = lastScrollTops.current[index];
@@ -137,6 +142,9 @@ export function WheelLayout() {
           </PageSlot>
         ))}
       </div>
+
+      {paginaConScanner && <BarcodeScanButton onClick={() => setScannerAperto(true)} />}
+      <BarcodeScannerOverlay open={scannerAperto} onClose={() => setScannerAperto(false)} />
 
       <WheelNav
         pages={PAGES}
