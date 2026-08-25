@@ -36,15 +36,13 @@ function varianteNumero(frase: string): string[] {
   return [frase, ...[...alternative].map((v) => [...base, v].join(" "))];
 }
 
-type VoceIndice = { chiave: string; ingrediente: IngredienteBase };
-
-let indiceCache: VoceIndice[] | null = null;
-function indice(): VoceIndice[] {
+let indiceCache: Map<string, IngredienteBase> | null = null;
+function indice(): Map<string, IngredienteBase> {
   if (indiceCache) return indiceCache;
-  indiceCache = [];
+  indiceCache = new Map();
   for (const ing of INGREDIENTI) {
     for (const forma of [ing.nome, ...ing.sinonimi]) {
-      indiceCache.push({ chiave: normalizza(forma), ingrediente: ing });
+      indiceCache.set(normalizza(forma), ing);
     }
   }
   return indiceCache;
@@ -62,8 +60,8 @@ export function risolviIngrediente(nomeLibero: string): IngredienteBase | null {
   if (!normalizzato) return null;
 
   for (const candidato of varianteNumero(normalizzato)) {
-    const trovato = indice().find((v) => v.chiave === candidato);
-    if (trovato) return trovato.ingrediente;
+    const trovato = indice().get(candidato);
+    if (trovato) return trovato;
   }
   return null;
 }
@@ -193,7 +191,10 @@ export function tagNutrizionaliCalcolati(ricetta: Ricetta): TagNutrizionaleCalco
   if (n.kcal <= SOGLIE_TAG_NUTRIZIONALI.ipocaloricaMaxKcal) tags.push("ipocalorica");
   if (n.zuccheri <= SOGLIE_TAG_NUTRIZIONALI.bassoZuccheroMaxG) tags.push("basso-zucchero");
   if (n.fibre >= SOGLIE_TAG_NUTRIZIONALI.riccaDiFibreMinG) tags.push("ricca-di-fibre");
-  return tags;
+
+  // Una ricetta può già avere lo stesso tag messo a mano in fase di seed:
+  // non mostrarlo due volte.
+  return tags.filter((t) => !ricetta.tags.includes(t));
 }
 
 /** Grammi risolti di un gruppo alimentare per una singola ricetta (per il motore di bilanciamento). */

@@ -328,6 +328,7 @@ export const INGREDIENTI: IngredienteBase[] = [
     sinonimi: ["cetrioli"],
     reparto: "frutta-verdura", gruppo: "verdura",
     per100g: { kcal: 12, proteine: 0.7, carboidrati: 1.5, zuccheri: 1.5, grassi: 0.2, fibre: 0.8 },
+    pesoMedioPz: 200,
   },
   {
     id: "funghi-porcini-secchi",
@@ -595,6 +596,7 @@ export const INGREDIENTI: IngredienteBase[] = [
     sinonimi: ["pollo a fette", "fettine di pollo", "pollo", "bocconcini di pollo"],
     reparto: "carne-pesce", gruppo: "carne-bianca",
     per100g: { kcal: 113, proteine: 23, carboidrati: 0, zuccheri: 0, grassi: 1.5, fibre: 0 },
+    pesoMedioPz: 70,
   },
   {
     id: "tacchino",
@@ -618,6 +620,7 @@ export const INGREDIENTI: IngredienteBase[] = [
     sinonimi: ["filetti di salmone", "salmone"],
     reparto: "carne-pesce", gruppo: "pesce",
     per100g: { kcal: 208, proteine: 20, carboidrati: 0, zuccheri: 0, grassi: 13, fibre: 0 },
+    pesoMedioPz: 150,
   },
   {
     id: "orata",

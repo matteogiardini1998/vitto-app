@@ -1,5 +1,6 @@
 import type { Ricetta } from "../types";
 import type { Filtri, Ordinamento } from "./filtriRicette";
+import { tagNutrizionaliCalcolati, TAG_NUTRIZIONALE_LABEL } from "./nutrizione";
 
 function punteggioConsigliati(r: Ricetta): number {
   return r.rating + (r.preferita ? 2 : 0) - (r.sfavorita ? 3 : 0);
@@ -30,8 +31,13 @@ export function filtraEOrdinaRicette(
   const query = ricerca.trim().toLowerCase();
 
   const filtrate = ricette.filter((r) => {
-    if (query && !r.nome.toLowerCase().includes(query) && !r.tags.some((t) => t.toLowerCase().includes(query))) {
-      return false;
+    if (query) {
+      const tagCalcolatiLabel = tagNutrizionaliCalcolati(r).map((t) => TAG_NUTRIZIONALE_LABEL[t].toLowerCase());
+      const corrisponde =
+        r.nome.toLowerCase().includes(query) ||
+        r.tags.some((t) => t.toLowerCase().includes(query)) ||
+        tagCalcolatiLabel.some((t) => t.includes(query));
+      if (!corrisponde) return false;
     }
     if (filtri.pasto.length && !filtri.pasto.some((p) => r.pasto.includes(p))) return false;
     if (filtri.stile.length && !filtri.stile.includes(r.stile)) return false;

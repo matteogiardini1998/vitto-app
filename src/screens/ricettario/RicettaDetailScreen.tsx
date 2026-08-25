@@ -10,6 +10,7 @@ import { Button } from "../../components/Button";
 import { DIETA_RICETTA_LABEL, PASTO_LABEL, formattaTag } from "../../lib/recipeDisplay";
 import { formattaQuantita } from "../../lib/format";
 import { AddToPlanSheet } from "./components/AddToPlanSheet";
+import { calcolaNutrizione, mostraComeStima, tagNutrizionaliCalcolati, TAG_NUTRIZIONALE_LABEL } from "../../lib/nutrizione";
 
 export function RicettaDetailScreen() {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +34,9 @@ export function RicettaDetailScreen() {
       qtaScalata: ing.qta != null ? ing.qta * scala : null,
     }));
   }, [ricetta, scala]);
+
+  const nutrizione = useMemo(() => (ricetta ? calcolaNutrizione(ricetta) : null), [ricetta]);
+  const tagCalcolati = useMemo(() => (ricetta ? tagNutrizionaliCalcolati(ricetta) : []), [ricetta]);
 
   if (!ricetta) {
     return (
@@ -121,15 +125,39 @@ export function RicettaDetailScreen() {
           </span>
         </div>
 
-        {ricetta.tags.length > 0 && (
+        {(ricetta.tags.length > 0 || tagCalcolati.length > 0) && (
           <div className="flex flex-wrap gap-2 mt-3">
             {ricetta.tags.map((t) => (
               <span key={t} className="text-caption text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full">
                 {formattaTag(t)}
               </span>
             ))}
+            {tagCalcolati.map((t) => (
+              <span key={t} className="text-caption text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full">
+                {TAG_NUTRIZIONALE_LABEL[t]}
+              </span>
+            ))}
           </div>
         )}
+
+        <div className="mt-5 p-4 rounded-xl bg-paper-100">
+          {mostraComeStima(nutrizione) && nutrizione ? (
+            <>
+              <div className="flex items-baseline gap-2">
+                <span className="text-display-sm font-display font-bold text-primary-700">{nutrizione.kcal}</span>
+                <span className="text-body-sm text-paper-500">kcal stimate a porzione</span>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-body-sm text-paper-700">
+                <span>Proteine {nutrizione.proteine} g</span>
+                <span>Carboidrati {nutrizione.carboidrati} g</span>
+                <span>Grassi {nutrizione.grassi} g</span>
+                <span>Fibre {nutrizione.fibre} g</span>
+              </div>
+            </>
+          ) : (
+            <p className="text-body-sm text-paper-500">Dati nutrizionali incompleti per questa ricetta.</p>
+          )}
+        </div>
 
         <div className="flex items-center justify-between mt-5 p-4 rounded-md bg-paper-100">
           <StarRating value={ricetta.rating} onChange={(rating) => updateRicetta(ricetta.id, { rating })} size={24} />

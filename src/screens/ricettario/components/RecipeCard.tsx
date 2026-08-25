@@ -5,8 +5,11 @@ import type { Ricetta } from "../../../types";
 import { Card } from "../../../components/Card";
 import { StarRating } from "../../../components/StarRating";
 import { PastoIcon } from "../../../components/PastoIcon";
+import { calcolaNutrizione, mostraComeStima } from "../../../lib/nutrizione";
 
 export function RecipeCard({ ricetta }: { ricetta: Ricetta }) {
+  const nutrizione = calcolaNutrizione(ricetta);
+
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
       <Link to={`/ricettario/${ricetta.id}`}>
@@ -32,6 +35,9 @@ export function RecipeCard({ ricetta }: { ricetta: Ricetta }) {
               <span className="inline-flex items-center gap-0.5 text-caption text-paper-500">
                 <Euro size={13} /> {ricetta.costoStimatoPorzione.toFixed(2)}/porz.
               </span>
+              {mostraComeStima(nutrizione) && nutrizione && (
+                <span className="text-caption text-paper-500">{nutrizione.kcal} kcal</span>
+              )}
               {ricetta.rating > 0 && <StarRating value={ricetta.rating} readOnly size={13} />}
             </div>
           </div>
