@@ -1,14 +1,16 @@
 import { Search, X } from "lucide-react";
+import { cn } from "../lib/cn";
 
 type SearchInputProps = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  className?: string;
 };
 
-export function SearchInput({ value, onChange, placeholder = "Cerca..." }: SearchInputProps) {
+export function SearchInput({ value, onChange, placeholder = "Cerca...", className }: SearchInputProps) {
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
       <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-paper-400" />
       <input
         value={value}

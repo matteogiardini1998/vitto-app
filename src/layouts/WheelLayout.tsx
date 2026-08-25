@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useTransform, useMotionValue, type MotionValue } from "framer-motion";
 import { CalendarDays, BookOpen, ShoppingBasket, Archive } from "lucide-react";
 import { WheelNav, WHEEL_CONTAINER_HEIGHT, WHEEL_STEP, type WheelPageDef } from "../components/WheelNav";
 import { ProfileAvatar } from "../components/ProfileAvatar";
@@ -55,8 +55,6 @@ export function WheelLayout() {
     return () => ro.disconnect();
   }, []);
 
-  const trackX = useTransform(angle, (a) => -(a / WHEEL_STEP) * pageWidth);
-
   const handleSettle = (index: number) => {
     setActiveIndex(index);
     if (PAGES[index].path !== location.pathname) {
@@ -103,18 +101,11 @@ export function WheelLayout() {
       </button>
 
       <div className="flex-1 overflow-hidden relative" style={{ paddingBottom: WHEEL_CONTAINER_HEIGHT }} ref={trackWidth}>
-        <motion.div className="flex h-full transform-gpu" style={{ x: trackX, willChange: "transform" }}>
-          {SCREENS.map((Screen, i) => (
-            <div
-              key={PAGES[i].path}
-              className="w-full h-full shrink-0 overflow-y-auto no-scrollbar"
-              style={{ width: pageWidth || "100%", WebkitOverflowScrolling: "touch" }}
-              aria-hidden={i !== activeIndex}
-            >
-              <Screen />
-            </div>
-          ))}
-        </motion.div>
+        {SCREENS.map((Screen, i) => (
+          <PageSlot key={PAGES[i].path} index={i} count={PAGES.length} angle={angle} pageWidth={pageWidth} ariaHidden={i !== activeIndex}>
+            <Screen />
+          </PageSlot>
+        ))}
       </div>
 
       <WheelNav
@@ -125,5 +116,44 @@ export function WheelLayout() {
         onHubTap={() => navigate("/meal-prep/genera")}
       />
     </div>
+  );
+}
+
+/**
+ * Una pagina nello strip. La sua posizione è una funzione PERIODICA di
+ * `angle` (avvolta in [-count/2, count/2) passi), non un multiplo lineare:
+ * così un angolo che cresce all'infinito (tanti giri di ruota) non fa mai
+ * uscire la pagina dalla sua "corsia" — niente translateX enormi che
+ * finiscono oltre l'ultima pagina montata, che è la causa reale dello
+ * schermo vuoto dopo un giro completo. La pagina resta sempre la stessa
+ * istanza: si sposta, non si smonta mai.
+ */
+function PageSlot({
+  index,
+  count,
+  angle,
+  pageWidth,
+  ariaHidden,
+  children,
+}: {
+  index: number;
+  count: number;
+  angle: MotionValue<number>;
+  pageWidth: number;
+  ariaHidden: boolean;
+  children: ReactNode;
+}) {
+  const x = useTransform(angle, (a) => {
+    const raw = index - a / WHEEL_STEP;
+    const wrapped = (((raw + count / 2) % count) + count) % count - count / 2;
+    return wrapped * pageWidth;
+  });
+
+  return (
+    <motion.div className="absolute inset-0 transform-gpu" style={{ x, willChange: "transform" }} aria-hidden={ariaHidden}>
+      <div className="h-full overflow-y-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
+        {children}
+      </div>
+    </motion.div>
   );
 }

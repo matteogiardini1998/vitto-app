@@ -39,36 +39,36 @@ export function RicettarioScreen() {
 
   return (
     <div className="pb-8">
-      <PageHeader
-        title="Ricettario"
-        subtitle="La tua dispensa di ricette"
-        action={
-          <>
-            <button
-              onClick={() => setIncisivitaAperta(true)}
-              aria-label="Incisività dei voti"
-              className="h-10 w-10 rounded-full bg-paper-100 text-paper-600 flex items-center justify-center active:bg-paper-200"
-            >
-              <Star size={18} />
-            </button>
-            <Link
-              to="/ricettario/nuova"
-              aria-label="Nuova ricetta"
-              className="h-10 w-10 rounded-full bg-primary-700 text-paper-50 flex items-center justify-center active:bg-primary-800"
-            >
-              <Plus size={20} />
-            </Link>
-          </>
-        }
-      />
+      <PageHeader title="Ricettario" subtitle="La tua dispensa di ricette" />
 
       <div className="px-4 flex flex-col gap-3 mb-4">
-        <SearchInput value={ricerca} onChange={setRicerca} placeholder="Cerca ricette o tag..." />
+        <div className="flex items-center gap-2">
+          <SearchInput
+            className="flex-1"
+            value={ricerca}
+            onChange={setRicerca}
+            placeholder="Cerca ricette o tag..."
+          />
+          <Link
+            to="/ricettario/nuova"
+            aria-label="Nuova ricetta"
+            className="h-11 w-11 shrink-0 rounded-full bg-primary-700 text-paper-50 flex items-center justify-center active:bg-primary-800"
+          >
+            <Plus size={20} />
+          </Link>
+        </div>
         <div className="flex items-center gap-2">
           <Chip icon={<SlidersHorizontal size={14} />} onClick={() => setFiltriAperti(true)} selected={filtriAttivi > 0}>
             Filtri{filtriAttivi > 0 ? ` (${filtriAttivi})` : ""}
           </Chip>
-          <span className="text-body-sm text-paper-500">
+          <button
+            onClick={() => setIncisivitaAperta(true)}
+            aria-label="Incisività dei voti"
+            className="h-10 w-10 shrink-0 rounded-full bg-paper-100 text-paper-600 flex items-center justify-center active:bg-paper-200"
+          >
+            <Star size={16} />
+          </button>
+          <span className="text-body-sm text-paper-500 truncate">
             {risultati.length} {risultati.length === 1 ? "ricetta" : "ricette"}
           </span>
         </div>

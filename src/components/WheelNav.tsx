@@ -9,8 +9,8 @@ export type WheelPageDef = {
   icon: LucideIcon;
 };
 
-export const WHEEL_RADIUS = 190;
-const DOME_PADDING = 46;
+export const WHEEL_RADIUS = 92;
+const DOME_PADDING = 30;
 export const WHEEL_CONTAINER_HEIGHT = WHEEL_RADIUS + DOME_PADDING;
 export const WHEEL_STEP = 90;
 
@@ -96,11 +96,10 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap }: Whee
         type="button"
         onClick={onHubTap}
         aria-label="Pianifica pasti"
-        className="absolute left-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-500 text-paper-50 shadow-elevated border-4 border-paper-0 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform"
+        className="absolute left-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-500 text-paper-50 shadow-elevated border-[3px] border-paper-0 flex items-center justify-center active:scale-95 transition-transform"
         style={{ top: WHEEL_CONTAINER_HEIGHT }}
       >
-        <ChefHat size={20} strokeWidth={2} />
-        <span className="text-[9px] font-semibold leading-none">Pianifica</span>
+        <ChefHat size={18} strokeWidth={2} />
       </button>
     </div>
   );
@@ -142,11 +141,11 @@ function WheelItem({
       >
         <span
           className={cn(
-            "h-11 w-11 rounded-full flex items-center justify-center transition-colors",
+            "h-9 w-9 rounded-full flex items-center justify-center transition-colors",
             isActive ? "bg-primary-700 text-paper-50" : "bg-paper-100 text-paper-500",
           )}
         >
-          <Icon size={20} strokeWidth={isActive ? 2.3 : 1.9} />
+          <Icon size={16} strokeWidth={isActive ? 2.3 : 1.9} />
         </span>
         <motion.span
           style={{ opacity: labelOpacity }}
