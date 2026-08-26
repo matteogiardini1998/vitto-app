@@ -9,7 +9,6 @@ import { VincoliStep } from "./steps/VincoliStep";
 import { EsclusioniSettimanaStep } from "./steps/EsclusioniSettimanaStep";
 import { BudgetStep } from "./steps/BudgetStep";
 import { SlotSelectionStep } from "./steps/SlotSelectionStep";
-import { chiaviVuoteSelezionabili } from "../../../lib/planSlots";
 import { RisultatoStep } from "./steps/RisultatoStep";
 import { useProfileStore } from "../../../store/profileStore";
 import { useRecipeStore } from "../../../store/recipeStore";
@@ -37,7 +36,7 @@ export function GeneraWizardScreen() {
     budgetTotale: Math.round((90 * profilo.nucleo.persone) / 5) * 5,
     supermercato: profilo.supermercatoPreferito,
   });
-  const [slotSelezionati, setSlotSelezionati] = useState<string[]>(() => chiaviVuoteSelezionabili(pianoAttuale));
+  const [slotSelezionati, setSlotSelezionati] = useState<string[]>([]);
   const [risultato, setRisultato] = useState<RisultatoGenerazione | null>(null);
 
   const genera = () => {

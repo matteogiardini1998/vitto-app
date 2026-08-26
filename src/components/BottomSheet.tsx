@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import { useVisualViewportInset } from "../hooks/useVisualViewportInset";
 
 type BottomSheetProps = {
   open: boolean;
@@ -11,10 +12,15 @@ type BottomSheetProps = {
 };
 
 export function BottomSheet({ open, onClose, title, children }: BottomSheetProps) {
+  const { altezza, offsetTop, tastieraAperta } = useVisualViewportInset();
+
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <div
+          className="fixed inset-x-0 z-50 flex items-end justify-center"
+          style={{ top: offsetTop, height: altezza }}
+        >
           <motion.div
             className="absolute inset-0 bg-paper-950/50"
             initial={{ opacity: 0 }}
@@ -24,7 +30,8 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
             onClick={onClose}
           />
           <motion.div
-            className="relative w-full max-w-[440px] max-h-[85dvh] bg-paper-0 rounded-t-2xl shadow-sheet flex flex-col safe-bottom"
+            className="relative w-full max-w-[440px] bg-paper-0 rounded-t-2xl shadow-sheet flex flex-col"
+            style={{ maxHeight: altezza * 0.85 }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
@@ -47,7 +54,9 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
                 </button>
               </div>
             )}
-            <div className="overflow-y-auto px-5 pb-5">{children}</div>
+            <div className={tastieraAperta ? "overflow-y-auto px-5 pb-5" : "overflow-y-auto px-5 pb-5 safe-bottom"}>
+              {children}
+            </div>
           </motion.div>
         </div>
       )}

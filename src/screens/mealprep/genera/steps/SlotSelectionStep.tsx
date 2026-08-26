@@ -5,7 +5,7 @@ import { Checkbox } from "../../../../components/Checkbox";
 import { GIORNI, PASTI, chiaveSlot, type Giorno, type Pasto, type Piano, type Ricetta } from "../../../../types";
 import { GIORNO_LABEL_FULL } from "../../../../lib/date";
 import { PASTO_LABEL } from "../../../../lib/recipeDisplay";
-import { chiaviNonBloccate } from "../../../../lib/planSlots";
+import { chiaviVuoteSelezionabili, chiaviPreparate } from "../../../../lib/planSlots";
 import { cn } from "../../../../lib/cn";
 
 const FERIALI: Giorno[] = ["Lun", "Mar", "Mer", "Gio", "Ven"];
@@ -19,25 +19,42 @@ type SlotSelectionStepProps = {
 };
 
 export function SlotSelectionStep({ pianoAttuale, ricette, selezionati, onChange }: SlotSelectionStepProps) {
-  const set = new Set(selezionati);
-  const tutte = chiaviNonBloccate(pianoAttuale);
+  const selezione = new Set(selezionati);
+  const liberi = chiaviVuoteSelezionabili(pianoAttuale);
+  const liberiSet = new Set(liberi);
+  const preparati = chiaviPreparate(pianoAttuale);
 
-  const applica = (nuovo: Set<string>) => onChange(Array.from(nuovo));
+  const overriddenCount = preparati.filter((c) => selezione.has(c)).length;
+  const liberiSelezionati = liberi.filter((c) => selezione.has(c)).length;
+  const totaleDaGenerare = liberiSelezionati + overriddenCount;
+  const preparatiCheRestano = preparati.length - overriddenCount;
 
+  // Un tap diretto su un singolo slot (libero o già preparato) lo aggiunge/toglie dalla selezione: è l'unica
+  // azione che può mettere in rigenerazione uno slot già preparato.
   const toggleSlot = (chiave: string) => {
     if (pianoAttuale[chiave]?.lockata) return;
-    const next = new Set(set);
+    const next = new Set(selezione);
     if (next.has(chiave)) next.delete(chiave);
     else next.add(chiave);
-    applica(next);
+    onChange(Array.from(next));
   };
 
-  const toggleGruppo = (chiaviGruppo: string[]) => {
-    const valide = chiaviGruppo.filter((c) => !pianoAttuale[c]?.lockata);
-    const tutteSelezionate = valide.every((c) => set.has(c));
-    const next = new Set(set);
-    valide.forEach((c) => (tutteSelezionate ? next.delete(c) : next.add(c)));
-    applica(next);
+  // I bottoni di gruppo agiscono SOLO sugli slot liberi: non toccano mai gli slot già preparati,
+  // nemmeno quelli che l'utente ha messo in rigenerazione con un tap diretto.
+  const applicaSuLiberi = (nuoviLiberi: Set<string>) => {
+    const overrides = selezionati.filter((c) => !liberiSet.has(c));
+    onChange([...overrides, ...nuoviLiberi]);
+  };
+
+  const selezionaTutti = () => applicaSuLiberi(new Set(liberi));
+  const deselezionaTutti = () => applicaSuLiberi(new Set());
+
+  const toggleGruppoLiberi = (chiaviGruppo: string[]) => {
+    const valide = chiaviGruppo.filter((c) => liberiSet.has(c));
+    const tutteSelezionate = valide.length > 0 && valide.every((c) => selezione.has(c));
+    const nuovi = new Set(liberi.filter((c) => selezione.has(c)));
+    valide.forEach((c) => (tutteSelezionate ? nuovi.delete(c) : nuovi.add(c)));
+    applicaSuLiberi(nuovi);
   };
 
   const chiaviPasto = (pasto: Pasto) => GIORNI.map((g) => chiaveSlot(g, pasto));
@@ -46,19 +63,23 @@ export function SlotSelectionStep({ pianoAttuale, ricette, selezionati, onChange
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap gap-2">
-        <Chip onClick={() => applica(new Set(tutte))}>Tutti</Chip>
-        <Chip onClick={() => applica(new Set())}>Nessuno</Chip>
-        <Chip onClick={() => toggleGruppo(chiaviPasto("colazione"))}>Colazioni</Chip>
-        <Chip onClick={() => toggleGruppo(chiaviPasto("pranzo"))}>Pranzi</Chip>
-        <Chip onClick={() => toggleGruppo(chiaviPasto("cena"))}>Cene</Chip>
-        <Chip onClick={() => toggleGruppo(chiaviGiorni(FERIALI))}>Feriali</Chip>
-        <Chip onClick={() => toggleGruppo(chiaviGiorni(WEEKEND))}>Weekend</Chip>
+        <Chip onClick={selezionaTutti}>Tutti</Chip>
+        <Chip onClick={deselezionaTutti}>Nessuno</Chip>
+        <Chip onClick={() => toggleGruppoLiberi(chiaviPasto("colazione"))}>Colazioni</Chip>
+        <Chip onClick={() => toggleGruppoLiberi(chiaviPasto("pranzo"))}>Pranzi</Chip>
+        <Chip onClick={() => toggleGruppoLiberi(chiaviPasto("cena"))}>Cene</Chip>
+        <Chip onClick={() => toggleGruppoLiberi(chiaviGiorni(FERIALI))}>Feriali</Chip>
+        <Chip onClick={() => toggleGruppoLiberi(chiaviGiorni(WEEKEND))}>Weekend</Chip>
       </div>
 
-      <p className="text-body-sm text-paper-500">
-        Segna i pasti che vuoi far generare. I pasti già assegnati restano com'erano, a meno che tu
-        non li selezioni tu stesso per rigenerarli.
-      </p>
+      <div className="px-4 py-2.5 rounded-md bg-primary-50 border border-primary-100">
+        <p className="text-body-sm font-medium text-primary-800">
+          Genererò {totaleDaGenerare} {totaleDaGenerare === 1 ? "pasto" : "pasti"}
+          {preparatiCheRestano > 0 && (
+            <> · {preparatiCheRestano} già {preparatiCheRestano === 1 ? "preparato" : "preparati"} {preparatiCheRestano === 1 ? "resterà" : "resteranno"} com'è</>
+          )}
+        </p>
+      </div>
 
       {GIORNI.map((giorno) => (
         <div key={giorno}>
@@ -71,7 +92,8 @@ export function SlotSelectionStep({ pianoAttuale, ricette, selezionati, onChange
               const slot = pianoAttuale[chiave];
               const ricetta = slot ? ricette.find((r) => r.id === slot.ricettaId) : undefined;
               const lockata = Boolean(slot?.lockata);
-              const selezionato = set.has(chiave);
+              const preparato = Boolean(slot) && !lockata;
+              const selezionato = selezione.has(chiave) && !lockata;
               return (
                 <button
                   key={pasto}
@@ -82,7 +104,13 @@ export function SlotSelectionStep({ pianoAttuale, ricette, selezionati, onChange
                     !lockata && "active:bg-paper-100",
                   )}
                 >
-                  <Checkbox checked={selezionato && !lockata} disabled={lockata} />
+                  {preparato && !selezionato ? (
+                    <span className="h-5 w-5 shrink-0 rounded-full bg-paper-200 flex items-center justify-center">
+                      <span className="h-2 w-2 rounded-full bg-paper-400" />
+                    </span>
+                  ) : (
+                    <Checkbox checked={selezionato} disabled={lockata} />
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="text-caption text-paper-500">{PASTO_LABEL[pasto]}</div>
                     {ricetta ? (
@@ -93,10 +121,10 @@ export function SlotSelectionStep({ pianoAttuale, ricette, selezionati, onChange
                   </div>
                   {lockata ? (
                     <Lock size={14} className="text-accent-500 shrink-0" />
+                  ) : preparato && selezionato ? (
+                    <span className="text-caption font-medium text-accent-600 shrink-0">Verrà sostituito</span>
                   ) : (
-                    ricetta && (
-                      <span className="text-caption text-paper-400 shrink-0">Già presente</span>
-                    )
+                    preparato && <span className="text-caption text-paper-400 shrink-0">Già preparato</span>
                   )}
                 </button>
               );

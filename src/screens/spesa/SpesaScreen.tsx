@@ -11,6 +11,7 @@ import { useToastStore } from "../../store/toastStore";
 import { REPARTI, type Reparto, type VoceSpesa } from "../../types";
 import { risolviCategoria, impareCategoria, indizioCategoria, ORDINE_SCAFFALI } from "../../lib/smistamento";
 import { trovaCorrispondenzaDispensa } from "../../lib/dispensaMatch";
+import { SCAN_BUTTON_CLEARANCE } from "../../components/barcode/BarcodeScanButton";
 import { VoceRow } from "./components/VoceRow";
 import { UsataDaSheet } from "./components/UsataDaSheet";
 import { EditVoceSheet } from "./components/EditVoceSheet";
@@ -100,7 +101,7 @@ export function SpesaScreen() {
   };
 
   return (
-    <div className="pb-8">
+    <div style={{ paddingBottom: SCAN_BUTTON_CLEARANCE + 32 }}>
       <PageHeader title="Lista della spesa" accent={PAGE_ACCENT[2]} />
 
       <div className="px-4 flex flex-col gap-4">
@@ -207,17 +208,15 @@ export function SpesaScreen() {
       )}
 
       {voci.length > 0 && (
-        <div className="px-4 mt-6">
+        <div className="px-4 mt-8 flex justify-center">
           <button
             onClick={handleSvuota}
             className={cn(
-              "w-full flex items-center justify-center gap-2 h-12 rounded-xl text-body-md font-semibold transition-colors",
-              confermaSvuota
-                ? "bg-danger-500 text-paper-50"
-                : "bg-danger-500/10 text-danger-500 active:bg-danger-500/15",
+              "flex items-center gap-1.5 h-9 px-3 rounded-full text-body-sm font-medium transition-colors",
+              confermaSvuota ? "text-danger-500" : "text-paper-400 active:text-danger-500",
             )}
           >
-            <Trash2 size={17} />
+            <Trash2 size={14} />
             {confermaSvuota ? "Tocca di nuovo per confermare" : "Svuota spesa"}
           </button>
         </div>

@@ -1,7 +1,8 @@
-import { AlertTriangle } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import type { Profilo } from "../../../types";
 import { Chip } from "../../../components/Chip";
 import { TagInput } from "../../../components/TagInput";
+import { Callout } from "../../../components/Callout";
 
 const CHIP_RAPIDE = [
   "Glutine / celiachia",
@@ -31,13 +32,10 @@ export function EsclusioniStep({ draft, onChange }: EsclusioniStepProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-start gap-3 p-4 rounded-md bg-accent-50 border border-accent-200">
-        <AlertTriangle size={20} className="text-accent-600 shrink-0 mt-0.5" strokeWidth={1.8} />
-        <p className="text-body-sm text-accent-800">
-          Questi alimenti non compariranno <strong>mai</strong> in nessuna ricetta, nemmeno in
-          tracce.
-        </p>
-      </div>
+      <Callout icon={ShieldCheck} tone="shield">
+        Questi alimenti non compariranno <strong>mai</strong> in nessuna ricetta, nemmeno in tracce: te lo
+        garantiamo.
+      </Callout>
 
       <div className="flex flex-wrap gap-2">
         {CHIP_RAPIDE.map((voce) => (

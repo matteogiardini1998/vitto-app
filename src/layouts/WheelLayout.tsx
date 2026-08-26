@@ -60,6 +60,13 @@ export function WheelLayout() {
   // pagina davvero attiva.
   const [wheelHidden, setWheelHidden] = useState(false);
   const lastScrollTops = useRef<number[]>(PAGES.map(() => 0));
+  const scrollRefs = useRef<(HTMLDivElement | null)[]>(PAGES.map(() => null));
+
+  // Un gesto verticale iniziato sulla ruota (vedi WheelNav) scorre la pagina
+  // davvero attiva, esattamente come farebbe uno scroll nativo.
+  const handleVerticalPan = (deltaY: number) => {
+    scrollRefs.current[activeIndex]?.scrollBy({ top: deltaY });
+  };
 
   const [scannerAperto, setScannerAperto] = useState(false);
   const paginaConScanner = location.pathname === "/dispensa" || location.pathname === "/spesa";
@@ -276,6 +283,9 @@ export function WheelLayout() {
             pageWidth={pageWidth}
             ariaHidden={i !== activeIndex}
             onScroll={handlePageScroll}
+            scrollRef={(el) => {
+              scrollRefs.current[i] = el;
+            }}
           >
             <Screen />
           </PageSlot>
@@ -302,6 +312,7 @@ export function WheelLayout() {
         onSettle={handleSettle}
         onHubTap={() => navigate("/meal-prep/genera")}
         hidden={wheelHidden}
+        onVerticalPan={handleVerticalPan}
       />
     </div>
   );
@@ -323,6 +334,7 @@ function PageSlot({
   pageWidth,
   ariaHidden,
   onScroll,
+  scrollRef,
   children,
 }: {
   index: number;
@@ -331,6 +343,7 @@ function PageSlot({
   pageWidth: number;
   ariaHidden: boolean;
   onScroll: (index: number, scrollTop: number) => void;
+  scrollRef: (el: HTMLDivElement | null) => void;
   children: ReactNode;
 }) {
   const x = useTransform(angle, (a) => {
@@ -342,6 +355,7 @@ function PageSlot({
   return (
     <motion.div className="absolute inset-0 transform-gpu" style={{ x, willChange: "transform" }} aria-hidden={ariaHidden}>
       <div
+        ref={scrollRef}
         className="h-full overflow-y-auto no-scrollbar"
         style={{ WebkitOverflowScrolling: "touch" }}
         onScroll={(e) => onScroll(index, e.currentTarget.scrollTop)}

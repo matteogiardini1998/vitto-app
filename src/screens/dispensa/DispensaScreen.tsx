@@ -4,6 +4,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { IconaDispensaGlyph } from "../../components/IconaDispensaGlyph";
 import { ScaffaleChipRow } from "../../components/ScaffaleChipRow";
 import { PAGE_ACCENT, PAGE_BLOB } from "../../components/WheelNav";
+import { SCAN_BUTTON_CLEARANCE } from "../../components/barcode/BarcodeScanButton";
 import { useDispensaStore } from "../../store/dispensaStore";
 import { useToastStore } from "../../store/toastStore";
 import { type Reparto, type VoceDispensa } from "../../types";
@@ -106,7 +107,7 @@ export function DispensaScreen() {
   };
 
   return (
-    <div className="pb-8">
+    <div style={{ paddingBottom: SCAN_BUTTON_CLEARANCE + 32 }}>
       <header className="relative px-14 pt-7 pb-5 text-center">
         <button
           type="button"

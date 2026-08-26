@@ -71,6 +71,21 @@ export function MealPrepScreen() {
       <PageHeader title="Piano Pasti" accent={PAGE_ACCENT[0]} />
 
       {!pianoVuoto && (
+        <div className="mx-4 mb-4 px-4 py-3.5 rounded-xl bg-primary-50 border border-primary-100 flex items-center gap-3">
+          <span className="h-10 w-10 shrink-0 rounded-full bg-primary-700 text-paper-50 flex items-center justify-center">
+            <ShoppingBasket size={18} />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-body-sm font-semibold text-primary-800">Il meal prep è pronto</p>
+            <p className="text-caption text-primary-700">Aggiorna la lista con tutto quello che ti serve</p>
+          </div>
+          <Button size="md" onClick={aggiornaListaSpesa} className="shrink-0">
+            Aggiorna
+          </Button>
+        </div>
+      )}
+
+      {!pianoVuoto && (
         <div className="px-4 mb-3 flex items-center justify-between gap-2">
           <EquilibrioBadge piano={piano} ricette={ricette} />
           <button
@@ -87,22 +102,6 @@ export function MealPrepScreen() {
         {GIORNI.map((giorno) => (
           <DaySection key={giorno} giorno={giorno} isOggi={giorno === oggi} onTapSlot={onTapSlot} />
         ))}
-      </div>
-
-      <div className="px-4 mt-2">
-        <Button
-          fullWidth
-          size="lg"
-          variant="secondary"
-          disabled={pianoVuoto}
-          onClick={aggiornaListaSpesa}
-          className="gap-2"
-        >
-          <ShoppingBasket size={18} /> Aggiorna lista della spesa
-        </Button>
-        <p className="text-caption text-paper-400 text-center mt-2">
-          Carica gli ingredienti del piano nella lista della spesa. Rifallo ogni volta che cambi qualcosa.
-        </p>
       </div>
 
       <AssignRecipeSheet

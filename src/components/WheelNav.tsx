@@ -1,7 +1,11 @@
 import { motion, useTransform, animate, type MotionValue, type PanInfo } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { ChefHat } from "lucide-react";
+import { useRef } from "react";
 import { cn } from "../lib/cn";
+
+/** Sotto questa soglia (px) di spostamento totale, il gesto non ha ancora una direzione chiara: si aspetta. */
+const SOGLIA_LOCK_DIREZIONALE = 6;
 
 export type WheelPageDef = {
   path: string;
@@ -49,6 +53,8 @@ type WheelNavProps = {
   onHubTap: () => void;
   /** Vero mentre l'utente scorre la pagina verso il basso: la ruota si fa da parte. */
   hidden: boolean;
+  /** Un gesto iniziato sulla ruota si è rivelato verticale: qui si passa il delta Y allo scroll della pagina attiva. */
+  onVerticalPan?: (deltaY: number) => void;
 };
 
 /**
@@ -56,8 +62,13 @@ type WheelNavProps = {
  * rappresentano le pagine. Il drag ruota il disco e — tramite lo stesso
  * MotionValue `angle` — trascina in sincrono lo strip di pagine nel layout
  * genitore. Isolato: non conosce il router, espone solo `onSettle(index)`.
+ *
+ * La ruota è un elemento che si TOCCA, non una zona che cattura tutto: nei
+ * primi pixel di ogni gesto si decide se è a dominanza orizzontale (ruota la
+ * ruota, comportamento invariato) o verticale (si passa il delta allo scroll
+ * della pagina sottostante via `onVerticalPan`, e la ruota resta ferma).
  */
-export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden }: WheelNavProps) {
+export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden, onVerticalPan }: WheelNavProps) {
   // Lo stato attivo (e la navigazione) si aggiornano SUBITO al tap/rilascio:
   // la molla su `angle` è solo l'estetica che rincorre, non una condizione
   // per considerare la pagina "arrivata".
@@ -71,12 +82,30 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden
     animate(angle, target, { type: "spring", stiffness: 260, damping: 28, mass: 0.9 });
   };
 
+  const modoGesto = useRef<"indeciso" | "orizzontale" | "verticale">("indeciso");
+
   const handlePan = (_event: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
+    if (modoGesto.current === "indeciso") {
+      if (Math.abs(info.offset.x) < SOGLIA_LOCK_DIREZIONALE && Math.abs(info.offset.y) < SOGLIA_LOCK_DIREZIONALE) {
+        return; // ancora troppo presto per capire la direzione
+      }
+      modoGesto.current = Math.abs(info.offset.x) >= Math.abs(info.offset.y) ? "orizzontale" : "verticale";
+    }
+
+    if (modoGesto.current === "verticale") {
+      onVerticalPan?.(-info.delta.y);
+      return;
+    }
+
     const deltaDeg = (info.delta.x / WHEEL_RADIUS) * (180 / Math.PI);
     angle.set(angle.get() - deltaDeg);
   };
 
   const handlePanEnd = (_event: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
+    const eraOrizzontale = modoGesto.current === "orizzontale";
+    modoGesto.current = "indeciso";
+    if (!eraOrizzontale) return; // gesto verticale (o troppo corto per capirlo): niente snap, la ruota non si è mossa
+
     const inertiaDeg = (info.velocity.x / WHEEL_RADIUS) * (180 / Math.PI) * 0.12;
     const projected = angle.get() - inertiaDeg;
     const nearestIndex = Math.round(projected / WHEEL_STEP);
