@@ -267,6 +267,7 @@ export function WheelLayout() {
       >
         <ProfileAvatar
           avatarId={profilo.avatarId}
+          fotoAvatar={profilo.fotoAvatar}
           nome={profilo.nome}
           cognome={profilo.cognome}
           size={44}

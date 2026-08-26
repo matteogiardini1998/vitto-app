@@ -48,6 +48,8 @@ export type Profilo = {
   eta: number;
   residenza: string;
   avatarId: AvatarId | null;
+  /** Foto personale come avatar (dataURL, quadrata, ~256px): quando presente ha priorità sull'avatar illustrato. Resta solo sul dispositivo. */
+  fotoAvatar: string | null;
   nucleo: {
     persone: number;
     tipo: TipoNucleo;

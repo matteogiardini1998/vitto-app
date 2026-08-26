@@ -14,6 +14,7 @@ import {
   Upload,
   Trash2,
   Info,
+  Camera,
 } from "lucide-react";
 import { SettingsSection } from "../../components/SettingsSection";
 import { SettingsRow } from "../../components/SettingsRow";
@@ -35,6 +36,7 @@ import { EsclusioniStep } from "../onboarding/steps/EsclusioniStep";
 import { PreferenzeStep } from "../onboarding/steps/PreferenzeStep";
 import { SupermercatoStep } from "../onboarding/steps/SupermercatoStep";
 import { downloadBackup, importBackupFromFile, resetAllData } from "../../lib/backup";
+import { elaboraFotoAvatar } from "../../lib/avatarPhoto";
 
 type Sezione =
   | "anagrafica"
@@ -88,6 +90,7 @@ export function ProfiloScreen() {
   const [avatarSheetOpen, setAvatarSheetOpen] = useState(false);
   const [infoNutrizioneAperta, setInfoNutrizioneAperta] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fotoInputRef = useRef<HTMLInputElement>(null);
 
   const openSheet = (sezione: Exclude<Sezione, null>) => {
     setDraft(profilo);
@@ -107,6 +110,21 @@ export function ProfiloScreen() {
   };
 
   const handleImportClick = () => fileInputRef.current?.click();
+
+  const handleScegliFoto = () => fotoInputRef.current?.click();
+
+  const handleFotoSelezionata = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const fotoAvatar = await elaboraFotoAvatar(file);
+      updateProfilo({ fotoAvatar });
+      setAvatarSheetOpen(false);
+    } catch {
+      showToast("Non sono riuscito a leggere questa foto", "error");
+    }
+  };
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -148,6 +166,7 @@ export function ProfiloScreen() {
       <div className="flex flex-col items-center text-center pt-2 pb-6 px-4">
         <ProfileAvatar
           avatarId={profilo.avatarId}
+          fotoAvatar={profilo.fotoAvatar}
           nome={profilo.nome}
           cognome={profilo.cognome}
           onClick={() => setAvatarSheetOpen(true)}
@@ -290,8 +309,26 @@ export function ProfiloScreen() {
       <BottomSheet open={avatarSheetOpen} onClose={() => setAvatarSheetOpen(false)} title="Scegli il tuo avatar">
         <div className="grid grid-cols-4 gap-3.5 pt-1">
           <button
+            onClick={handleScegliFoto}
+            className="flex flex-col items-center gap-1.5"
+          >
+            <span
+              className={cn(
+                "h-14 w-14 rounded-full overflow-hidden bg-paper-100 flex items-center justify-center text-paper-500",
+                profilo.fotoAvatar && "ring-2 ring-accent-500 ring-offset-2 ring-offset-paper-0",
+              )}
+            >
+              {profilo.fotoAvatar ? (
+                <img src={profilo.fotoAvatar} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <Camera size={22} />
+              )}
+            </span>
+            <span className="text-caption text-paper-500">Foto</span>
+          </button>
+          <button
             onClick={() => {
-              updateProfilo({ avatarId: null });
+              updateProfilo({ avatarId: null, fotoAvatar: null });
               setAvatarSheetOpen(false);
             }}
             className="flex flex-col items-center gap-1.5"
@@ -299,7 +336,7 @@ export function ProfiloScreen() {
             <span
               className={cn(
                 "h-14 w-14 rounded-full bg-primary-600 flex items-center justify-center text-paper-50 font-display font-semibold",
-                profilo.avatarId === null && "ring-2 ring-accent-500 ring-offset-2 ring-offset-paper-0",
+                profilo.avatarId === null && !profilo.fotoAvatar && "ring-2 ring-accent-500 ring-offset-2 ring-offset-paper-0",
               )}
             >
               {`${profilo.nome.trim().charAt(0)}${profilo.cognome.trim().charAt(0)}`.toUpperCase() || "🙂"}
@@ -310,7 +347,7 @@ export function ProfiloScreen() {
             <button
               key={opzione.id}
               onClick={() => {
-                updateProfilo({ avatarId: opzione.id });
+                updateProfilo({ avatarId: opzione.id, fotoAvatar: null });
                 setAvatarSheetOpen(false);
               }}
               className="flex flex-col items-center gap-1.5"
@@ -319,7 +356,7 @@ export function ProfiloScreen() {
                 className={cn(
                   "h-14 w-14 rounded-full flex items-center justify-center text-primary-900",
                   opzione.bg,
-                  profilo.avatarId === opzione.id && "ring-2 ring-accent-500 ring-offset-2 ring-offset-paper-0",
+                  profilo.avatarId === opzione.id && !profilo.fotoAvatar && "ring-2 ring-accent-500 ring-offset-2 ring-offset-paper-0",
                 )}
               >
                 <AvatarGlyph id={opzione.id} size={28} />
@@ -328,6 +365,17 @@ export function ProfiloScreen() {
             </button>
           ))}
         </div>
+        <p className="text-caption text-paper-400 text-center mt-4">
+          La foto resta solo sul tuo telefono: non viene inviata da nessuna parte.
+        </p>
+        <input
+          ref={fotoInputRef}
+          type="file"
+          accept="image/*"
+          capture="user"
+          className="hidden"
+          onChange={handleFotoSelezionata}
+        />
       </BottomSheet>
 
       <BottomSheet

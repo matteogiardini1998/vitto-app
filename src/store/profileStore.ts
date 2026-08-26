@@ -8,6 +8,7 @@ export const PROFILO_VUOTO: Profilo = {
   eta: 30,
   residenza: "",
   avatarId: null,
+  fotoAvatar: null,
   nucleo: { persone: 1, tipo: "single" },
   tempoMaxCucina: 45,
   dieta: "onnivora",
