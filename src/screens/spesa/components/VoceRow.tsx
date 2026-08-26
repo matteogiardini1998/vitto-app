@@ -74,7 +74,7 @@ export function VoceRow({ voce, onTapTesto, corrispondenza }: VoceRowProps) {
 
       {mostraBadge && (
         <div className="relative flex items-center justify-between gap-2 flex-wrap px-4 pb-3 -mt-1 bg-paper-0">
-          <span className="inline-flex items-center gap-1.5 text-caption font-medium text-primary-700 bg-primary-50 rounded-full px-2.5 py-1">
+          <span className="inline-flex items-center gap-1.5 text-caption font-medium text-primary-700 bg-primary-50 rounded-full px-2.5 py-1 dark:bg-primary-900/40 dark:text-primary-300">
             <PackageCheck size={13} />
             Già in dispensa
             {corrispondenza.qta != null ? ` · ${formattaQtaUnita(corrispondenza.qta, corrispondenza.unita)}` : ""}
@@ -83,7 +83,7 @@ export function VoceRow({ voce, onTapTesto, corrispondenza }: VoceRowProps) {
             <button
               type="button"
               onClick={() => rimuoviVoce(voce.id)}
-              className="text-caption font-semibold text-primary-700"
+              className="text-caption font-semibold text-primary-700 dark:text-primary-300"
             >
               Ce l'ho, togli dalla lista
             </button>

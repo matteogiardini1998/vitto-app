@@ -150,20 +150,31 @@
   }
 }
 
-/* Dark mode: stessi ruoli semantici, valori invertiti */
+/*
+ * Dark mode: stessi ruoli semantici (0 = superficie elevata, 50 = sfondo
+ * pagina, 900+ = testo ad alto contrasto), ma una rampa pensata apposta per
+ * lo scuro — non l'inverso meccanico della scala chiara. Grigi-verdi caldi
+ * (mai nero puro), e paper-0 resta più CHIARO di paper-50 così le card
+ * restano visibilmente sopra la pagina, non sotto.
+ */
 :root.dark {
-  --color-paper-0: #14100c;
-  --color-paper-50: #1a1510;
-  --color-paper-100: #221c16;
-  --color-paper-200: #322a21;
-  --color-paper-300: #443a2e;
-  --color-paper-400: #6b5d4a;
-  --color-paper-500: #948364;
-  --color-paper-600: #b4a483;
-  --color-paper-700: #d3c3a5;
-  --color-paper-800: #e7dcc8;
-  --color-paper-900: #f4eee2;
-  --color-paper-950: #fbf8f2;
+  --color-paper-0: #262b23;
+  --color-paper-50: #1e2219;
+  --color-paper-100: #2c3226;
+  --color-paper-200: #3a4130;
+  --color-paper-300: #4d573f;
+  --color-paper-400: #707a5c;
+  --color-paper-500: #94997c;
+  --color-paper-600: #b3b89b;
+  --color-paper-700: #cdd0b9;
+  --color-paper-800: #e3e5d3;
+  --color-paper-900: #f2f3e8;
+  --color-paper-950: #f9faf2;
+
+  /* Le ombre calde su sfondo chiaro spariscono su sfondo scuro: qui servono più opache e neutre per restare visibili. */
+  --shadow-card: 0 2px 6px rgb(0 0 0 / 0.25), 0 10px 26px -10px rgb(0 0 0 / 0.4);
+  --shadow-elevated: 0 10px 24px -6px rgb(0 0 0 / 0.35), 0 30px 60px -18px rgb(0 0 0 / 0.5);
+  --shadow-sheet: 0 -10px 34px -8px rgb(0 0 0 / 0.45);
 }
 
 @layer base {

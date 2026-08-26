@@ -24,7 +24,7 @@ export function BarcodeScanButton({ onClick }: BarcodeScanButtonProps) {
       exit={{ opacity: 0, scale: 0.7 }}
       whileTap={{ scale: 0.92 }}
       transition={{ type: "spring", stiffness: 420, damping: 28 }}
-      className="absolute left-4 z-40 rounded-full bg-paper-0 text-primary-700 shadow-elevated border border-paper-200 flex items-center justify-center"
+      className="absolute left-4 z-40 rounded-full bg-paper-0 text-primary-700 dark:text-primary-300 shadow-elevated border border-paper-200 flex items-center justify-center"
       style={{ bottom: WHEEL_CONTAINER_HEIGHT + GAP_SOPRA_RUOTA, height: DIMENSIONE, width: DIMENSIONE }}
     >
       <ScanBarcode size={25} strokeWidth={1.9} />

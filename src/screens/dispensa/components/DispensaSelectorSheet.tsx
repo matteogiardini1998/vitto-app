@@ -36,7 +36,7 @@ export function DispensaSelectorSheet({ open, onClose, onModifica }: DispensaSel
             key={d.id}
             className={cn(
               "flex items-center gap-1 rounded-xl border",
-              d.id === attivaId ? "border-primary-300 bg-primary-50" : "border-paper-200 bg-paper-0",
+              d.id === attivaId ? "border-primary-300 bg-primary-50 dark:bg-primary-900/40" : "border-paper-200 bg-paper-0",
             )}
           >
             <button
@@ -61,7 +61,7 @@ export function DispensaSelectorSheet({ open, onClose, onModifica }: DispensaSel
                   {d.voci.length} {d.voci.length === 1 ? "voce" : "voci"}
                 </span>
               </span>
-              {d.id === attivaId && <Check size={18} className="text-primary-700 shrink-0" />}
+              {d.id === attivaId && <Check size={18} className="text-primary-700 dark:text-primary-300 shrink-0" />}
             </button>
             <button
               type="button"

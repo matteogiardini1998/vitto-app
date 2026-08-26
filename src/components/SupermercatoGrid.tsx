@@ -23,19 +23,19 @@ export function SupermercatoGrid({ value, onChange }: SupermercatoGridProps) {
             className={cn(
               "aspect-square rounded-md border-2 flex flex-col items-center justify-center gap-1.5 px-1.5 text-center transition-colors",
               selected
-                ? "border-primary-600 bg-primary-50"
+                ? "border-primary-600 bg-primary-50 dark:bg-primary-900/40"
                 : "border-paper-200 bg-paper-0 active:bg-paper-100",
             )}
           >
             <Store
               size={20}
-              className={selected ? "text-primary-700" : "text-paper-400"}
+              className={selected ? "text-primary-700 dark:text-primary-300" : "text-paper-400"}
               strokeWidth={1.8}
             />
             <span
               className={cn(
                 "text-body-sm font-medium leading-tight",
-                selected ? "text-primary-800" : "text-paper-700",
+                selected ? "text-primary-800 dark:text-primary-200" : "text-paper-700",
               )}
             >
               {nome}

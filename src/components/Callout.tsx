@@ -5,15 +5,15 @@ import { cn } from "../lib/cn";
 type CalloutTone = "info" | "warning" | "shield";
 
 const TONE_CLASSES: Record<CalloutTone, string> = {
-  info: "bg-primary-50 border-primary-100 text-primary-800",
-  warning: "bg-accent-50 border-accent-200 text-accent-800",
-  shield: "bg-sage-50 border-sage-200 text-sage-800",
+  info: "bg-primary-50 border-primary-100 text-primary-800 dark:bg-primary-900/40 dark:border-primary-800 dark:text-primary-200",
+  warning: "bg-accent-50 border-accent-200 text-accent-800 dark:bg-accent-900/40 dark:border-accent-800 dark:text-accent-200",
+  shield: "bg-sage-50 border-sage-200 text-sage-800 dark:bg-sage-900/40 dark:border-sage-800 dark:text-sage-200",
 };
 
 const TONE_ICON_CLASSES: Record<CalloutTone, string> = {
-  info: "text-primary-700",
-  warning: "text-accent-600",
-  shield: "text-sage-700",
+  info: "text-primary-700 dark:text-primary-300",
+  warning: "text-accent-600 dark:text-accent-300",
+  shield: "text-sage-700 dark:text-sage-300",
 };
 
 type CalloutProps = {

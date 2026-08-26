@@ -20,7 +20,7 @@ export function Stepper({ value, onChange, min = 1, max = 20, label, size = "md"
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
         className={cn(
-          "rounded-full bg-paper-100 text-primary-800 flex items-center justify-center active:bg-paper-200 disabled:opacity-40",
+          "rounded-full bg-paper-100 text-primary-800 dark:text-primary-300 flex items-center justify-center active:bg-paper-200 disabled:opacity-40",
           grande ? "h-14 w-14" : "h-12 w-12",
         )}
         aria-label="Diminuisci"

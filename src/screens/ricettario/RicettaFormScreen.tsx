@@ -170,7 +170,7 @@ export function RicettaFormScreen() {
             <span className="text-body-sm font-medium text-paper-600">Ingredienti</span>
             <button
               onClick={() => patch({ ingredienti: [...form.ingredienti, nuovoIngrediente()] })}
-              className="text-body-sm font-semibold text-primary-700 flex items-center gap-1"
+              className="text-body-sm font-semibold text-primary-700 dark:text-primary-300 flex items-center gap-1"
             >
               <Plus size={16} /> Aggiungi
             </button>
@@ -195,7 +195,7 @@ export function RicettaFormScreen() {
             <span className="text-body-sm font-medium text-paper-600">Passi (facoltativo)</span>
             <button
               onClick={() => patch({ passi: [...form.passi, ""] })}
-              className="text-body-sm font-semibold text-primary-700 flex items-center gap-1"
+              className="text-body-sm font-semibold text-primary-700 dark:text-primary-300 flex items-center gap-1"
             >
               <Plus size={16} /> Aggiungi
             </button>

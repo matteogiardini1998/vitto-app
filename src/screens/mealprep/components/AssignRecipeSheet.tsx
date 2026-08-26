@@ -56,12 +56,12 @@ export function AssignRecipeSheet({ open, onClose, giorno, pasto, onAssegna }: A
         {mostraCreaNuova && (
           <button
             onClick={creaEAssegna}
-            className="flex items-center gap-3 p-2.5 rounded-md border-2 border-dashed border-primary-300 bg-primary-50 active:bg-primary-100 text-left"
+            className="flex items-center gap-3 p-2.5 rounded-md border-2 border-dashed border-primary-300 bg-primary-50 active:bg-primary-100 dark:bg-primary-900/40 dark:active:bg-primary-900/60 text-left"
           >
             <div className="h-11 w-11 shrink-0 rounded-md bg-primary-700 text-paper-50 flex items-center justify-center">
               <Plus size={20} />
             </div>
-            <p className="text-body-md font-medium text-primary-800">
+            <p className="text-body-md font-medium text-primary-800 dark:text-primary-200">
               Aggiungi "{nomeDigitato}"
             </p>
           </button>
@@ -79,7 +79,7 @@ export function AssignRecipeSheet({ open, onClose, giorno, pasto, onAssegna }: A
                 onClick={() => onAssegna(r.id, r.porzioniBase)}
                 className="flex items-center gap-3 p-2.5 rounded-md border border-paper-200 bg-paper-0 active:bg-paper-100 text-left"
               >
-                <div className="h-11 w-11 shrink-0 rounded-md bg-primary-50 text-primary-700 flex items-center justify-center">
+                <div className="h-11 w-11 shrink-0 rounded-md bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 flex items-center justify-center">
                   <PastoIcon pasti={r.pasto} size={18} strokeWidth={1.7} />
                 </div>
                 <div className="min-w-0 flex-1">

@@ -24,7 +24,7 @@ export function EmptyState({ icon: Icon, title, description, action, blobColor =
           className={cn("absolute inset-0", blobColor)}
           style={{ borderRadius: "62% 38% 55% 45% / 48% 45% 55% 52%" }}
         />
-        <div className="relative h-16 w-16 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center">
+        <div className="relative h-16 w-16 rounded-full bg-primary-50 text-primary-600 dark:bg-primary-900/50 dark:text-primary-300 flex items-center justify-center">
           <Icon size={28} strokeWidth={1.6} />
         </div>
       </motion.div>

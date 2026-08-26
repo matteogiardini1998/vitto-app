@@ -16,8 +16,8 @@ const variantClasses: Record<Variant, string> = {
   primary:
     "bg-primary-700 text-paper-50 shadow-card active:bg-primary-800 disabled:bg-paper-300 disabled:text-paper-500",
   secondary:
-    "bg-sage-100 text-sage-800 border border-sage-200 active:bg-sage-200 disabled:bg-paper-100 disabled:text-paper-400 disabled:border-paper-200",
-  ghost: "bg-transparent text-primary-700 active:bg-primary-50 disabled:text-paper-400",
+    "bg-sage-100 text-sage-800 border border-sage-200 active:bg-sage-200 disabled:bg-paper-100 disabled:text-paper-400 disabled:border-paper-200 dark:bg-sage-900/40 dark:text-sage-200 dark:border-sage-800 dark:active:bg-sage-900/60",
+  ghost: "bg-transparent text-primary-700 active:bg-primary-50 disabled:text-paper-400 dark:text-primary-300 dark:active:bg-primary-900/40",
   danger: "bg-transparent text-danger-500 active:bg-danger-500/10",
 };
 

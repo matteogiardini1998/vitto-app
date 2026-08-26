@@ -71,13 +71,13 @@ export function MealPrepScreen() {
       <PageHeader title="Piano Pasti" accent={PAGE_ACCENT[0]} />
 
       {!pianoVuoto && (
-        <div className="mx-4 mb-4 px-4 py-3.5 rounded-xl bg-primary-50 border border-primary-100 flex items-center gap-3">
+        <div className="mx-4 mb-4 px-4 py-3.5 rounded-xl bg-primary-50 border border-primary-100 dark:bg-primary-900/40 dark:border-primary-800 flex items-center gap-3">
           <span className="h-10 w-10 shrink-0 rounded-full bg-primary-700 text-paper-50 flex items-center justify-center">
             <ShoppingBasket size={18} />
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-body-sm font-semibold text-primary-800">Il meal prep è pronto</p>
-            <p className="text-caption text-primary-700">Aggiorna la lista con tutto quello che ti serve</p>
+            <p className="text-body-sm font-semibold text-primary-800 dark:text-primary-200">Il meal prep è pronto</p>
+            <p className="text-caption text-primary-700 dark:text-primary-300">Aggiorna la lista con tutto quello che ti serve</p>
           </div>
           <Button size="md" onClick={aggiornaListaSpesa} className="shrink-0">
             Aggiorna

@@ -51,8 +51,8 @@ export function EquilibrioBadge({ piano, ricette }: { piano: Piano; ricette: Ric
               <span
                 className={cn(
                   "h-6 w-6 shrink-0 rounded-full flex items-center justify-center mt-0.5",
-                  r.stato === "soddisfatta" && "bg-primary-50 text-primary-700",
-                  r.stato === "quasi" && "bg-accent-50 text-accent-600",
+                  r.stato === "soddisfatta" && "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300",
+                  r.stato === "quasi" && "bg-accent-50 text-accent-600 dark:bg-accent-900/40 dark:text-accent-300",
                   r.stato === "mancata" && "bg-paper-100 text-paper-400",
                 )}
               >

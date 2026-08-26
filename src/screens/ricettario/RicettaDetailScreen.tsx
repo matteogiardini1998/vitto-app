@@ -42,7 +42,7 @@ export function RicettaDetailScreen() {
     return (
       <div className="p-6 text-center">
         <p className="text-body-lg text-paper-600 mb-4">Ricetta non trovata.</p>
-        <Link to="/ricettario" className="text-primary-700 font-semibold">
+        <Link to="/ricettario" className="text-primary-700 dark:text-primary-300 font-semibold">
           Torna al ricettario
         </Link>
       </div>
@@ -128,12 +128,12 @@ export function RicettaDetailScreen() {
         {(ricetta.tags.length > 0 || tagCalcolati.length > 0) && (
           <div className="flex flex-wrap gap-2 mt-3">
             {ricetta.tags.map((t) => (
-              <span key={t} className="text-caption text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full">
+              <span key={t} className="text-caption text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full dark:bg-primary-900/40 dark:text-primary-300">
                 {formattaTag(t)}
               </span>
             ))}
             {tagCalcolati.map((t) => (
-              <span key={t} className="text-caption text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full">
+              <span key={t} className="text-caption text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full dark:bg-primary-900/40 dark:text-primary-300">
                 {TAG_NUTRIZIONALE_LABEL[t]}
               </span>
             ))}
@@ -144,7 +144,7 @@ export function RicettaDetailScreen() {
           {mostraComeStima(nutrizione) && nutrizione ? (
             <>
               <div className="flex items-baseline gap-2">
-                <span className="text-display-sm font-display font-bold text-primary-700">{nutrizione.kcal}</span>
+                <span className="text-display-sm font-display font-bold text-primary-700 dark:text-primary-300">{nutrizione.kcal}</span>
                 <span className="text-body-sm text-paper-500">kcal stimate a porzione</span>
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-body-sm text-paper-700">
@@ -221,7 +221,7 @@ export function RicettaDetailScreen() {
           ) : (
             <div className="flex items-center justify-between gap-3 p-4 rounded-md bg-paper-100">
               <p className="text-body-sm text-paper-500">Passi non ancora aggiunti.</p>
-              <Link to={`/ricettario/${ricetta.id}/modifica`} className="text-body-sm font-semibold text-primary-700 shrink-0">
+              <Link to={`/ricettario/${ricetta.id}/modifica`} className="text-body-sm font-semibold text-primary-700 dark:text-primary-300 shrink-0">
                 Aggiungi
               </Link>
             </div>

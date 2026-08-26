@@ -14,7 +14,7 @@ export function RecipeCard({ ricetta }: { ricetta: Ricetta }) {
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
       <Link to={`/ricettario/${ricetta.id}`}>
         <Card className="flex gap-3 relative active:bg-paper-100 transition-colors">
-          <div className="h-14 w-14 shrink-0 rounded-md bg-primary-50 text-primary-700 flex items-center justify-center">
+          <div className="h-14 w-14 shrink-0 rounded-md bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 flex items-center justify-center">
             <PastoIcon pasti={ricetta.pasto} size={24} strokeWidth={1.7} />
           </div>
           <div className="min-w-0 flex-1">

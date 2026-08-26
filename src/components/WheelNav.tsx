@@ -33,10 +33,10 @@ function angularDistance(deg: number) {
  * ruota non è mai un'informazione isolata.
  */
 export const GLAZE = [
-  { pale: "bg-sage-100 text-sage-700", vivid: "bg-sage-500 text-paper-50" },
-  { pale: "bg-pop-yellow-300/50 text-primary-800", vivid: "bg-pop-yellow-500 text-primary-900" },
-  { pale: "bg-pop-sky-300/40 text-primary-700", vivid: "bg-pop-sky-500 text-paper-50" },
-  { pale: "bg-pop-berry-300/40 text-primary-700", vivid: "bg-pop-berry-500 text-paper-50" },
+  { pale: "bg-sage-300/40 text-sage-800 dark:text-sage-300", vivid: "bg-sage-500 text-paper-50" },
+  { pale: "bg-pop-yellow-300/50 text-primary-800 dark:text-primary-300", vivid: "bg-pop-yellow-500 text-primary-900" },
+  { pale: "bg-pop-sky-300/40 text-primary-700 dark:text-primary-300", vivid: "bg-pop-sky-500 text-paper-50" },
+  { pale: "bg-pop-berry-300/40 text-primary-700 dark:text-primary-300", vivid: "bg-pop-berry-500 text-paper-50" },
 ];
 
 /** Solo il colore pieno, per il dettaglio-eco nell'header della pagina reale. */
@@ -129,19 +129,20 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden
         aria-label="Navigazione principale"
       >
         <div
-          className="absolute left-1/2 -translate-x-1/2 rounded-full shadow-elevated overflow-hidden"
+          className={cn(
+            "absolute left-1/2 -translate-x-1/2 rounded-full shadow-elevated overflow-hidden",
+            "bg-[radial-gradient(circle_at_32%_24%,#e88a4f,#cf6127_70%)]",
+            // In scuro la ruota non deve più "urlare" arancione: superficie scura coerente col resto, l'accento resta sul bottone centrale.
+            "dark:bg-[radial-gradient(circle_at_32%_24%,#3a4130,#1e2219_70%)]",
+          )}
           style={{
             width: WHEEL_RADIUS * 2,
             height: WHEEL_RADIUS * 2,
             top: WHEEL_CONTAINER_HEIGHT - WHEEL_RADIUS,
-            background: "radial-gradient(circle at 32% 24%, #e88a4f, #cf6127 70%)",
           }}
           aria-hidden="true"
         >
-          <div
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(circle at 32% 22%, rgba(255,255,255,0.35), transparent 55%)" }}
-          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.35),transparent_55%)] dark:bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.08),transparent_55%)]" />
         </div>
 
         {pages.map((page, i) => (
@@ -246,7 +247,7 @@ function WheelItem({
         </span>
         <motion.span
           style={{ opacity: labelOpacity }}
-          className="text-caption font-semibold text-primary-700 whitespace-nowrap"
+          className="text-caption font-semibold text-primary-700 dark:text-primary-300 whitespace-nowrap"
         >
           {page.label}
         </motion.span>

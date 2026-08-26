@@ -24,8 +24,8 @@ export function NucleoStep({ draft, onChange }: NucleoStepProps) {
 
   return (
     <div className="flex flex-col gap-7">
-      <div className="flex flex-col items-center gap-3 py-5 rounded-lg bg-primary-50 border border-primary-100">
-        <span className="text-body-md font-medium text-primary-800">Per quanti cucini?</span>
+      <div className="flex flex-col items-center gap-3 py-5 rounded-lg bg-primary-50 border border-primary-100 dark:bg-primary-900/40 dark:border-primary-800">
+        <span className="text-body-md font-medium text-primary-800 dark:text-primary-200">Per quanti cucini?</span>
         <Stepper
           size="lg"
           value={draft.nucleo.persone}

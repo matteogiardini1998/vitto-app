@@ -27,7 +27,7 @@ export function SelectableCard({
       className={cn(
         "w-full flex items-center gap-3.5 rounded-xl border-2 p-4 text-left transition-colors",
         selected
-          ? "border-primary-600 bg-primary-50"
+          ? "border-primary-600 bg-primary-50 dark:bg-primary-900/40"
           : "border-paper-200 bg-paper-0 active:bg-paper-100",
       )}
     >

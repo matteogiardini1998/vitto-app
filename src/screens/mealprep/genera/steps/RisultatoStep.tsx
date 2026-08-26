@@ -23,7 +23,7 @@ export function RisultatoStep({ piano, ricette, spesaStimata, risparmioDispensa,
       <Card>
         <div className="flex items-baseline justify-between mb-2">
           <span className="text-body-sm font-medium text-paper-600">Spesa stimata</span>
-          <span className={cn("text-title-md font-display font-semibold", entroBudget ? "text-primary-700" : "text-danger-500")}>
+          <span className={cn("text-title-md font-display font-semibold", entroBudget ? "text-primary-700 dark:text-primary-300" : "text-danger-500")}>
             € {spesaStimata.toFixed(0)}{" "}
             <span className="text-body-sm text-paper-400 font-sans font-normal">/ € {budgetTarget}</span>
           </span>
@@ -35,7 +35,7 @@ export function RisultatoStep({ piano, ricette, spesaStimata, risparmioDispensa,
           />
         </div>
         {risparmioDispensa >= 1 && (
-          <p className="flex items-center gap-1.5 text-caption text-primary-700 mt-2">
+          <p className="flex items-center gap-1.5 text-caption text-primary-700 dark:text-primary-300 mt-2">
             <Sprout size={13} /> € {risparmioDispensa.toFixed(0)} risparmiati grazie a quello che hai già in dispensa
           </p>
         )}

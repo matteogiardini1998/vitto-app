@@ -145,7 +145,7 @@ export function SpesaScreen() {
               onClick={() => setVista("reparto")}
               className={cn(
                 "px-3 h-8 rounded-full text-body-sm font-medium transition-colors",
-                vista === "reparto" ? "bg-paper-0 text-primary-800 shadow-card" : "text-paper-500",
+                vista === "reparto" ? "bg-paper-0 text-primary-800 dark:text-primary-200 shadow-card" : "text-paper-500",
               )}
             >
               Per reparto
@@ -154,7 +154,7 @@ export function SpesaScreen() {
               onClick={() => setVista("pasto")}
               className={cn(
                 "px-3 h-8 rounded-full text-body-sm font-medium transition-colors",
-                vista === "pasto" ? "bg-paper-0 text-primary-800 shadow-card" : "text-paper-500",
+                vista === "pasto" ? "bg-paper-0 text-primary-800 dark:text-primary-200 shadow-card" : "text-paper-500",
               )}
             >
               Per pasto
@@ -169,7 +169,7 @@ export function SpesaScreen() {
         {prese > 0 && (
           <button
             onClick={azzeraSpunte}
-            className="self-end -mt-2 flex items-center gap-1.5 text-body-sm font-semibold text-primary-700"
+            className="self-end -mt-2 flex items-center gap-1.5 text-body-sm font-semibold text-primary-700 dark:text-primary-300"
           >
             <RotateCcw size={14} /> Azzera spunte
           </button>

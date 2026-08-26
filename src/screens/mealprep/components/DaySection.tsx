@@ -17,7 +17,7 @@ export function DaySection({ giorno, isOggi, onTapSlot }: DaySectionProps) {
           {GIORNO_LABEL_FULL[giorno]}
         </h2>
         {isOggi && (
-          <span className="text-caption font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded-full">
+          <span className="text-caption font-semibold text-primary-700 bg-primary-50 px-2 py-0.5 rounded-full dark:bg-primary-900/40 dark:text-primary-300">
             Oggi
           </span>
         )}

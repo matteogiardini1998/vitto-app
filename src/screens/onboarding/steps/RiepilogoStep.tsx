@@ -40,7 +40,7 @@ function RiepilogoRow({
       </div>
       <button
         onClick={onEdit}
-        className="text-body-sm font-semibold text-primary-700 shrink-0 active:text-primary-800"
+        className="text-body-sm font-semibold text-primary-700 dark:text-primary-300 shrink-0 active:text-primary-800"
       >
         Modifica
       </button>

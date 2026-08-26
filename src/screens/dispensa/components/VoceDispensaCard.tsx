@@ -23,9 +23,9 @@ export function VoceDispensaCard({
       className={cn(
         "relative flex flex-col items-center justify-center gap-0.5 text-center rounded-2xl border px-2 py-3 min-h-[76px] transition-colors",
         evidenziata
-          ? "bg-primary-50 border-primary-400 ring-2 ring-primary-300"
+          ? "bg-primary-50 border-primary-400 ring-2 ring-primary-300 dark:bg-primary-900/40"
           : voce.daConsumarePresto
-            ? "bg-accent-50 border-accent-300 active:bg-accent-100"
+            ? "bg-accent-50 border-accent-300 active:bg-accent-100 dark:bg-accent-900/40 dark:active:bg-accent-900/60"
             : "bg-paper-0 border-paper-100 active:bg-paper-100",
       )}
     >

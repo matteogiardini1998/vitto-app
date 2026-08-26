@@ -125,8 +125,8 @@ export function DispensaScreen() {
       </header>
 
       {daFinirePresto.length > 0 && (
-        <div className="mx-4 mb-4 px-4 py-3 rounded-xl bg-accent-50 border border-accent-200">
-          <p className="text-body-sm text-accent-700">
+        <div className="mx-4 mb-4 px-4 py-3 rounded-xl bg-accent-50 border border-accent-200 dark:bg-accent-900/40 dark:border-accent-800">
+          <p className="text-body-sm text-accent-700 dark:text-accent-200">
             <span className="font-semibold">Da finire presto:</span>{" "}
             {daFinirePresto.map((v) => v.nome).join(", ")}
           </p>

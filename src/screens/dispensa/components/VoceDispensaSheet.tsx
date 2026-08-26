@@ -116,7 +116,7 @@ export function VoceDispensaSheet({ open, onClose, dispensaId, voce, altreDispen
             <button
               type="button"
               onClick={() => setSpostaAperto((v) => !v)}
-              className="text-body-sm font-semibold text-primary-700"
+              className="text-body-sm font-semibold text-primary-700 dark:text-primary-300"
             >
               Sposta in un'altra dispensa
             </button>

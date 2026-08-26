@@ -21,7 +21,7 @@ export function MealRow({ giorno, pasto, onTap }: MealRowProps) {
       onClick={() => onTap(giorno, pasto)}
       className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-paper-100 transition-colors"
     >
-      <div className="h-10 w-10 shrink-0 rounded-md bg-primary-50 text-primary-700 flex items-center justify-center">
+      <div className="h-10 w-10 shrink-0 rounded-md bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 flex items-center justify-center">
         <PastoIcon pasti={[pasto]} size={18} strokeWidth={1.7} />
       </div>
       <div className="flex-1 min-w-0">

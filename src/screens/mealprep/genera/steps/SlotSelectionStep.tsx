@@ -72,8 +72,8 @@ export function SlotSelectionStep({ pianoAttuale, ricette, selezionati, onChange
         <Chip onClick={() => toggleGruppoLiberi(chiaviGiorni(WEEKEND))}>Weekend</Chip>
       </div>
 
-      <div className="px-4 py-2.5 rounded-md bg-primary-50 border border-primary-100">
-        <p className="text-body-sm font-medium text-primary-800">
+      <div className="px-4 py-2.5 rounded-md bg-primary-50 border border-primary-100 dark:bg-primary-900/40 dark:border-primary-800">
+        <p className="text-body-sm font-medium text-primary-800 dark:text-primary-200">
           Genererò {totaleDaGenerare} {totaleDaGenerare === 1 ? "pasto" : "pasti"}
           {preparatiCheRestano > 0 && (
             <> · {preparatiCheRestano} già {preparatiCheRestano === 1 ? "preparato" : "preparati"} {preparatiCheRestano === 1 ? "resterà" : "resteranno"} com'è</>
@@ -122,7 +122,7 @@ export function SlotSelectionStep({ pianoAttuale, ricette, selezionati, onChange
                   {lockata ? (
                     <Lock size={14} className="text-accent-500 shrink-0" />
                   ) : preparato && selezionato ? (
-                    <span className="text-caption font-medium text-accent-600 shrink-0">Verrà sostituito</span>
+                    <span className="text-caption font-medium text-accent-600 dark:text-accent-300 shrink-0">Verrà sostituito</span>
                   ) : (
                     preparato && <span className="text-caption text-paper-400 shrink-0">Già preparato</span>
                   )}

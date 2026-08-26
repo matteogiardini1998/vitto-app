@@ -42,8 +42,8 @@ export function SlotPickerTable({ onPick, escludiChiave }: SlotPickerTableProps)
                         corrente
                           ? "border-paper-200 bg-paper-100 opacity-40"
                           : occupato
-                            ? "border-accent-300 bg-accent-50 active:bg-accent-100"
-                            : "border-paper-200 bg-paper-0 active:bg-primary-50 active:border-primary-400",
+                            ? "border-accent-300 bg-accent-50 active:bg-accent-100 dark:bg-accent-900/40 dark:active:bg-accent-900/60"
+                            : "border-paper-200 bg-paper-0 active:bg-primary-50 active:border-primary-400 dark:active:bg-primary-900/40",
                       )}
                       aria-label={`${giorno} ${PASTO_LABEL[pasto]}`}
                     />

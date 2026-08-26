@@ -173,7 +173,7 @@ export function ProfiloScreen() {
         />
         <button
           onClick={() => setAvatarSheetOpen(true)}
-          className="mt-2.5 text-caption font-semibold text-accent-600"
+          className="mt-2.5 text-caption font-semibold text-accent-600 dark:text-accent-300"
         >
           Cambia avatar
         </button>
@@ -407,7 +407,7 @@ export function ProfiloScreen() {
               href="https://it.openfoodfacts.org"
               target="_blank"
               rel="noreferrer"
-              className="text-primary-700 underline"
+              className="text-primary-700 dark:text-primary-300 underline"
             >
               Open Food Facts
             </a>
