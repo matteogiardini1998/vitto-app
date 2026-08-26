@@ -15,6 +15,8 @@ import {
   Trash2,
   Info,
   Camera,
+  Sparkles,
+  GraduationCap,
 } from "lucide-react";
 import { SettingsSection } from "../../components/SettingsSection";
 import { SettingsRow } from "../../components/SettingsRow";
@@ -25,6 +27,7 @@ import { ProfileAvatar } from "../../components/ProfileAvatar";
 import { AVATAR_OPZIONI, AvatarGlyph } from "../../components/AvatarGlyph";
 import { useProfileStore } from "../../store/profileStore";
 import { useUiStore } from "../../store/uiStore";
+import { useTutorialStore } from "../../store/tutorialStore";
 import { useToastStore } from "../../store/toastStore";
 import type { Profilo } from "../../types";
 import { cn } from "../../lib/cn";
@@ -260,6 +263,21 @@ export function ProfiloScreen() {
             value="Da dove vengono le stime nutrizionali"
             icon={<Info size={20} className="text-primary-600" />}
             onClick={() => setInfoNutrizioneAperta(true)}
+          />
+          <SettingsRow
+            label="Pagina di presentazione"
+            value="La pagina che racconta l'app"
+            icon={<Sparkles size={20} className="text-primary-600" />}
+            onClick={() => navigate("/benvenuto")}
+          />
+          <SettingsRow
+            label="Rivedi il tutorial"
+            value="Rifai la visita guidata da capo"
+            icon={<GraduationCap size={20} className="text-primary-600" />}
+            onClick={() => {
+              useTutorialStore.getState().avvia();
+              navigate("/meal-prep");
+            }}
           />
         </SettingsSection>
 

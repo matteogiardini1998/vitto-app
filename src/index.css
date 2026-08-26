@@ -10,6 +10,8 @@
 @import "@fontsource/figtree/500.css";
 @import "@fontsource/figtree/600.css";
 @import "@fontsource/figtree/700.css";
+@import "@fontsource/architects-daughter/latin.css";
+@import "@fontsource/architects-daughter/latin-ext.css";
 @import "@fontsource/figtree/800.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -20,6 +22,8 @@
 @theme {
   --font-display: "Lora", ui-serif, serif;
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  /* Gessetto su lavagna: annotazioni handwritten di landing e tutorial (modulo src/chalk/). */
+  --font-chalk: "Architects Daughter", "Comic Sans MS", cursive;
 
   /* Primario — verde profondo "bosco" */
   --color-primary-50: #eef4f0;
@@ -90,6 +94,9 @@
   --color-success-500: #3d7657;
   --color-warning-500: #d3941f;
   --color-danger-500: #c0442c;
+
+  /* Legno d'ulivo — tinta piena campionata dalla venatura scura, per elementi troppo piccoli perché la texture si legga (sotto ~28px: pallini, bordi, badge minuscoli). */
+  --color-wood-solid: #6b433a;
 
   /* Raggi */
   --radius-xs: 6px;
@@ -219,6 +226,131 @@
   }
   .no-scrollbar {
     scrollbar-width: none;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Fondale di legno d'ulivo: vive dietro tutto, mai sotto il testo.  */
+  /* ---------------------------------------------------------------- */
+  .wood-backdrop {
+    /* Colore medio campionato dalla texture: quello che si vede finché l'immagine non è pronta. */
+    background-color: #a17b67;
+    background-image: linear-gradient(rgba(20, 14, 10, 0.14), rgba(20, 14, 10, 0.14)), url("./assets/wood-bg.webp");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  /* iOS Safari non regge bene background-attachment:fixed (glitch/scatta): fallback statico. */
+  @supports (-webkit-touch-callout: none) {
+    .wood-backdrop {
+      background-attachment: scroll;
+    }
+  }
+  /* Su schermi grandi il "cover" ingrandirebbe troppo la texture: si passa al
+     tile ripetuto, nella variante specchiata 2x2 che non mostra giunture. */
+  @media (min-width: 1200px) {
+    .wood-backdrop {
+      background-image: linear-gradient(rgba(20, 14, 10, 0.14), rgba(20, 14, 10, 0.14)), url("./assets/wood-tile-mirror.webp");
+      background-size: 1024px 1024px;
+      background-position: top left;
+    }
+  }
+  :root.dark .wood-backdrop {
+    background-color: #241a13;
+    /* Stessa materia, di notte: overlay scuro più forte e leggera desaturazione via filter (l'elemento non ha testo sopra). */
+    background-image: linear-gradient(rgba(10, 7, 5, 0.55), rgba(10, 7, 5, 0.55)), url("./assets/wood-bg.webp");
+    filter: saturate(0.8);
+  }
+  @media (min-width: 1200px) {
+    :root.dark .wood-backdrop {
+      background-image: linear-gradient(rgba(10, 7, 5, 0.55), rgba(10, 7, 5, 0.55)), url("./assets/wood-tile-mirror.webp");
+      background-size: 1024px 1024px;
+      background-position: top left;
+    }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Accento di legno: un solo punto da cui si applica ovunque. La     */
+  /* texture sta in un ::before dietro al contenuto, cosi filtri e     */
+  /* stati (hover/active/disabled/dark) non toccano mai testo o icone. */
+  /* ---------------------------------------------------------------- */
+  .accent-wood {
+    position: relative;
+    isolation: isolate;
+    color: #fff9f2;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  }
+  .accent-wood::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: #6b433a;
+    background-image: linear-gradient(rgb(20 12 8 / 0.45), rgb(20 12 8 / 0.45)), url("./assets/wood-accent.webp");
+    background-size: 220% 220%;
+    background-position: 30% 30%;
+    transition: filter 0.15s ease;
+  }
+  /* Posizioni diverse della venatura, cosi due accenti vicini non sembrano lo stesso ritaglio. */
+  .accent-wood-pos-2::before {
+    background-position: 78% 20%;
+  }
+  .accent-wood-pos-3::before {
+    background-position: 35% 82%;
+  }
+  .accent-wood-pos-4::before {
+    background-position: 65% 55%;
+  }
+  @media (hover: hover) {
+    .accent-wood:hover::before {
+      filter: brightness(0.92);
+    }
+  }
+  .accent-wood:active::before {
+    filter: brightness(0.82);
+  }
+  .accent-wood:disabled::before,
+  .accent-wood[aria-disabled="true"]::before {
+    filter: saturate(0.2) brightness(1.05);
+  }
+  .accent-wood:disabled,
+  .accent-wood[aria-disabled="true"] {
+    color: rgb(255 255 255 / 0.75);
+  }
+  :root.dark .accent-wood::before {
+    filter: saturate(0.8) brightness(0.55);
+  }
+
+  /* Tagliere della ruota: stessa materia del fondale, ma con bordo crema e ombra decisa perché non si confonda con lui. */
+  .wood-tagliere {
+    background-image: url("./assets/wood-tagliere.webp");
+    background-size: cover;
+    background-position: center;
+  }
+  :root.dark .wood-tagliere {
+    filter: saturate(0.75) brightness(0.62);
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Lavagnetta magnetica da cucina: sfondo della giostra mockup nella  */
+  /* landing. Il legno "respira" solo attorno, qui il telefono ha una  */
+  /* superficie calma su cui risaltare — non più trasparente su venatura. */
+  /* ---------------------------------------------------------------- */
+  .magnet-board {
+    background: linear-gradient(160deg, #f6f1e5 0%, #ece1c9 55%, #e2d4b6 100%);
+    box-shadow:
+      0 24px 48px -16px rgb(20 12 8 / 0.4),
+      0 2px 0 rgb(255 255 255 / 0.55) inset,
+      0 0 0 7px rgb(255 255 255 / 0.55) inset,
+      0 0 0 9px rgb(120 95 60 / 0.28) inset;
+  }
+  :root.dark .magnet-board {
+    background: linear-gradient(160deg, #3a3226 0%, #2c2619 55%, #221d13 100%);
+    box-shadow:
+      0 24px 48px -16px rgb(0 0 0 / 0.55),
+      0 2px 0 rgb(255 255 255 / 0.08) inset,
+      0 0 0 7px rgb(255 255 255 / 0.08) inset,
+      0 0 0 9px rgb(0 0 0 / 0.35) inset;
   }
 }
 

@@ -263,6 +263,7 @@ export function WheelLayout() {
         type="button"
         onClick={() => navigate("/profilo")}
         aria-label="Profilo"
+        data-tutorial="profilo-avatar"
         className="absolute right-4 top-4 z-40 active:scale-95 transition-transform"
       >
         <ProfileAvatar

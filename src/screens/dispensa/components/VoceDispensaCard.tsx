@@ -30,7 +30,7 @@ export function VoceDispensaCard({
       )}
     >
       {voce.daConsumarePresto && (
-        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-accent-500" aria-hidden="true" />
+        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-wood-solid" aria-hidden="true" />
       )}
       <span className="text-body-sm font-semibold text-paper-900 leading-tight line-clamp-2">{voce.nome}</span>
       {voce.qta != null && (

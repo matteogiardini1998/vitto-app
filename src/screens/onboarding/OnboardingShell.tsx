@@ -76,7 +76,7 @@ export function OnboardingShell({
 
         <div className="sticky bottom-0 bg-paper-50 px-5 pb-6 pt-3">
           {footer ?? (
-            <Button fullWidth size="lg" disabled={!canContinue} onClick={onContinue}>
+            <Button fullWidth size="lg" disabled={!canContinue} onClick={onContinue} data-tutorial="wizard-continua">
               {continueLabel}
             </Button>
           )}

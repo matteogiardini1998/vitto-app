@@ -13,6 +13,7 @@ import { RiepilogoStep } from "./steps/RiepilogoStep";
 import { useProfileStore } from "../../store/profileStore";
 import type { Profilo } from "../../types";
 import { useToastStore } from "../../store/toastStore";
+import { useTutorialStore } from "../../store/tutorialStore";
 
 const TOTAL_STEPS = 9;
 
@@ -40,6 +41,8 @@ export function OnboardingScreen() {
     if (step === TOTAL_STEPS - 1) {
       setProfilo({ ...draft, onboardingCompletato: true });
       showToast(`Benvenuto, ${draft.nome || "chef"}!`);
+      // Si parte subito col fare: il tutorial si attiva nello stesso istante in cui si entra in app.
+      useTutorialStore.getState().avvia();
       navigate("/meal-prep", { replace: true });
       return;
     }

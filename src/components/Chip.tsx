@@ -22,9 +22,7 @@ export function Chip({
   className,
 }: ChipProps) {
   const selectedClasses =
-    variant === "accent"
-      ? "bg-accent-500 border-accent-500 text-paper-0"
-      : "bg-primary-700 border-primary-700 text-paper-50";
+    variant === "accent" ? "accent-wood border-transparent" : "bg-primary-700 border-primary-700 text-paper-50";
 
   return (
     <motion.button

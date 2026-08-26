@@ -9,9 +9,11 @@ import { RicettaDetailScreen } from "./screens/ricettario/RicettaDetailScreen";
 import { RicettaFormScreen } from "./screens/ricettario/RicettaFormScreen";
 import { GeneraWizardScreen } from "./screens/mealprep/genera/GeneraWizardScreen";
 import { useProfileStore } from "./store/profileStore";
+import { LandingScreen } from "./screens/landing/LandingScreen";
 import { useUiStore } from "./store/uiStore";
 import { PatternBackground } from "./components/PatternBackground";
 import { ToastHost } from "./components/ToastHost";
+import { TutorialEngine } from "./tutorial/TutorialEngine";
 
 export function App() {
   const onboardingCompletato = useProfileStore((s) => s.profilo.onboardingCompletato);
@@ -25,14 +27,21 @@ export function App() {
     <>
       <PatternBackground />
       <ToastHost />
+      <TutorialEngine />
       {!onboardingCompletato ? (
         <Routes>
+          {/* Primo arrivo: la landing pubblica accoglie su "/", l'onboarding parte dalle sue CTA. */}
+          <Route path="/" element={<LandingScreen />} />
           <Route element={<OnboardingLayout />}>
-            <Route path="*" element={<OnboardingScreen />} />
+            <Route path="/onboarding" element={<OnboardingScreen />} />
           </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       ) : (
         <Routes>
+          {/* Chi ha già un profilo salta la landing ("/" ricade sul redirect in fondo);
+              ci torna solo dal link discreto nel profilo, su questo path dedicato. */}
+          <Route path="/benvenuto" element={<LandingScreen />} />
           <Route element={<OnboardingLayout />}>
             <Route path="/onboarding" element={<OnboardingScreen />} />
             <Route path="/ricettario/nuova" element={<RicettaFormScreen />} />

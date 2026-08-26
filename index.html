@@ -13,9 +13,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MealPrep" />
 
+    <!-- Precarica il fondale di legno: niente flash di colore al primo paint. -->
+    <link rel="preload" as="image" href="/src/assets/wood-bg.webp" />
+
     <title>MealPrep</title>
   </head>
-  <body class="bg-primary-900">
+  <body style="background-color: #a17b67">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

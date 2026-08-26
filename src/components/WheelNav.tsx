@@ -18,6 +18,8 @@ const DOME_PADDING = 30;
 export const WHEEL_CONTAINER_HEIGHT = WHEEL_RADIUS + DOME_PADDING;
 export const WHEEL_STEP = 90;
 const HUB_SIZE = 64;
+/** Quanto si solleva l'hub rispetto al bordo della ruota: resta un'icona che sparisce di poco sotto lo schermo, non un mezzo cerchio. */
+const HUB_TOP = WHEEL_CONTAINER_HEIGHT - 22;
 
 /** Porta un valore angolare nell'intervallo (-180, 180]. */
 function angularDistance(deg: number) {
@@ -69,6 +71,12 @@ type WheelNavProps = {
  * della pagina sottostante via `onVerticalPan`, e la ruota resta ferma).
  */
 export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden, onVerticalPan }: WheelNavProps) {
+  // Le icone avanzano con "index*STEP - angle" (vedi WheelItem): al crescere
+  // di `angle` la loro posizione sul cerchio arretra. Il tagliere deve girare
+  // nello stesso verso percepito dalle icone, quindi la sua rotazione è
+  // l'opposto del valore grezzo di `angle`, non `angle` diretto.
+  const discRotate = useTransform(angle, (a) => -a);
+
   // Lo stato attivo (e la navigazione) si aggiornano SUBITO al tap/rilascio:
   // la molla su `angle` è solo l'estetica che rincorre, non una condizione
   // per considerare la pagina "arrivata".
@@ -116,6 +124,7 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden
 
   return (
     <motion.div
+      data-tutorial="wheel-nav"
       className="absolute inset-x-0 bottom-0 z-30"
       style={{ height: WHEEL_CONTAINER_HEIGHT, pointerEvents: hidden ? "none" : "auto" }}
       animate={{ y: hidden ? WHEEL_CONTAINER_HEIGHT * 0.65 : 0, opacity: hidden ? 0 : 1 }}
@@ -129,12 +138,7 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden
         aria-label="Navigazione principale"
       >
         <div
-          className={cn(
-            "absolute left-1/2 -translate-x-1/2 rounded-full shadow-elevated overflow-hidden",
-            "bg-[radial-gradient(circle_at_32%_24%,#e88a4f,#cf6127_70%)]",
-            // In scuro la ruota non deve più "urlare" arancione: superficie scura coerente col resto, l'accento resta sul bottone centrale.
-            "dark:bg-[radial-gradient(circle_at_32%_24%,#3a4130,#1e2219_70%)]",
-          )}
+          className="absolute left-1/2 -translate-x-1/2 rounded-full shadow-elevated overflow-hidden"
           style={{
             width: WHEEL_RADIUS * 2,
             height: WHEEL_RADIUS * 2,
@@ -142,7 +146,9 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden
           }}
           aria-hidden="true"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.35),transparent_55%)] dark:bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.08),transparent_55%)]" />
+          {/* Il tagliere gira davvero con il gesto, nello stesso verso delle icone: solo questo strato ruota, la cornice resta ferma. */}
+          <motion.div className="absolute inset-0 wood-tagliere" style={{ rotate: discRotate }} />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.22),transparent_55%)] dark:bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.06),transparent_55%)]" />
         </div>
 
         {pages.map((page, i) => (
@@ -169,7 +175,7 @@ function HubGlow() {
   return (
     <motion.div
       className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none bg-primary-500"
-      style={{ top: WHEEL_CONTAINER_HEIGHT, width: size, height: size, filter: "blur(6px)" }}
+      style={{ top: HUB_TOP, width: size, height: size, filter: "blur(6px)" }}
       animate={{ scale: [1, 1.08, 1], opacity: [0.45, 0.7, 0.45] }}
       transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
       aria-hidden="true"
@@ -184,19 +190,17 @@ function HubButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       whileTap={{ scale: 0.92 }}
       aria-label="Pianifica pasti"
-      className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full text-paper-50 shadow-elevated overflow-hidden border-[3px] border-paper-0 flex items-center justify-center"
+      data-tutorial="hub"
+      className="text-paper-50 absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden border-[3px] border-paper-0 flex items-center justify-center shadow-[0_2px_3px_rgb(20_12_8_/_0.35),0_14px_22px_-6px_rgb(20_12_8_/_0.55)]"
       style={{
-        top: WHEEL_CONTAINER_HEIGHT,
+        top: HUB_TOP,
         width: HUB_SIZE,
         height: HUB_SIZE,
         background: "radial-gradient(circle at 32% 26%, #4a8a68, #234a36 70%)",
       }}
     >
-      <ChefHat size={26} strokeWidth={2} />
-      <div
-        className="absolute inset-0 rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle at 30% 22%, rgba(255,255,255,0.4), transparent 45%)" }}
-      />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.35),transparent_55%)] dark:bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.08),transparent_55%)]" />
+      <ChefHat size={26} strokeWidth={2} className="relative" />
     </motion.button>
   );
 }
@@ -246,8 +250,8 @@ function WheelItem({
           <Icon size={16} strokeWidth={isActive ? 2.3 : 1.9} />
         </span>
         <motion.span
-          style={{ opacity: labelOpacity }}
-          className="text-caption font-semibold text-primary-700 dark:text-primary-300 whitespace-nowrap"
+          style={{ opacity: labelOpacity, textShadow: "0 1px 3px rgb(0 0 0 / 0.45)" }}
+          className="text-caption font-semibold text-paper-50 whitespace-nowrap"
         >
           {page.label}
         </motion.span>

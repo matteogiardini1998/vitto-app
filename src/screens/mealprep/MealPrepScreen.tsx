@@ -79,7 +79,7 @@ export function MealPrepScreen() {
             <p className="text-body-sm font-semibold text-primary-800 dark:text-primary-200">Il meal prep è pronto</p>
             <p className="text-caption text-primary-700 dark:text-primary-300">Aggiorna la lista con tutto quello che ti serve</p>
           </div>
-          <Button size="md" onClick={aggiornaListaSpesa} className="shrink-0">
+          <Button size="md" onClick={aggiornaListaSpesa} className="shrink-0" data-tutorial="banner-aggiorna">
             Aggiorna
           </Button>
         </div>
@@ -98,7 +98,7 @@ export function MealPrepScreen() {
         </div>
       )}
 
-      <div className="px-4 mt-4">
+      <div className="px-4 mt-4" data-tutorial="meal-list">
         {GIORNI.map((giorno) => (
           <DaySection key={giorno} giorno={giorno} isOggi={giorno === oggi} onTapSlot={onTapSlot} />
         ))}

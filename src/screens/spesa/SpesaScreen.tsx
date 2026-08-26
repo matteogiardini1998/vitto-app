@@ -102,7 +102,7 @@ export function SpesaScreen() {
 
   return (
     <div style={{ paddingBottom: SCAN_BUTTON_CLEARANCE + 32 }}>
-      <PageHeader title="Lista della spesa" accent={PAGE_ACCENT[2]} />
+      <PageHeader title="Lista della spesa" accent={PAGE_ACCENT[2]} tutorialId="header-spesa" />
 
       <div className="px-4 flex flex-col gap-4">
         <div className="flex gap-2">

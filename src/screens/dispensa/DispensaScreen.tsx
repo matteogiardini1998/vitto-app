@@ -108,7 +108,7 @@ export function DispensaScreen() {
 
   return (
     <div style={{ paddingBottom: SCAN_BUTTON_CLEARANCE + 32 }}>
-      <header className="relative px-14 pt-7 pb-5 text-center">
+      <header className="relative px-14 pt-7 pb-5 text-center" data-tutorial="header-dispensa">
         <button
           type="button"
           onClick={() => setSelectorAperto(true)}

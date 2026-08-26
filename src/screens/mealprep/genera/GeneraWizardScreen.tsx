@@ -79,6 +79,9 @@ export function GeneraWizardScreen() {
   };
 
   return (
+    // Espone lo step corrente nel DOM: è l'unico modo semplice per il tutorial
+    // (che vive fuori da questo albero) di sapere a che punto del wizard siamo.
+    <div data-wizard-step={step} className="h-full">
     <OnboardingShell
       step={step}
       totalSteps={TOTAL_STEPS}
@@ -93,7 +96,7 @@ export function GeneraWizardScreen() {
             <Button variant="secondary" fullWidth onClick={genera} className="gap-2">
               <RefreshCw size={18} /> Rigenera
             </Button>
-            <Button fullWidth onClick={accetta} className="gap-2">
+            <Button fullWidth onClick={accetta} className="gap-2" data-tutorial="wizard-accetta">
               <Check size={18} /> Accetta
             </Button>
           </div>
@@ -146,5 +149,6 @@ export function GeneraWizardScreen() {
         />
       )}
     </OnboardingShell>
+    </div>
   );
 }
