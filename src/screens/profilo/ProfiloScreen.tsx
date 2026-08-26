@@ -260,15 +260,18 @@ export function ProfiloScreen() {
             icon={<Info size={20} className="text-primary-600" />}
             onClick={() => setInfoNutrizioneAperta(true)}
           />
+        </SettingsSection>
+
+        <SettingsSection title="I miei dati">
           <SettingsRow
             label="Esporta backup"
-            value="Salva tutti i tuoi dati in un file JSON"
+            value="Salva una copia dei tuoi dati in un file"
             icon={<Download size={20} className="text-primary-600" />}
             onClick={handleExport}
           />
           <SettingsRow
             label="Importa backup"
-            value="Ripristina i dati da un file JSON"
+            value="Ripristina i dati da un file — utile per passare a un nuovo telefono"
             icon={<Upload size={20} className="text-primary-600" />}
             onClick={handleImportClick}
           />
