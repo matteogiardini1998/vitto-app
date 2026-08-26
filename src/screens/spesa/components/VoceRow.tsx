@@ -1,7 +1,7 @@
 import { animate, motion, useMotionValue } from "framer-motion";
 import { Check, PackageCheck, Trash2 } from "lucide-react";
 import type { VoceDispensa, VoceSpesa } from "../../../types";
-import { formattaQuantita } from "../../../lib/format";
+import { formattaQtaUnita } from "../../../lib/format";
 import { cn } from "../../../lib/cn";
 import { useShoppingStore } from "../../../store/shoppingStore";
 
@@ -67,7 +67,7 @@ export function VoceRow({ voce, onTapTesto, corrispondenza }: VoceRowProps) {
         </button>
         {(voce.qta != null || voce.unita) && (
           <span className={cn("text-body-sm shrink-0", voce.presa ? "text-paper-300" : "text-paper-500")}>
-            {voce.qta != null ? formattaQuantita(voce.qta) : ""} {voce.unita}
+            {formattaQtaUnita(voce.qta, voce.unita)}
           </span>
         )}
       </motion.div>
@@ -77,9 +77,7 @@ export function VoceRow({ voce, onTapTesto, corrispondenza }: VoceRowProps) {
           <span className="inline-flex items-center gap-1.5 text-caption font-medium text-primary-700 bg-primary-50 rounded-full px-2.5 py-1">
             <PackageCheck size={13} />
             Già in dispensa
-            {corrispondenza.qta != null
-              ? ` · ${formattaQuantita(corrispondenza.qta)} ${corrispondenza.unita ?? ""}`
-              : ""}
+            {corrispondenza.qta != null ? ` · ${formattaQtaUnita(corrispondenza.qta, corrispondenza.unita)}` : ""}
           </span>
           <div className="flex items-center gap-3">
             <button

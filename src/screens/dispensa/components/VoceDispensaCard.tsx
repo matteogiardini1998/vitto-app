@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import type { VoceDispensa } from "../../../types";
 import { cn } from "../../../lib/cn";
-import { formattaQuantita } from "../../../lib/format";
+import { formattaQtaUnita } from "../../../lib/format";
 
 export function VoceDispensaCard({
   voce,
@@ -34,9 +34,7 @@ export function VoceDispensaCard({
       )}
       <span className="text-body-sm font-semibold text-paper-900 leading-tight line-clamp-2">{voce.nome}</span>
       {voce.qta != null && (
-        <span className="text-caption text-paper-500">
-          {formattaQuantita(voce.qta)} {voce.unita ?? ""}
-        </span>
+        <span className="text-caption text-paper-500">{formattaQtaUnita(voce.qta, voce.unita)}</span>
       )}
     </motion.button>
   );

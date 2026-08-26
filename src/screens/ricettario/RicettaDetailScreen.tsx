@@ -8,7 +8,7 @@ import { Stepper } from "../../components/Stepper";
 import { Chip } from "../../components/Chip";
 import { Button } from "../../components/Button";
 import { DIETA_RICETTA_LABEL, PASTO_LABEL, formattaTag } from "../../lib/recipeDisplay";
-import { formattaQuantita } from "../../lib/format";
+import { formattaQtaUnita } from "../../lib/format";
 import { AddToPlanSheet } from "./components/AddToPlanSheet";
 import { calcolaNutrizione, mostraComeStima, tagNutrizionaliCalcolati, TAG_NUTRIZIONALE_LABEL } from "../../lib/nutrizione";
 
@@ -198,7 +198,7 @@ export function RicettaDetailScreen() {
               <li key={i} className="flex items-center justify-between px-4 py-3 bg-paper-0">
                 <span className="text-body-md text-paper-800">{ing.nome}</span>
                 <span className="text-body-sm text-paper-500 shrink-0 ml-3">
-                  {ing.qtaScalata != null ? `${formattaQuantita(ing.qtaScalata)} ${ing.unita}` : ing.unita}
+                  {ing.qtaScalata != null ? formattaQtaUnita(ing.qtaScalata, ing.unita) : ing.unita}
                 </span>
               </li>
             ))}

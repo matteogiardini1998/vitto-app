@@ -8,13 +8,14 @@ import { Stepper } from "../../components/Stepper";
 import { Chip } from "../../components/Chip";
 import { TagInput } from "../../components/TagInput";
 import { Button } from "../../components/Button";
-import { REPARTI, PASTI, type Ingrediente, type Pasto, type Ricetta, type DietaRicetta } from "../../types";
+import { PASTI, type Ingrediente, type Pasto, type Ricetta, type DietaRicetta } from "../../types";
 import { DIETA_RICETTA_LABEL, PASTO_LABEL } from "../../lib/recipeDisplay";
+import { IngredienteRow } from "./components/IngredienteRow";
 
 type FormState = Omit<Ricetta, "id">;
 
 function nuovoIngrediente(): Ingrediente {
-  return { nome: "", qta: null, unita: "", reparto: "altro" };
+  return { nome: "", qta: null, unita: "pz", reparto: "altro" };
 }
 
 export function RicettaFormScreen() {
@@ -176,41 +177,12 @@ export function RicettaFormScreen() {
           </div>
           <div className="flex flex-col gap-2">
             {form.ingredienti.map((ing, i) => (
-              <div key={i} className="flex items-center gap-2 bg-paper-0 border border-paper-200 rounded-md p-2">
-                <input
-                  value={ing.nome}
-                  onChange={(e) => updateIngrediente(i, { nome: e.target.value })}
-                  placeholder="Ingrediente"
-                  className="flex-[2] min-w-0 h-9 px-2 text-body-sm bg-transparent focus:outline-none"
-                />
-                <input
-                  value={ing.qta ?? ""}
-                  onChange={(e) => updateIngrediente(i, { qta: e.target.value === "" ? null : Number(e.target.value) })}
-                  placeholder="Qta"
-                  type="number"
-                  className="w-14 h-9 px-1 text-body-sm bg-transparent focus:outline-none"
-                />
-                <input
-                  value={ing.unita}
-                  onChange={(e) => updateIngrediente(i, { unita: e.target.value })}
-                  placeholder="Unità"
-                  className="w-16 h-9 px-1 text-body-sm bg-transparent focus:outline-none"
-                />
-                <select
-                  value={ing.reparto}
-                  onChange={(e) => updateIngrediente(i, { reparto: e.target.value as Ingrediente["reparto"] })}
-                  className="h-9 text-caption bg-paper-100 rounded-sm px-1 shrink-0 max-w-[86px]"
-                >
-                  {REPARTI.map((r) => (
-                    <option key={r.value} value={r.value}>
-                      {r.label}
-                    </option>
-                  ))}
-                </select>
-                <button onClick={() => rimuoviIngrediente(i)} aria-label="Rimuovi ingrediente" className="text-paper-400 shrink-0">
-                  <Trash2 size={16} />
-                </button>
-              </div>
+              <IngredienteRow
+                key={i}
+                ingrediente={ing}
+                onChange={(patch) => updateIngrediente(i, patch)}
+                onRimuovi={() => rimuoviIngrediente(i)}
+              />
             ))}
             {form.ingredienti.length === 0 && (
               <p className="text-body-sm text-paper-400 py-2">Nessun ingrediente aggiunto.</p>

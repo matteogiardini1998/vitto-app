@@ -10,7 +10,7 @@ import { GIORNI, PASTI, chiaveSlot, type Giorno, type Pasto, type Ricetta } from
 import { GIORNO_LABEL_FULL } from "../../../lib/date";
 import { PASTO_LABEL } from "../../../lib/recipeDisplay";
 import { chiaveIngrediente } from "../../../lib/shoppingList";
-import { formattaQuantita } from "../../../lib/format";
+import { formattaQtaUnita } from "../../../lib/format";
 import { cn } from "../../../lib/cn";
 
 type Sezione = {
@@ -102,7 +102,7 @@ export function PerPastoView() {
                     {ing.nome}
                   </span>
                   <span className="text-body-sm text-paper-500 shrink-0">
-                    {ing.qtaScalata != null ? formattaQuantita(ing.qtaScalata) : ""} {ing.unita}
+                    {formattaQtaUnita(ing.qtaScalata, ing.unita)}
                   </span>
                 </button>
               );
