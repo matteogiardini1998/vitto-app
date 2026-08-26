@@ -37,6 +37,7 @@ import { PreferenzeStep } from "../onboarding/steps/PreferenzeStep";
 import { SupermercatoStep } from "../onboarding/steps/SupermercatoStep";
 import { downloadBackup, importBackupFromFile, resetAllData } from "../../lib/backup";
 import { elaboraFotoAvatar } from "../../lib/avatarPhoto";
+import { APP_NAME } from "../../config/app";
 
 type Sezione =
   | "anagrafica"
@@ -400,7 +401,7 @@ export function ProfiloScreen() {
             rincorrere a ogni costo.
           </p>
           <p className="text-body-sm text-paper-500">
-            MealPrep dà indicazioni generali di buon senso alimentare, non consigli medici o dietetici
+            {APP_NAME} dà indicazioni generali di buon senso alimentare, non consigli medici o dietetici
             personalizzati. Per esigenze di salute specifiche, parlane con un professionista.
           </p>
           <p className="text-body-sm text-paper-500">

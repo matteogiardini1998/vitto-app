@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { APP_NAME, APP_SHORT_NAME, APP_DESCRIPTION, APP_ICONS } from "./src/config/app.ts";
 
 export default defineConfig({
   plugins: [
@@ -18,9 +19,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "MealPrep",
-        short_name: "MealPrep",
-        description: "Pianifica la settimana, scopri ricette italiane e genera la lista della spesa.",
+        name: APP_NAME,
+        short_name: APP_SHORT_NAME,
+        description: APP_DESCRIPTION,
         lang: "it",
         theme_color: "#234a36",
         background_color: "#fbf8f2",
@@ -29,10 +30,10 @@ export default defineConfig({
         start_url: "/",
         scope: "/",
         icons: [
-          { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-          { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-          { src: "icons/icon-maskable-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
-          { src: "icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          { src: APP_ICONS.icon192, sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: APP_ICONS.icon512, sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: APP_ICONS.iconMaskable192, sizes: "192x192", type: "image/png", purpose: "maskable" },
+          { src: APP_ICONS.iconMaskable512, sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
       workbox: {
