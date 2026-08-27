@@ -12,7 +12,14 @@ type BarcodeScanButtonProps = {
   onClick: () => void;
 };
 
-/** Bottone flottante per lo scanner: solo in Dispensa e Lista della spesa, stessa posizione in entrambe, sempre sopra la ruota. */
+/**
+ * Bottone flottante per lo scanner: solo in Dispensa e Lista della spesa,
+ * stessa posizione in entrambe, sempre sopra la ruota.
+ *
+ * TODO(brand): icona da definire nel brand — Scanner è una funzione
+ * trasversale senza colore di sezione. In attesa della decisione definitiva,
+ * trattamento neutro in tono legno/bruno (non una macchia di sezione).
+ */
 export function BarcodeScanButton({ onClick }: BarcodeScanButtonProps) {
   return (
     <motion.button
@@ -25,7 +32,7 @@ export function BarcodeScanButton({ onClick }: BarcodeScanButtonProps) {
       exit={{ opacity: 0, scale: 0.7 }}
       whileTap={{ scale: 0.92 }}
       transition={{ type: "spring", stiffness: 420, damping: 28 }}
-      className="absolute left-4 z-40 rounded-full bg-paper-0 text-primary-700 dark:text-primary-300 shadow-elevated border border-paper-200 flex items-center justify-center"
+      className="absolute left-4 z-40 rounded-full bg-paper-0 text-wood-solid dark:text-[#e0a679] shadow-elevated border border-wood-solid/25 flex items-center justify-center"
       style={{ bottom: WHEEL_CONTAINER_HEIGHT + GAP_SOPRA_RUOTA, height: DIMENSIONE, width: DIMENSIONE }}
     >
       <ScanBarcode size={25} strokeWidth={1.9} />

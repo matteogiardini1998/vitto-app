@@ -1,8 +1,12 @@
 import { motion, useTransform, animate, type MotionValue, type PanInfo } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
-import { ChefHat } from "lucide-react";
 import { useRef } from "react";
 import { cn } from "../lib/cn";
+import iconMealPrep from "../assets/icon-mealprep.webp";
+import iconRicettario from "../assets/icon-ricettario.webp";
+import iconSpesa from "../assets/icon-spesa.webp";
+import iconDispensa from "../assets/icon-dispensa.webp";
+import iconHubWood from "../assets/icon-hub-wood.webp";
 
 /** Sotto questa soglia (px) di spostamento totale, il gesto non ha ancora una direzione chiara: si aspetta. */
 const SOGLIA_LOCK_DIREZIONALE = 6;
@@ -30,16 +34,15 @@ function angularDistance(deg: number) {
 }
 
 /**
- * Colore di glassa per spicchio: uno per pagina, ripreso poi come dettaglio
- * sottile nella pagina reale (vedi PageHeader `accent`) così il colore in
- * ruota non è mai un'informazione isolata.
+ * Icone sticker di sezione (brand VITTO): contorno bruno, bordo bianco tipo
+ * adesivo, macchia organica nel colore della sezione — la macchia è già
+ * dentro l'immagine, non più una <span> di sfondo separata.
+ *
+ * TODO(brand): l'icona Ricettario è ancora la versione precedente allo stile
+ * sticker (senza bordo bianco) — da sostituire quando arriverà la definitiva.
+ * Non rigenerarla né modificarla nel frattempo (indicazione esplicita brand).
  */
-export const GLAZE = [
-  { pale: "bg-sage-300/40 text-sage-800 dark:text-sage-300", vivid: "bg-sage-500 text-paper-50" },
-  { pale: "bg-pop-yellow-300/50 text-primary-800 dark:text-primary-300", vivid: "bg-pop-yellow-500 text-primary-900" },
-  { pale: "bg-pop-sky-300/40 text-primary-700 dark:text-primary-300", vivid: "bg-pop-sky-500 text-paper-50" },
-  { pale: "bg-pop-berry-300/40 text-primary-700 dark:text-primary-300", vivid: "bg-pop-berry-500 text-paper-50" },
-];
+export const SECTION_ICONS = [iconMealPrep, iconRicettario, iconSpesa, iconDispensa];
 
 /** Solo il colore pieno, per il dettaglio-eco nell'header della pagina reale. */
 export const PAGE_ACCENT = ["bg-sage-500", "bg-pop-yellow-500", "bg-pop-sky-500", "bg-pop-berry-500"];
@@ -183,6 +186,12 @@ function HubGlow() {
   );
 }
 
+/**
+ * Il centro della ruota non è una sezione: è il fulcro che le tiene insieme,
+ * per questo è materia (disco di legno tornito, cappello e frusta incisi)
+ * invece di una macchia di colore piatta. Ombra a doppio strato per farlo
+ * leggere come un pomello fisico rilevato, non un elemento grafico della ruota.
+ */
 function HubButton({ onClick }: { onClick: () => void }) {
   return (
     <motion.button
@@ -191,16 +200,10 @@ function HubButton({ onClick }: { onClick: () => void }) {
       whileTap={{ scale: 0.92 }}
       aria-label="Pianifica pasti"
       data-tutorial="hub"
-      className="text-paper-50 absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden border-[3px] border-paper-0 flex items-center justify-center shadow-[0_2px_3px_rgb(20_12_8_/_0.35),0_14px_22px_-6px_rgb(20_12_8_/_0.55)]"
-      style={{
-        top: HUB_TOP,
-        width: HUB_SIZE,
-        height: HUB_SIZE,
-        background: "radial-gradient(circle at 32% 26%, #4a8a68, #234a36 70%)",
-      }}
+      className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden border-[3px] border-paper-0 shadow-[0_3px_4px_rgb(20_12_8_/_0.4),0_16px_26px_-6px_rgb(20_12_8_/_0.55)]"
+      style={{ top: HUB_TOP, width: HUB_SIZE, height: HUB_SIZE }}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.35),transparent_55%)] dark:bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.08),transparent_55%)]" />
-      <ChefHat size={26} strokeWidth={2} className="relative" />
+      <img src={iconHubWood} alt="" className="h-full w-full object-cover" draggable={false} />
     </motion.button>
   );
 }
@@ -218,7 +221,6 @@ function WheelItem({
   isActive: boolean;
   onTap: () => void;
 }) {
-  const Icon = page.icon;
   const theta = useTransform(angle, (a) => ((index * WHEEL_STEP - a) * Math.PI) / 180);
   const x = useTransform(theta, (t) => WHEEL_RADIUS * Math.sin(t));
   const y = useTransform(theta, (t) => -WHEEL_RADIUS * Math.cos(t));
@@ -227,7 +229,7 @@ function WheelItem({
   const scale = useTransform(dist, [0, 90], [1, 0.62]);
   const labelOpacity = useTransform(dist, [0, 20, 45], [1, 0.4, 0]);
 
-  const glaze = GLAZE[index % GLAZE.length];
+  const sectionIcon = SECTION_ICONS[index % SECTION_ICONS.length];
 
   return (
     <motion.div
@@ -239,16 +241,18 @@ function WheelItem({
         onClick={onTap}
         aria-label={page.label}
         aria-current={isActive ? "page" : undefined}
-        className="-translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1"
+        className="-translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-0.5"
       >
-        <span
+        {/* La macchia organica è già dentro l'immagine: qui solo spazio per respirare, niente sfondo proprio. */}
+        <img
+          src={sectionIcon}
+          alt=""
+          draggable={false}
           className={cn(
-            "h-9 w-9 rounded-full flex items-center justify-center transition-colors",
-            isActive ? cn(glaze.vivid, "shadow-card scale-105") : glaze.pale,
+            "h-12 w-12 object-contain transition-[transform,opacity] drop-shadow-[0_3px_4px_rgba(20,12,8,0.35)]",
+            isActive ? "scale-110" : "scale-90 opacity-80",
           )}
-        >
-          <Icon size={16} strokeWidth={isActive ? 2.3 : 1.9} />
-        </span>
+        />
         <motion.span
           style={{ opacity: labelOpacity, textShadow: "0 1px 3px rgb(0 0 0 / 0.45)" }}
           className="text-caption font-semibold text-paper-50 whitespace-nowrap"

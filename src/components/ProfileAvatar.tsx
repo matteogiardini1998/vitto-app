@@ -24,7 +24,10 @@ export function ProfileAvatar({ avatarId, fotoAvatar, nome, cognome, size = 88, 
       aria-label={onClick ? "Cambia avatar" : undefined}
       className={cn(
         "relative shrink-0 rounded-full flex items-center justify-center shadow-elevated border-4 border-paper-0 overflow-hidden",
-        !fotoAvatar && (opzione ? opzione.bg : "bg-primary-600"),
+        // TODO(brand): icona da definire nel brand — Profilo è una funzione
+        // trasversale senza colore di sezione. Prima che l'utente scelga un
+        // avatar, il segnaposto resta neutro in tono legno/bruno.
+        !fotoAvatar && (opzione ? opzione.bg : "bg-wood-solid"),
         onClick && "active:scale-95 transition-transform",
       )}
       style={{ width: size, height: size }}

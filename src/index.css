@@ -50,31 +50,54 @@
   --color-accent-800: #653013;
   --color-accent-900: #42200d;
 
-  /* Salvia/oliva — superfici secondarie calde, tono su tono col verde primario */
-  --color-sage-50: #f3f3e7;
-  --color-sage-100: #e6e7cc;
-  --color-sage-200: #d0d3a4;
-  --color-sage-300: #b7bc7c;
-  --color-sage-400: #9da45f;
-  --color-sage-500: #838a4c;
-  --color-sage-600: #676d3b;
-  --color-sage-700: #4f542e;
-  --color-sage-800: #383c20;
-  --color-sage-900: #242714;
+  /* Salvia/oliva — colore di sezione Meal Prep (brand VITTO). Tono DISTINTO dal
+     verde bosco di contenuto (--color-primary-*, usato per check/tag/anello
+     equilibrio): sezione ≠ stato, di proposito. */
+  --color-sage-50: #f3f5ef;
+  --color-sage-100: #e8ebde;
+  --color-sage-200: #d0d7bd;
+  --color-sage-300: #b9c29d;
+  --color-sage-400: #a1ae7c;
+  --color-sage-500: #8a9a5b;
+  --color-sage-600: #75834d;
+  --color-sage-700: #616c40;
+  --color-sage-800: #4c5532;
+  --color-sage-900: #373e24;
 
-  /* Pop — accenti "cartoon" decorativi, usati con parsimonia */
-  --color-pop-yellow-300: #ffe07a;
-  --color-pop-yellow-400: #ffcc33;
-  --color-pop-yellow-500: #f5b400;
+  /* Pop — colori di sezione (brand VITTO): giallo=Ricettario, corallo=Dispensa, teal=Spesa. */
+  --color-pop-yellow-50: #fcf6eb;
+  --color-pop-yellow-100: #f9eed7;
+  --color-pop-yellow-200: #f3ddb0;
+  --color-pop-yellow-300: #eccb88;
+  --color-pop-yellow-400: #e6ba61;
+  --color-pop-yellow-500: #e0a939;
+  --color-pop-yellow-600: #be9030;
+  --color-pop-yellow-700: #9d7628;
+  --color-pop-yellow-800: #7b5d1f;
+  --color-pop-yellow-900: #5a4417;
   --color-pop-leaf-300: #a8dd8a;
   --color-pop-leaf-400: #85cc61;
   --color-pop-leaf-500: #64b23f;
-  --color-pop-berry-300: #ffb3ba;
-  --color-pop-berry-400: #ff8b96;
-  --color-pop-berry-500: #f9636f;
-  --color-pop-sky-300: #a9dde6;
-  --color-pop-sky-400: #74c8d6;
-  --color-pop-sky-500: #45aebd;
+  --color-pop-berry-50: #fcf0f0;
+  --color-pop-berry-100: #f9e1e1;
+  --color-pop-berry-200: #f3c3c3;
+  --color-pop-berry-300: #eea5a6;
+  --color-pop-berry-400: #e88788;
+  --color-pop-berry-500: #e2696a;
+  --color-pop-berry-600: #c0595a;
+  --color-pop-berry-700: #9e4a4a;
+  --color-pop-berry-800: #7c3a3a;
+  --color-pop-berry-900: #5a2a2a;
+  --color-pop-sky-50: #eff7f8;
+  --color-pop-sky-100: #deeff1;
+  --color-pop-sky-200: #bedfe3;
+  --color-pop-sky-300: #9dced4;
+  --color-pop-sky-400: #7dbec6;
+  --color-pop-sky-500: #5caeb8;
+  --color-pop-sky-600: #4e949c;
+  --color-pop-sky-700: #407a81;
+  --color-pop-sky-800: #336065;
+  --color-pop-sky-900: #25464a;
 
   /* Neutri "carta" — caldi, non grigio puro (né bianco puro) */
   --color-paper-0: #fffbf3;
@@ -95,8 +118,13 @@
   --color-warning-500: #d3941f;
   --color-danger-500: #c0442c;
 
-  /* Legno d'ulivo — tinta piena campionata dalla venatura scura, per elementi troppo piccoli perché la texture si legga (sotto ~28px: pallini, bordi, badge minuscoli). */
-  --color-wood-solid: #6b433a;
+  /* Legno/Accento caldo (brand VITTO): tinta piena di "servizio" della materia
+     legno, per elementi troppo piccoli perché la texture si legga (sotto
+     ~28px: pallini, bordi, badge minuscoli) e per le funzioni trasversali
+     senza colore di sezione (scanner, profilo). */
+  --color-wood-solid: #c97b4a;
+  /* Marchiatura scura (brand VITTO): testo su legno, contorni, tratti forti. */
+  --color-marchiatura: #3d2817;
 
   /* Raggi */
   --radius-xs: 6px;

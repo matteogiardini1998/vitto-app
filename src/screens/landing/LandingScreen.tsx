@@ -1,22 +1,12 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { APP_ICONS, APP_NAME } from "../../config/app";
+import { APP_NAME, APP_TAGLINE } from "../../config/app";
 import { useProfileStore } from "../../store/profileStore";
 import { ChalkText } from "../../chalk";
 import { MockupCarousel } from "./components/MockupCarousel";
 import { InstallSection } from "./components/InstallSection";
-
-/**
- * PROPOSTE frase hero (direzione: cosa fa l'app per una casa vera).
- * Se ne usa una sola: cambia FRASE_HERO_SCELTA per provarle.
- */
-const FRASI_HERO = [
-  "Decide con te cosa si mangia questa settimana — e ti prepara la lista della spesa.",
-  "Pasti della settimana, ricette e spesa: tutto deciso in cinque minuti, una volta sola.",
-  "Pianifichi una volta, mangi tutta la settimana senza pensarci più.",
-];
-const FRASE_HERO_SCELTA = 0;
+import iconHero from "../../assets/icon-hero.webp";
 
 /** PROPOSTE riga del banner finale. */
 const FRASI_CTA = [
@@ -52,9 +42,10 @@ export function LandingScreen() {
           transition={{ duration: 0.55, ease: "easeOut" }}
           className="mx-auto mt-8 max-w-xl rounded-3xl bg-paper-50 px-6 py-8 text-center shadow-elevated md:mt-14 md:py-10"
         >
-          <img src={APP_ICONS.favicon} alt="" className="mx-auto h-16 w-16 md:h-20 md:w-20" />
+          <img src={iconHero} alt="" className="mx-auto h-16 w-16 md:h-20 md:w-20" />
           <h1 className="mt-4 font-display text-display-lg text-paper-900">{APP_NAME}</h1>
-          <p className="mx-auto mt-3 max-w-md text-body-lg text-paper-700">{FRASI_HERO[FRASE_HERO_SCELTA]}</p>
+          {/* Claim ufficiale: vive SOLO qui e nei meta/og della landing (vedi index.html). */}
+          <p className="mx-auto mt-3 max-w-md text-body-lg text-paper-700">{APP_TAGLINE}</p>
         </motion.header>
 
         {/* --------------------------- GIOSTRA MOCKUP ----------------------- */}

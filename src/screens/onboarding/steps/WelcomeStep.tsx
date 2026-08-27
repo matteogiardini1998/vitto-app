@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ScanBarcode, Archive, ShoppingBasket } from "lucide-react";
 import { MealPrepIcon } from "../../../components/MealPrepIcon";
-import { APP_NAME, APP_TAGLINE } from "../../../config/app";
+import { APP_NAME } from "../../../config/app";
 
 const SATELLITI = [
   { Icon: ScanBarcode, bg: "bg-pop-sky-400", pos: "-top-2 -right-8", delay: 0.35, rotate: -10 },
@@ -45,7 +45,8 @@ export function WelcomeStep() {
       </motion.div>
       <div>
         <h1 className="text-display-lg font-display font-semibold text-paper-900">{APP_NAME}</h1>
-        <p className="text-body-lg text-paper-500 mt-2 max-w-[240px] mx-auto">{APP_TAGLINE}</p>
+        {/* Il claim ufficiale vive solo nella landing e nei meta: qui il tono resta breve e situazionale. */}
+        <p className="text-body-lg text-paper-500 mt-2 max-w-[240px] mx-auto">Due minuti, poi si cucina.</p>
       </div>
     </div>
   );
