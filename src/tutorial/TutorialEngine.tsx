@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { useLocation } from "react-router-dom";
-import { ChalkArrow, ChalkCircle, ChalkText } from "../chalk";
+import { useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import { cn } from "../lib/cn";
+import { ChalkFumetto } from "../chalk";
 import { useTutorialStore } from "../store/tutorialStore";
 import { useShoppingStore } from "../store/shoppingStore";
 import { useToastStore } from "../store/toastStore";
+import { APP_NAME, APP_TAGLINE } from "../config/app";
+import iconHero from "../assets/icon-hero.webp";
 import { BEATS, type Beat, type ContestoTutorial } from "./beats";
 
-/** Bersagli rotondi: il cerchio di gesso e il ritaglio dello spotlight seguono la forma reale del bottone. */
+/** Bersagli rotondi: il glow segue la forma reale del bottone. */
 const BERSAGLI_CIRCOLARI = new Set(["hub", "profilo-avatar", "scanner-btn"]);
 const FINESTRA_TAP_RAPIDI_MS = 700;
 const SOGLIA_TAP_RAPIDI = 3;
-const LARGHEZZA_ANNOTAZIONE = 300;
+const LARGHEZZA_ANNOTAZIONE = 260;
+/** Solo per il clamp verticale: altezza "tipica" di un fumetto a 1-2 righe, mai il layout reale (che resta auto-height). */
+const ALTEZZA_ANNOTAZIONE_STIMATA = 140;
 
 type Rect = { top: number; left: number; width: number; height: number };
 
@@ -45,9 +52,16 @@ function clamp(v: number, min: number, max: number) {
  * brevi, così segue l'app ovunque l'utente la porti invece di dettarle il
  * percorso. Se un bersaglio non è (ancora) in pagina, si mette da parte in
  * silenzio: nessun overlay orfano, nessun blocco.
+ *
+ * Velo scuro: UNO solo, leggero, sempre uguale — mai un "buco" scuro che fa
+ * sembrare il resto dello schermo spento. L'evidenziazione di un bersaglio è
+ * un alone pulsante (pulse-glow) sul bersaglio reale, mai una scuritura
+ * aggiuntiva né una freccia: il contenuto reale (tag da scegliere, liste,
+ * bottoni) resta sempre leggibile e chiaramente toccabile a vista.
  */
 export function TutorialEngine() {
   const location = useLocation();
+  const navigate = useNavigate();
   const attivo = useTutorialStore((s) => s.attivo);
   const passoCorrente = useTutorialStore((s) => s.passoCorrente);
   const eraReplay = useTutorialStore((s) => s.eraReplay);
@@ -113,36 +127,41 @@ export function TutorialEngine() {
 
   if (!attivo || !beat) return null;
 
+  if (beat.chiusura) {
+    // Chiude il tutorial e porta subito dove si inizia davvero a usare l'app.
+    return createPortal(<Chiusura onFine={() => { avanza(); navigate("/meal-prep"); }} />, document.body);
+  }
+
   const isTap = beat.avanzamento.tipo === "tap";
   const isCircolare = beat.target ? BERSAGLI_CIRCOLARI.has(beat.target) : false;
   const padding = isCircolare ? 10 : 7;
 
   return createPortal(
     // pointer-events:none sul contenitore: di default il tutorial non intercetta NULLA.
-    // Solo l'overlay scuro (nei passi informativi) si riattiva esplicitamente sotto.
+    // Solo l'overlay scuro (nei passi "tap") si riattiva esplicitamente sotto.
     <div className="fixed inset-0 z-[999] pointer-events-none" aria-live="polite">
-      {/* Overlay scuro leggerissimo: l'app resta visibile e viva sotto. Cattura il tap solo nei passi informativi. */}
+      {/* Un solo velo, leggero, sempre uguale: segnala "modalità guidata attiva"
+          senza mai far sembrare l'app spenta o non toccabile. */}
       <div
-        className="absolute inset-0 bg-[#140c08]/25"
+        className="absolute inset-0 bg-[#140c08]/12"
         style={{ pointerEvents: isTap ? "auto" : "none" }}
         onClick={isTap ? () => avanza() : undefined}
       />
 
+      {/* Evidenziazione = un solo alone pulsante sul bersaglio reale, mai una
+          scuritura aggiuntiva né una freccia: richiama l'attenzione senza
+          spegnere il resto e senza bisogno di puntare da lontano. */}
       {rect && beat.evidenzia && (
         <div
-          className="absolute"
+          className={cn("absolute tutorial-glow", isCircolare ? "rounded-full" : "rounded-2xl")}
           style={{
             top: rect.top - padding,
             left: rect.left - padding,
             width: rect.width + padding * 2,
             height: rect.height + padding * 2,
-            borderRadius: isCircolare ? "999px" : "18px",
-            boxShadow: "0 0 0 9999px rgba(20,12,8,0.42)",
             pointerEvents: "none",
           }}
-        >
-          <ChalkCircle attivo animaKey={beat.id} className="absolute inset-0 h-full w-full" />
-        </div>
+        />
       )}
 
       {rect && <Annotazione beat={beat} rect={rect} />}
@@ -155,46 +174,75 @@ function Annotazione({ beat, rect }: { beat: Beat; rect: Rect }) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const centroX = rect.left + rect.width / 2;
-  const GAP = 16;
+  const centroY = rect.top + rect.height / 2;
+  const GAP = 18;
 
   const orizzontale: CSSProperties = {
-    left: clamp(centroX - LARGHEZZA_ANNOTAZIONE / 2, 12, vw - LARGHEZZA_ANNOTAZIONE - 12),
+    left: clamp(centroX - LARGHEZZA_ANNOTAZIONE / 2, 8, vw - LARGHEZZA_ANNOTAZIONE - 8),
     width: LARGHEZZA_ANNOTAZIONE,
   };
 
   let posizione: CSSProperties;
+  let puntaOffset: number;
   if (beat.posizione === "sopra") {
-    posizione = { ...orizzontale, bottom: vh - rect.top + GAP };
+    posizione = { ...orizzontale, top: clamp(rect.top - GAP - ALTEZZA_ANNOTAZIONE_STIMATA, 8, vh - ALTEZZA_ANNOTAZIONE_STIMATA - 8) };
+    puntaOffset = ((centroX - (orizzontale.left as number)) / LARGHEZZA_ANNOTAZIONE);
   } else if (beat.posizione === "sotto") {
-    posizione = { ...orizzontale, top: rect.top + rect.height + GAP };
+    posizione = { ...orizzontale, top: clamp(rect.top + rect.height + GAP, 8, vh - ALTEZZA_ANNOTAZIONE_STIMATA - 8) };
+    puntaOffset = ((centroX - (orizzontale.left as number)) / LARGHEZZA_ANNOTAZIONE);
   } else if (beat.posizione === "sinistra") {
-    posizione = { top: clamp(rect.top + rect.height / 2 - 50, 12, vh - 100), right: vw - rect.left + GAP, width: LARGHEZZA_ANNOTAZIONE };
+    const top = clamp(centroY - ALTEZZA_ANNOTAZIONE_STIMATA / 2, 12, vh - ALTEZZA_ANNOTAZIONE_STIMATA - 12);
+    posizione = { top, right: vw - rect.left + GAP, width: LARGHEZZA_ANNOTAZIONE };
+    puntaOffset = (centroY - top) / ALTEZZA_ANNOTAZIONE_STIMATA;
   } else {
-    posizione = { top: clamp(rect.top + rect.height / 2 - 50, 12, vh - 100), left: rect.left + rect.width + GAP, width: LARGHEZZA_ANNOTAZIONE };
+    const top = clamp(centroY - ALTEZZA_ANNOTAZIONE_STIMATA / 2, 12, vh - ALTEZZA_ANNOTAZIONE_STIMATA - 12);
+    posizione = { top, left: rect.left + rect.width + GAP, width: LARGHEZZA_ANNOTAZIONE };
+    puntaOffset = (centroY - top) / ALTEZZA_ANNOTAZIONE_STIMATA;
   }
 
-  const testo = (
-    <ChalkText attivo animaKey={beat.id} centrato className={beat.evidenzia ? "text-xl leading-snug" : "text-lg leading-snug"}>
-      {beat.testo}
-    </ChalkText>
-  );
-  const freccia = beat.evidenzia && (
-    <ChalkArrow attivo animaKey={beat.id} variante={beat.freccia} ritardo={0.5} className="mx-auto h-12 w-12" />
-  );
+  // Il lato del fumetto dice da che parte sta il bersaglio (per la punta); la
+  // punta scorre poi lungo quel bordo fino al punto reale del bersaglio —
+  // anche quando è in un angolo (es. l'avatar profilo), invece di restare
+  // sempre fissa al centro del fumetto.
+  const lato = beat.posizione === "sopra" ? "sotto" : beat.posizione === "sotto" ? "sopra" : beat.posizione === "sinistra" ? "destra" : "sinistra";
 
   return (
     <div className="absolute z-10 text-center" style={{ ...posizione, pointerEvents: "none" }}>
-      {beat.posizione === "sotto" ? (
-        <>
-          {freccia}
-          {testo}
-        </>
-      ) : (
-        <>
-          {testo}
-          {freccia}
-        </>
-      )}
+      <ChalkFumetto attivo animaKey={beat.id} lato={lato} puntaOffset={puntaOffset}>
+        {beat.testo}
+      </ChalkFumetto>
+    </div>
+  );
+}
+
+/**
+ * Schermata di chiusura: non un fumetto d'angolo come tutti gli altri passi,
+ * ma un momento riconoscibile — icona, nome, claim e conferma esplicita che
+ * il tutorial è finito. L'ultimo passo (`beat.chiusura`) usa questo invece
+ * della normale `Annotazione`.
+ */
+function Chiusura({ onFine }: { onFine: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#140c08]/55 px-6" onClick={onFine}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 26 }}
+        className="flex max-w-xs flex-col items-center gap-3 rounded-3xl bg-paper-50 px-7 py-8 text-center shadow-elevated"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img src={iconHero} alt="" className="h-14 w-14" />
+        <p className="font-display text-title-md font-bold uppercase tracking-wide text-primary-700">Tutorial completato</p>
+        <h2 className="font-display text-display-sm font-bold text-paper-900">{APP_NAME}</h2>
+        <p className="text-body-md text-paper-700">{APP_TAGLINE}</p>
+        <button
+          type="button"
+          onClick={onFine}
+          className="mt-2 flex items-center gap-2 rounded-full bg-primary-700 px-6 py-3 text-body-md font-bold text-paper-50 active:bg-primary-800"
+        >
+          Inizia a cucinare <ArrowRight size={18} />
+        </button>
+      </motion.div>
     </div>
   );
 }

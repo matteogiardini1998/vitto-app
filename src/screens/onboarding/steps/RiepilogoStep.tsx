@@ -75,7 +75,7 @@ export function RiepilogoStep({ draft, onEdit }: RiepilogoStepProps) {
       />
       <RiepilogoRow
         label="Supermercato"
-        value={draft.supermercatoPreferito || "Non impostato"}
+        value={draft.supermercatoPreferito.length ? draft.supermercatoPreferito.join(", ") : "Non impostato"}
         onEdit={() => onEdit(7)}
       />
     </div>

@@ -8,14 +8,6 @@ import { MockupCarousel } from "./components/MockupCarousel";
 import { InstallSection } from "./components/InstallSection";
 import iconHero from "../../assets/icon-hero.webp";
 
-/** PROPOSTE riga del banner finale. */
-const FRASI_CTA = [
-  "La cena di stasera è già decisa.",
-  "Da domani la lista della spesa si scrive da sola.",
-  "Meno “cosa mangiamo?”, più cena in tavola.",
-];
-const FRASE_CTA_SCELTA = 0;
-
 /**
  * Landing pubblica: prima impressione dell'app, stessa identità visiva
  * (legno, crema, verde) con le annotazioni gessetto del modulo condiviso.
@@ -40,12 +32,26 @@ export function LandingScreen() {
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
-          className="mx-auto mt-8 max-w-xl rounded-3xl bg-paper-50 px-6 py-8 text-center shadow-elevated md:mt-14 md:py-10"
+          className="mx-auto mt-8 max-w-xl rounded-3xl bg-paper-100 px-6 py-8 text-center shadow-elevated md:mt-14 md:py-10"
         >
-          <img src={iconHero} alt="" className="mx-auto h-16 w-16 md:h-20 md:w-20" />
-          <h1 className="mt-4 font-display text-display-lg text-paper-900">{APP_NAME}</h1>
+          <div className="relative mx-auto h-16 w-16 overflow-hidden rounded-[30%] shadow-[0_2px_3px_rgb(20_12_8_/_0.35),0_14px_22px_-6px_rgb(20_12_8_/_0.5)] md:h-20 md:w-20">
+            <img src={iconHero} alt="" className="h-full w-full object-cover" />
+            {/* Sheen leggero: stesso trattamento usato su tagliere/hub della ruota, per un rilievo quasi 3D invece di un'immagine piatta. */}
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_22%,rgba(255,255,255,0.4),transparent_60%)]" />
+          </div>
+          <h1 className="mt-4 font-display font-bold text-display-lg tracking-tight text-paper-900 md:text-[3.25rem]">
+            {APP_NAME}
+          </h1>
           {/* Claim ufficiale: vive SOLO qui e nei meta/og della landing (vedi index.html). */}
-          <p className="mx-auto mt-3 max-w-md text-body-lg text-paper-700">{APP_TAGLINE}</p>
+          <p className="mx-auto mt-3 max-w-md text-title-lg font-bold text-primary-800">{APP_TAGLINE}</p>
+          <motion.button
+            type="button"
+            onClick={entra}
+            whileTap={{ scale: 0.96 }}
+            className="mx-auto mt-6 flex items-center gap-2 rounded-full bg-primary-700 px-7 py-3.5 text-body-lg font-bold text-paper-50 shadow-card active:bg-primary-800"
+          >
+            Inizia ora <ArrowRight size={20} />
+          </motion.button>
         </motion.header>
 
         {/* --------------------------- GIOSTRA MOCKUP ----------------------- */}
@@ -90,19 +96,11 @@ export function LandingScreen() {
       </main>
 
       {/* ------------------------- BANNER CTA FINALE ------------------------ */}
+      {/* Chiusura sulla texture legno: ripete il claim ufficiale, il bottone "Inizia ora"
+          vive già nell'hero (visibile senza scroll) — qui niente doppione. */}
       <section aria-label="Inizia" className="accent-wood mt-14 md:mt-20">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-5 px-6 py-12 text-center md:py-16">
-          <ChalkText className="text-4xl md:text-5xl" ruota={-2}>
-            {FRASI_CTA[FRASE_CTA_SCELTA]}
-          </ChalkText>
-          <motion.button
-            type="button"
-            onClick={entra}
-            whileTap={{ scale: 0.96 }}
-            className="flex items-center gap-2 rounded-full bg-paper-50 px-7 py-3.5 text-body-lg font-bold text-primary-800 shadow-elevated"
-          >
-            Inizia ora <ArrowRight size={20} />
-          </motion.button>
+          <ChalkText className="text-4xl md:text-5xl">{APP_TAGLINE}</ChalkText>
         </div>
       </section>
     </div>

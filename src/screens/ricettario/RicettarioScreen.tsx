@@ -40,7 +40,7 @@ export function RicettarioScreen() {
 
   return (
     <div className="pb-8">
-      <PageHeader title="Ricettario" subtitle="La tua dispensa di ricette" accent={PAGE_ACCENT[1]} tutorialId="header-ricettario" />
+      <PageHeader title="Ricettario" subtitle="La tua dispensa di ricette" accent={PAGE_ACCENT["/ricettario"]} tutorialId="header-ricettario" />
 
       <div className="px-4 flex flex-col gap-3 mb-4">
         <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export function RicettarioScreen() {
       {risultati.length === 0 ? (
         <EmptyState
           icon={BookOpen}
-          blobColor={PAGE_BLOB[1]}
+          blobColor={PAGE_BLOB["/ricettario"]}
           title="Nessuna ricetta trovata"
           description="Prova a modificare la ricerca o i filtri, oppure crea una nuova ricetta."
           action={

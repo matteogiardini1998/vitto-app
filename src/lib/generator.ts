@@ -53,7 +53,7 @@ export type PreferenzeGenerazione = {
   vincoli: VincoloPuntuale[];
   esclusioniTemporanee: string[];
   budgetTotale: number;
-  supermercato: string;
+  supermercato: string[];
 };
 
 export type RisultatoGenerazione = {

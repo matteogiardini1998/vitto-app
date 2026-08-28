@@ -19,14 +19,18 @@ import { trovaVoceListaCorrispondente, impareAssociazioneLista } from "../lib/sm
 import type { ProdottoBarcode } from "../store/barcodeCacheStore";
 import type { RisultatoAzione } from "../lib/barcode/types";
 
+// Ordine sulla ruota: Dispensa e Spesa scambiate rispetto a prima. Da Meal Prep,
+// Spesa era "opposta" nel cerchio a 4 voci (2 passi in qualunque verso) — ora è
+// adiacente (1 passo), e il tratto finale Meal Prep→Spesa→Dispensa diventa una
+// rotazione continua nello stesso verso invece di un salto seguito da un'inversione.
 const PAGES: WheelPageDef[] = [
-  { path: "/meal-prep", label: "Meal Prep", icon: CalendarDays },
+  { path: "/meal-prep", label: "Piano Pasti", icon: CalendarDays },
   { path: "/ricettario", label: "Ricettario", icon: BookOpen },
-  { path: "/spesa", label: "Spesa", icon: ShoppingBasket },
   { path: "/dispensa", label: "Dispensa", icon: Archive },
+  { path: "/spesa", label: "Spesa", icon: ShoppingBasket },
 ];
 
-const SCREENS = [MealPrepScreen, RicettarioScreen, SpesaScreen, DispensaScreen];
+const SCREENS = [MealPrepScreen, RicettarioScreen, DispensaScreen, SpesaScreen];
 
 /**
  * Layout delle 4 pagine principali, guidato dalla ruota di navigazione.

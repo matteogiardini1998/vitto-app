@@ -38,17 +38,37 @@ function angularDistance(deg: number) {
  * adesivo, macchia organica nel colore della sezione — la macchia è già
  * dentro l'immagine, non più una <span> di sfondo separata.
  *
+ * Chiavi per `path`, non per posizione: la ruota può cambiare ordine (vedi
+ * PAGES in WheelLayout.tsx) senza dover risincronizzare a mano quale colore
+ * o icona appartiene a quale sezione — l'identità della sezione è il path,
+ * mai la sua posizione sulla ruota in un dato momento.
+ *
  * TODO(brand): l'icona Ricettario è ancora la versione precedente allo stile
  * sticker (senza bordo bianco) — da sostituire quando arriverà la definitiva.
  * Non rigenerarla né modificarla nel frattempo (indicazione esplicita brand).
  */
-export const SECTION_ICONS = [iconMealPrep, iconRicettario, iconSpesa, iconDispensa];
+export const SECTION_ICONS: Record<string, string> = {
+  "/meal-prep": iconMealPrep,
+  "/ricettario": iconRicettario,
+  "/spesa": iconSpesa,
+  "/dispensa": iconDispensa,
+};
 
 /** Solo il colore pieno, per il dettaglio-eco nell'header della pagina reale. */
-export const PAGE_ACCENT = ["bg-sage-500", "bg-pop-yellow-500", "bg-pop-sky-500", "bg-pop-berry-500"];
+export const PAGE_ACCENT: Record<string, string> = {
+  "/meal-prep": "bg-sage-500",
+  "/ricettario": "bg-pop-yellow-500",
+  "/spesa": "bg-pop-sky-500",
+  "/dispensa": "bg-pop-berry-500",
+};
 
 /** Stesso colore, tono chiaro da "macchia" per lo stato vuoto della pagina. */
-export const PAGE_BLOB = ["bg-sage-300", "bg-pop-yellow-300", "bg-pop-sky-300", "bg-pop-berry-300"];
+export const PAGE_BLOB: Record<string, string> = {
+  "/meal-prep": "bg-sage-300",
+  "/ricettario": "bg-pop-yellow-300",
+  "/spesa": "bg-pop-sky-300",
+  "/dispensa": "bg-pop-berry-300",
+};
 
 type WheelNavProps = {
   pages: WheelPageDef[];
@@ -229,7 +249,7 @@ function WheelItem({
   const scale = useTransform(dist, [0, 90], [1, 0.62]);
   const labelOpacity = useTransform(dist, [0, 20, 45], [1, 0.4, 0]);
 
-  const sectionIcon = SECTION_ICONS[index % SECTION_ICONS.length];
+  const sectionIcon = SECTION_ICONS[page.path];
 
   return (
     <motion.div

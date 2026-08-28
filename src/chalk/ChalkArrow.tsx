@@ -90,8 +90,10 @@ export function ChalkArrow({
     >
       <defs>
         <filter id={filtroId} x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="7" result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" />
+          {/* Tratto veloce ma sicuro: distorsione più lieve di prima (era 0.045/2.6),
+              organica senza tremolare — come un gesso tirato senza esitare. */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="7" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="1.2" />
         </filter>
       </defs>
       <g filter={`url(#${filtroId})`}>

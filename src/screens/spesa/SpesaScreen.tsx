@@ -102,7 +102,7 @@ export function SpesaScreen() {
 
   return (
     <div style={{ paddingBottom: SCAN_BUTTON_CLEARANCE + 32 }}>
-      <PageHeader title="Lista della spesa" accent={PAGE_ACCENT[2]} tutorialId="header-spesa" />
+      <PageHeader title="Lista della spesa" accent={PAGE_ACCENT["/spesa"]} tutorialId="header-spesa" />
 
       <div className="px-4 flex flex-col gap-4">
         <div className="flex gap-2">
@@ -181,7 +181,7 @@ export function SpesaScreen() {
       ) : voci.length === 0 ? (
         <EmptyState
           icon={ShoppingBasket}
-          blobColor={PAGE_BLOB[2]}
+          blobColor={PAGE_BLOB["/spesa"]}
           title="Nessuna voce ancora"
           description="Aggiorna la lista dal piano pasti o aggiungi una voce manuale per iniziare."
         />

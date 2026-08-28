@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { ScanBarcode } from "lucide-react";
+import { cn } from "../../lib/cn";
 import { WHEEL_CONTAINER_HEIGHT } from "../WheelNav";
+import { useTutorialStore } from "../../store/tutorialStore";
 
 const GAP_SOPRA_RUOTA = 16;
 const DIMENSIONE = 56;
@@ -21,6 +23,12 @@ type BarcodeScanButtonProps = {
  * trattamento neutro in tono legno/bruno (non una macchia di sezione).
  */
 export function BarcodeScanButton({ onClick }: BarcodeScanButtonProps) {
+  const attivo = useTutorialStore((s) => s.attivo);
+  const passoCorrente = useTutorialStore((s) => s.passoCorrente);
+  // Il tutorial punta a questo stesso bottone sia in Spesa (spesa-2) sia in
+  // Dispensa (dispensa-2): è un unico componente condiviso, non serve altro.
+  const inEvidenza = attivo && (passoCorrente === "spesa-2" || passoCorrente === "dispensa-2");
+
   return (
     <motion.button
       type="button"
@@ -32,7 +40,10 @@ export function BarcodeScanButton({ onClick }: BarcodeScanButtonProps) {
       exit={{ opacity: 0, scale: 0.7 }}
       whileTap={{ scale: 0.92 }}
       transition={{ type: "spring", stiffness: 420, damping: 28 }}
-      className="absolute left-4 z-40 rounded-full bg-paper-0 text-wood-solid dark:text-[#e0a679] shadow-elevated border border-wood-solid/25 flex items-center justify-center"
+      className={cn(
+        "absolute left-4 z-40 rounded-full bg-paper-0 text-wood-solid dark:text-[#e0a679] shadow-elevated border border-wood-solid/25 flex items-center justify-center",
+        inEvidenza && "tutorial-glow",
+      )}
       style={{ bottom: WHEEL_CONTAINER_HEIGHT + GAP_SOPRA_RUOTA, height: DIMENSIONE, width: DIMENSIONE }}
     >
       <ScanBarcode size={25} strokeWidth={1.9} />

@@ -165,7 +165,11 @@ function Contenuto({ onClose, onRisolto }: { onClose: () => void; onRisolto?: (p
   const totaleScansionati = pila.reduce((tot, v) => tot + v.quantita, 0);
 
   return (
-    <div className="fixed inset-0 z-50 bg-paper-950">
+    // z-index sopra il motore del tutorial (z-[999]): uno scanner a schermo intero deve
+    // sempre coprirlo, altrimenti la sua annotazione (freccia/testo per il passo corrente)
+    // resta visibile per trasparenza sopra la fotocamera, scollegata da qualunque bersaglio
+    // reale ormai nascosto sotto — un elemento decorativo senza funzione apparente.
+    <div className="fixed inset-0 z-[1000] bg-paper-950">
       <motion.div
         drag="y"
         dragConstraints={{ top: 0, bottom: 0 }}
@@ -431,7 +435,10 @@ function Fotocamera({ onHit, onRetry }: { onHit: (hit: BarcodeHit) => void; onRe
 function Mirino({ feedback }: { feedback: FeedbackLettura }) {
   const quieto = feedback !== "neutro";
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+    // fixed, non absolute: l'area camera è più bassa dell'header e si stringe quando
+    // il pannello dei prodotti scansionati cresce sotto — un centraggio "absolute" su
+    // quell'area risulterebbe visibilmente decentrato rispetto allo schermo reale.
+    <div className="fixed inset-0 flex flex-col items-center justify-center pointer-events-none">
       <div className="relative w-[78%] max-w-[340px] aspect-[8/5]">
         <motion.div
           className="absolute inset-0 rounded-2xl border"

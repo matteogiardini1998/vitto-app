@@ -242,7 +242,7 @@ export function ProfiloScreen() {
         <SettingsSection title="Spesa">
           <SettingsRow
             label="Supermercato abituale"
-            value={profilo.supermercatoPreferito || "Non impostato"}
+            value={profilo.supermercatoPreferito.length ? profilo.supermercatoPreferito.join(", ") : "Non impostato"}
             icon={<Store size={20} className="text-primary-600" />}
             onClick={() => openSheet("supermercato")}
           />

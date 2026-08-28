@@ -1,47 +1,62 @@
 import { motion } from "framer-motion";
-import { ScanBarcode, Archive, ShoppingBasket } from "lucide-react";
-import { MealPrepIcon } from "../../../components/MealPrepIcon";
 import { APP_NAME } from "../../../config/app";
+import iconMealPrep from "../../../assets/icon-mealprep.webp";
+import iconRicettario from "../../../assets/icon-ricettario.webp";
+import iconDispensa from "../../../assets/icon-dispensa.webp";
+import iconSpesa from "../../../assets/icon-spesa.webp";
+import iconHubWood from "../../../assets/icon-hub-wood.webp";
 
-const SATELLITI = [
-  { Icon: ScanBarcode, bg: "bg-pop-sky-400", pos: "-top-2 -right-8", delay: 0.35, rotate: -10 },
-  { Icon: Archive, bg: "bg-pop-berry-400", pos: "-bottom-3 -right-6", delay: 0.5, rotate: 8 },
-  { Icon: ShoppingBasket, bg: "bg-pop-yellow-400", pos: "-bottom-4 -left-8", delay: 0.65, rotate: -6 },
+const SEZIONI = [
+  { icon: iconMealPrep, pos: "-top-3 left-1/2 -translate-x-1/2", delay: 0.3 },
+  { icon: iconRicettario, pos: "top-1/2 -right-3 -translate-y-1/2", delay: 0.42 },
+  { icon: iconDispensa, pos: "-bottom-3 left-1/2 -translate-x-1/2", delay: 0.54 },
+  { icon: iconSpesa, pos: "top-1/2 -left-3 -translate-y-1/2", delay: 0.66 },
 ];
 
 /**
- * Prima schermata: si guarda, non si legge. Il piatto è il centro (il
- * pasto pronto), scanner/dispensa/lista orbitano intorno come segnali di
- * cosa sa fare l'app — nessun paragrafo a spiegarlo.
+ * Prima schermata: si guarda, non si legge. Non più icone generiche sparse —
+ * la ruota vera, in miniatura: lo stesso tagliere, lo stesso hub, le stesse
+ * quattro sezioni che l'utente userà davvero, così si riconosce fin dal primo
+ * istante invece di scoprirla solo dopo.
  */
 export function WelcomeStep() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center text-center gap-7 py-10">
+    <div className="flex-1 flex flex-col items-center justify-center text-center gap-8 py-10">
       <motion.div
         initial={{ scale: 0.6, opacity: 0, rotate: -8 }}
         animate={{ scale: 1, opacity: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 260, damping: 14 }}
-        className="relative h-36 w-36 flex items-center justify-center"
+        className="relative h-56 w-56"
       >
-        {SATELLITI.map(({ Icon, bg, pos, delay, rotate }, i) => (
-          <motion.span
+        <div className="absolute inset-0 rounded-full overflow-hidden shadow-elevated wood-tagliere">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.22),transparent_55%)] dark:bg-[radial-gradient(circle_at_32%_22%,rgba(255,255,255,0.06),transparent_55%)]" />
+        </div>
+
+        {SEZIONI.map(({ icon, pos, delay }, i) => (
+          <motion.img
             key={i}
-            initial={{ scale: 0, opacity: 0, rotate: rotate * 2 }}
-            animate={{ scale: 1, opacity: 1, rotate: 0, y: [0, -4, 0] }}
+            src={icon}
+            alt=""
+            draggable={false}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1, y: [0, -4, 0] }}
             transition={{
               scale: { type: "spring", stiffness: 300, damping: 16, delay },
               opacity: { duration: 0.3, delay },
-              rotate: { type: "spring", stiffness: 300, damping: 16, delay },
               y: { duration: 3.2 + i * 0.4, repeat: Infinity, ease: "easeInOut", delay: delay + 0.6 },
             }}
-            className={`absolute ${pos} h-11 w-11 rounded-full ${bg} text-primary-900 shadow-card flex items-center justify-center`}
-          >
-            <Icon size={19} strokeWidth={2} />
-          </motion.span>
+            className={`absolute h-12 w-12 object-contain drop-shadow-[0_3px_4px_rgba(20,12,8,0.35)] ${pos}`}
+          />
         ))}
-        <div className="h-20 w-20 rounded-2xl bg-primary-700 text-paper-50 flex items-center justify-center shadow-elevated">
-          <MealPrepIcon size={40} />
-        </div>
+
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 280, damping: 18, delay: 0.15 }}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 rounded-full overflow-hidden border-[3px] border-paper-0 shadow-[0_3px_4px_rgb(20_12_8_/_0.4),0_16px_26px_-6px_rgb(20_12_8_/_0.55)]"
+        >
+          <img src={iconHubWood} alt="" className="h-full w-full object-cover" draggable={false} />
+        </motion.div>
       </motion.div>
       <div>
         <h1 className="text-display-lg font-display font-semibold text-paper-900">{APP_NAME}</h1>

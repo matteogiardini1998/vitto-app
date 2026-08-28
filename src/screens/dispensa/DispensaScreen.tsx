@@ -117,11 +117,11 @@ export function DispensaScreen() {
           <span className="h-9 w-9 rounded-full bg-primary-700 text-paper-50 flex items-center justify-center shrink-0">
             <IconaDispensaGlyph icona={dispensa.icona} size={17} />
           </span>
-          <h1 className="text-display-md font-display font-bold text-paper-900">{dispensa.nome}</h1>
+          <h1 className="text-display-lg font-display font-bold text-paper-900">{dispensa.nome}</h1>
           <ChevronDown size={20} className="text-paper-400 shrink-0" />
         </button>
         <p className="text-body-sm text-paper-500 mt-1">Quello che hai già in casa</p>
-        <span className={cn("block mx-auto mt-2.5 h-1 w-8 rounded-full", PAGE_ACCENT[3])} />
+        <span className={cn("block mx-auto mt-2.5 h-1 w-8 rounded-full", PAGE_ACCENT["/dispensa"])} />
       </header>
 
       {daFinirePresto.length > 0 && (
@@ -181,7 +181,7 @@ export function DispensaScreen() {
       {dispensa.voci.length === 0 && !query ? (
         <EmptyState
           icon={Archive}
-          blobColor={PAGE_BLOB[3]}
+          blobColor={PAGE_BLOB["/dispensa"]}
           title="Questa dispensa è vuota"
           description="Aggiungi quello che hai già in casa: la prossima lista della spesa ne terrà conto."
         />

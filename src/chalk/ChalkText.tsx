@@ -54,7 +54,7 @@ export function ChalkText({ children, className, ritardo = 0, ruota = 0, animaKe
         }}
         className={cn(
           centrato ? "block w-full text-center" : "inline-block",
-          "font-chalk font-medium leading-tight",
+          "font-chalk font-normal leading-tight",
           tono === "gesso"
             ? "text-[#f6efe3] [text-shadow:0_0_6px_rgb(0_0_0_/_0.5),0_1px_2px_rgb(0_0_0_/_0.6)]"
             : "text-primary-900 [text-shadow:0_1px_0_rgb(255_255_255_/_0.4)]",

@@ -68,7 +68,7 @@ export function MealPrepScreen() {
 
   return (
     <div className="pb-8">
-      <PageHeader title="Piano Pasti" accent={PAGE_ACCENT[0]} />
+      <PageHeader title="Piano Pasti" accent={PAGE_ACCENT["/meal-prep"]} />
 
       {!pianoVuoto && (
         <div className="mx-4 mb-4 px-4 py-3.5 rounded-xl bg-primary-50 border border-primary-100 dark:bg-primary-900/40 dark:border-primary-800 flex items-center gap-3">

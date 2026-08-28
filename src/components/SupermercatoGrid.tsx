@@ -5,21 +5,26 @@ import { cn } from "../lib/cn";
 const SUPERMERCATI = ["Esselunga", "Coop", "Conad", "Carrefour", "Lidl", "Eurospin", "Pam", "MD", "Altro"];
 
 type SupermercatoGridProps = {
-  value: string;
-  onChange: (value: string) => void;
+  value: string[];
+  onChange: (value: string[]) => void;
 };
 
 export function SupermercatoGrid({ value, onChange }: SupermercatoGridProps) {
+  const toggle = (nome: string) => {
+    const has = value.includes(nome);
+    onChange(has ? value.filter((v) => v !== nome) : [...value, nome]);
+  };
+
   return (
     <div className="grid grid-cols-3 gap-2.5">
       {SUPERMERCATI.map((nome) => {
-        const selected = value === nome;
+        const selected = value.includes(nome);
         return (
           <motion.button
             key={nome}
             type="button"
             whileTap={{ scale: 0.96 }}
-            onClick={() => onChange(nome)}
+            onClick={() => toggle(nome)}
             className={cn(
               "aspect-square rounded-md border-2 flex flex-col items-center justify-center gap-1.5 px-1.5 text-center transition-colors",
               selected

@@ -32,14 +32,14 @@ const MOCKUPS: { id: string; src: string; alt: string; titolo: string; note: Ann
     src: mockupMealprep,
     alt: "La settimana di pasti pianificata nell'app",
     titolo: "Piano Pasti",
-    note: { alto: "la tua settimana, generata su misura", basso: "un occhio anche all'equilibrio" },
+    note: { alto: "La tua settimana, generata su misura", basso: "Un occhio anche all'equilibrio" },
   },
   {
     id: "ricettario",
     src: mockupRicettario,
     alt: "Il ricettario con le ricette personali",
     titolo: "Ricettario",
-    note: { alto: "ricette tue, modificabili sempre" },
+    note: { alto: "Ricette tue, modificabili sempre" },
   },
   {
     id: "spesa",
@@ -47,7 +47,7 @@ const MOCKUPS: { id: string; src: string; alt: string; titolo: string; note: Ann
     alt: "La lista della spesa divisa per reparti",
     titolo: "Lista della spesa",
     note: {
-      basso: "batti i codici come al salvatempo",
+      basso: "Batti i codici come al salvatempo",
       // Coordinate misurate sullo screenshot reale: il bottone scanner, in basso a sinistra.
       cerchio: { left: "4%", top: "74%", width: "18%", height: "8%" },
     },
@@ -57,7 +57,7 @@ const MOCKUPS: { id: string; src: string; alt: string; titolo: string; note: Ann
     src: mockupDispensa,
     alt: "La dispensa con quello che hai già in casa",
     titolo: "Dispensa",
-    note: { alto: "quello che hai già in casa" },
+    note: { alto: "Quello che hai già in casa" },
   },
 ];
 
@@ -128,8 +128,10 @@ export function MockupCarousel() {
   return (
     <section ref={sectionRef} aria-roledescription="giostra" aria-label="Le pagine dell'app" className="relative">
       <div className="magnet-board relative rounded-[2rem]">
-        {/* Targhetta col nome della pagina attiva: cambia scorrendo la giostra, come un'etichetta appesa alla lavagna. */}
-        <div className="pointer-events-none absolute right-4 top-4 z-40 overflow-hidden md:right-6 md:top-6">
+        {/* Targhetta col nome della pagina attiva: cambia scorrendo la giostra, come un'etichetta appesa alla lavagna.
+            Centrata sul telefono attivo (z-[110], sopra il suo z-index dinamico che arriva fino a 100): sfondo
+            verde all'80% per lasciar intravedere lo schermo sotto, testo pieno per restare comunque leggibile. */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 z-[110] -translate-x-1/2 -translate-y-1/2 overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={MOCKUPS[activeIndex].id}
@@ -137,7 +139,7 @@ export function MockupCarousel() {
               animate={{ y: "0%", opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ duration: 0.32, ease: "easeInOut" }}
-              className="block rounded-full bg-primary-700 px-3.5 py-1.5 font-display text-caption font-semibold tracking-wide text-paper-50 shadow-card dark:bg-primary-800"
+              className="block rounded-full bg-primary-700/80 px-5 py-2.5 font-display text-title-md font-bold tracking-wide text-paper-50 shadow-card dark:bg-primary-800/80"
             >
               {MOCKUPS[activeIndex].titolo}
             </motion.span>

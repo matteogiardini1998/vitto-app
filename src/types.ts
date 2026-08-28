@@ -58,7 +58,7 @@ export type Profilo = {
   dieta: Dieta;
   esclusioniAssolute: string[];
   preferenzeNegative: string[];
-  supermercatoPreferito: string;
+  supermercatoPreferito: string[];
   incisivitaVoti: IncisivitaVoti;
   incisivitaVotiMinimo: number;
   onboardingCompletato: boolean;

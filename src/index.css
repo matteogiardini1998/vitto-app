@@ -10,8 +10,10 @@
 @import "@fontsource/figtree/500.css";
 @import "@fontsource/figtree/600.css";
 @import "@fontsource/figtree/700.css";
-@import "@fontsource/architects-daughter/latin.css";
-@import "@fontsource/architects-daughter/latin-ext.css";
+@import "@fontsource/kalam/400.css";
+@import "@fontsource/kalam/700.css";
+@import "@fontsource/kalam/latin-ext-400.css";
+@import "@fontsource/kalam/latin-ext-700.css";
 @import "@fontsource/figtree/800.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -23,7 +25,7 @@
   --font-display: "Lora", ui-serif, serif;
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   /* Gessetto su lavagna: annotazioni handwritten di landing e tutorial (modulo src/chalk/). */
-  --font-chalk: "Architects Daughter", "Comic Sans MS", cursive;
+  --font-chalk: "Kalam", "Comic Sans MS", cursive;
 
   /* Primario — verde profondo "bosco" */
   --color-primary-50: #eef4f0;
@@ -357,6 +359,25 @@
   }
   :root.dark .wood-tagliere {
     filter: saturate(0.75) brightness(0.62);
+  }
+
+  /* Alone pulsante del tutorial: unico segnale "tocca qui" rimasto sul
+     bersaglio reale, al posto di freccia+cerchio di gesso. Leggero, ma
+     staccato dal velo uniforme sotto — stesso colore ovunque nell'app
+     (bottone Continua, ruota, scanner), mai un overlay a parte. */
+  .tutorial-glow {
+    animation: tutorialGlow 1.7s ease-out infinite;
+  }
+  @keyframes tutorialGlow {
+    0% {
+      box-shadow: 0 0 0 0 rgb(61 118 87 / 0.55);
+    }
+    70% {
+      box-shadow: 0 0 0 11px rgb(61 118 87 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(61 118 87 / 0);
+    }
   }
 
   /* ---------------------------------------------------------------- */

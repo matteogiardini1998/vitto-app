@@ -15,6 +15,8 @@ import { useRecipeStore } from "../../../store/recipeStore";
 import { usePlanStore } from "../../../store/planStore";
 import { useDispensaStore } from "../../../store/dispensaStore";
 import { useToastStore } from "../../../store/toastStore";
+import { useTutorialStore } from "../../../store/tutorialStore";
+import { creaPianoDimostrativo } from "../../../tutorial/pianoDimostrativo";
 import { generaPiano, type PreferenzeGenerazione, type RisultatoGenerazione } from "../../../lib/generator";
 
 const TOTAL_STEPS = 7;
@@ -63,7 +65,13 @@ export function GeneraWizardScreen() {
 
   const accetta = () => {
     if (!risultato) return;
-    applyPiano(risultato.piano);
+    // Se il tutorial è attivo e l'utente non ha selezionato nessun pasto, il
+    // piano risultante resta vuoto: il tutorial si bloccherebbe non potendo
+    // mai arrivare alla lista della spesa. In quel caso soltanto, si applica
+    // un piano dimostrativo così la guida può proseguire.
+    const tutorialAttivo = useTutorialStore.getState().attivo;
+    const pianoVuoto = Object.keys(risultato.piano).length === 0;
+    applyPiano(tutorialAttivo && pianoVuoto ? creaPianoDimostrativo(profilo.nucleo.persone) : risultato.piano);
     navigate("/meal-prep", { replace: true });
     showToast("Fatto! Il tuo piano è pronto 🎉");
   };

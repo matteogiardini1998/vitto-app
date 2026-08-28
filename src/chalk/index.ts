@@ -7,3 +7,4 @@ export { ChalkText } from "./ChalkText";
 export { ChalkArrow, type VarianteFreccia } from "./ChalkArrow";
 export { ChalkCircle } from "./ChalkCircle";
 export { ChalkPostIt } from "./ChalkPostIt";
+export { ChalkFumetto } from "./ChalkFumetto";

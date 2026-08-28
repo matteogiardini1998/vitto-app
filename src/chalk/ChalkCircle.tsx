@@ -40,8 +40,9 @@ export function ChalkCircle({ className, ritardo = 0, animaKey, attivo, tono = "
     >
       <defs>
         <filter id={filtroId} x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="11" result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="3" />
+          {/* Stesso criterio di ChalkArrow: distorsione più lieve (era 0.05/3). */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="11" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" />
         </filter>
       </defs>
       <motion.path
