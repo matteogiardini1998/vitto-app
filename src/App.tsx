@@ -13,6 +13,7 @@ import { LandingScreen } from "./screens/landing/LandingScreen";
 import { useUiStore } from "./store/uiStore";
 import { PatternBackground } from "./components/PatternBackground";
 import { ToastHost } from "./components/ToastHost";
+import { UpdatePrompt } from "./components/UpdatePrompt";
 import { TutorialEngine } from "./tutorial/TutorialEngine";
 
 export function App() {
@@ -27,6 +28,7 @@ export function App() {
     <>
       <PatternBackground />
       <ToastHost />
+      <UpdatePrompt />
       <TutorialEngine />
       {!onboardingCompletato ? (
         <Routes>

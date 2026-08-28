@@ -61,7 +61,8 @@ export function ChalkFumetto({ children, lato, puntaOffset = 0.5, className, ani
         visibile: { opacity: 1, scale: 1, transition: { duration: 0.22, ease: "easeOut" } },
       }}
       className={cn(
-        "relative rounded-2xl bg-marchiatura px-4 py-3 shadow-[0_8px_18px_-6px_rgb(0_0_0/0.5)]",
+        // rounded-lg, non più rounded-2xl: rettangolo smussato, non più una pillola.
+        "relative rounded-lg bg-marchiatura px-4 py-3 shadow-[0_8px_18px_-6px_rgb(0_0_0/0.5)]",
         className,
       )}
     >

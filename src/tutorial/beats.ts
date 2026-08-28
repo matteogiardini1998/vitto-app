@@ -41,7 +41,13 @@ export const BEATS: Beat[] = [
     id: "wizard-0",
     testo: "Tocca i tag che ti interessano, poi Continua",
     target: "wizard-continua",
-    posizione: "sopra",
+    // "Sotto", non "sopra": la card del wizard occupa quasi tutta l'altezza dello
+    // schermo, e per gli step corti (tag, testo libero, esclusioni, budget,
+    // supermercato) c'è molto spazio libero SOTTO il bottone Continua, non sopra
+    // (dove invece stanno i controlli veri). Solo i due step lunghi e scrollabili
+    // (wizard-4, wizard-6) restano "sopra": lì il bottone è già quasi in fondo e
+    // sotto non c'è spazio, mentre sopra il fumetto copre al più una riga.
+    posizione: "sotto",
     evidenzia: true,
     avanzamento: { tipo: "azione", verifica: (c) => (c.wizardStep ?? -1) > 0 },
   },
@@ -49,7 +55,7 @@ export const BEATS: Beat[] = [
     id: "wizard-1",
     testo: "Scrivi richieste puntuali, se vuoi, poi Continua",
     target: "wizard-continua",
-    posizione: "sopra",
+    posizione: "sotto",
     evidenzia: true,
     avanzamento: { tipo: "azione", verifica: (c) => (c.wizardStep ?? -1) > 1 },
   },
@@ -57,7 +63,7 @@ export const BEATS: Beat[] = [
     id: "wizard-2",
     testo: "Segna cosa evitare solo questa settimana",
     target: "wizard-continua",
-    posizione: "sopra",
+    posizione: "sotto",
     evidenzia: true,
     avanzamento: { tipo: "azione", verifica: (c) => (c.wizardStep ?? -1) > 2 },
   },
@@ -65,7 +71,7 @@ export const BEATS: Beat[] = [
     id: "wizard-3",
     testo: "Imposta quanto vuoi spendere in totale",
     target: "wizard-continua",
-    posizione: "sopra",
+    posizione: "sotto",
     evidenzia: true,
     avanzamento: { tipo: "azione", verifica: (c) => (c.wizardStep ?? -1) > 3 },
   },
@@ -81,7 +87,7 @@ export const BEATS: Beat[] = [
     id: "wizard-5",
     testo: "Indica il tuo supermercato, poi genera",
     target: "wizard-continua",
-    posizione: "sopra",
+    posizione: "sotto",
     evidenzia: true,
     avanzamento: { tipo: "azione", verifica: (c) => (c.wizardStep ?? -1) > 5 },
   },
@@ -96,16 +102,20 @@ export const BEATS: Beat[] = [
   {
     id: "piano-1",
     testo: "Eccola: la tua settimana è pronta",
-    target: "meal-list",
-    posizione: "sopra",
+    // "meal-list" è l'intera lista (7 giorni, molto più alta dello schermo): usarla
+    // come bersaglio con "sopra" faceva finire il fumetto sopra il banner Aggiorna,
+    // coprendolo. "banner-aggiorna" è corto e sta appena sopra la lista: "sotto"
+    // atterra proprio all'inizio della settimana, senza coprire nulla di cliccabile.
+    target: "banner-aggiorna",
+    posizione: "sotto",
     evidenzia: false,
     avanzamento: { tipo: "tap" },
   },
   {
     id: "piano-2",
     testo: "Tocca un pasto per cambiarlo o bloccarlo",
-    target: "meal-list",
-    posizione: "sopra",
+    target: "banner-aggiorna",
+    posizione: "sotto",
     evidenzia: false,
     avanzamento: { tipo: "tap" },
   },

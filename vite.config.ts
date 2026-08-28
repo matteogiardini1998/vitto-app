@@ -16,7 +16,14 @@ export default defineConfig({
     // possono accettare un certificato self-signed, es. browser automatizzati.)
     ...(process.env.HTTP_ONLY ? [] : [basicSsl()]),
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt", non "autoUpdate": un nuovo service worker resta IN ATTESA
+      // finché non è l'utente a dare il via (banner in UpdatePrompt.tsx) —
+      // mai uno scambio di versione silenzioso mentre l'app è già aperta.
+      // Chi la riapre da zero (nessuna scheda rimasta indietro) la ottiene
+      // comunque in automatico: è il browser stesso ad attivare il service
+      // worker in attesa non appena l'ultima scheda della versione precedente
+      // si chiude — nessun prompt necessario in quel caso.
+      registerType: "prompt",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
         name: APP_NAME,
@@ -39,6 +46,12 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff,woff2}"],
         navigateFallback: "/index.html",
+        // Non salta l'attesa da solo (coerente con registerType: "prompt" — è il
+        // messaggio SKIP_WAITING di updateServiceWorker() a farlo scattare) ma,
+        // una volta attivato, prende il controllo di tutte le schede subito:
+        // basta la reload che l'app fa già dopo l'ok dell'utente, non due.
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
       },
       devOptions: {
         enabled: true,

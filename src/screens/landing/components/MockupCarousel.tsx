@@ -250,14 +250,21 @@ function CarouselItem({
   const zIndex = useTransform(dist, (d) => Math.round(100 - d));
 
   return (
+    // Il ricentraggio (metà larghezza) è un margine, non più un transform su un
+    // figlio annidato dentro questo elemento ruotato: un margine si risolve
+    // nel layout PRIMA di qualunque transform, quindi qui il box ha già le sue
+    // dimensioni e la sua posizione vere quando rotate/scale entrano in gioco,
+    // e ruotano attorno al SUO centro reale — niente più deriva a sinistra su
+    // un lato sì e sull'altro no (ruotare un offset fisso in due versi opposti
+    // non è mai speculare; ruotare un box attorno al proprio centro lo è sempre).
     <motion.div
-      className="absolute left-1/2 top-10"
+      className="absolute left-1/2 top-10 w-[210px] -ml-[105px] md:w-[240px] md:-ml-[120px]"
       style={{ x, y, rotate, scale, opacity, zIndex }}
       onTap={() => {
         if (!isActive) onTap();
       }}
     >
-      <div className="-translate-x-1/2">{children}</div>
+      {children}
     </motion.div>
   );
 }
