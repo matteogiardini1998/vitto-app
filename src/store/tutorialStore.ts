@@ -32,11 +32,13 @@ export const useTutorialStore = create<TutorialState>()(
         // "Rivedi il tutorial" dal profilo riparte sempre da zero; una sessione
         // interrotta (tutorialCompletato ancora false) riprende da dove era.
         const primoPasso = BEATS[0].id;
+        // tutorialCompletato NON si azzera qui: una volta completato resta vero
+        // per sempre, così un replay abbandonato a metà non riapre il tutorial
+        // ad ogni avvio (vedi onRehydrateStorage sotto). Il replay è solo `attivo`.
         set({
           attivo: true,
           eraReplay: tutorialCompletato,
           passoCorrente: tutorialCompletato || !passoCorrente ? primoPasso : passoCorrente,
-          tutorialCompletato: false,
         });
       },
 
@@ -55,10 +57,19 @@ export const useTutorialStore = create<TutorialState>()(
 
       metteInPausa: () => set({ attivo: false }),
 
-      completa: () => set({ attivo: false, tutorialCompletato: true }),
+      completa: () => set({ attivo: false, tutorialCompletato: true, eraReplay: false }),
 
-      salta: () => set({ attivo: false, tutorialCompletato: true }),
+      salta: () => set({ attivo: false, tutorialCompletato: true, eraReplay: false }),
     }),
-    { name: "mealprep-tutorial" },
+    {
+      name: "mealprep-tutorial",
+      version: 1,
+      // Un tutorial attivo NON sopravvive alla chiusura dell'app se era già
+      // stato completato in passato (replay lasciato a metà, backup importato
+      // mentre era attivo): all'avvio riparte sempre spento.
+      onRehydrateStorage: () => (state) => {
+        if (state?.tutorialCompletato && state.attivo) state.metteInPausa();
+      },
+    },
   ),
 );

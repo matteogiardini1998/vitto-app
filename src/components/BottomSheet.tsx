@@ -30,6 +30,8 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
             onClick={onClose}
           />
           <motion.div
+            role="dialog"
+            aria-modal="true"
             className="relative w-full max-w-[440px] bg-paper-0 rounded-t-2xl shadow-sheet flex flex-col"
             style={{ maxHeight: altezza * 0.85 }}
             initial={{ y: "100%" }}

@@ -20,6 +20,16 @@ const LARGHEZZA_ANNOTAZIONE = 260;
 /** Solo per il clamp verticale: altezza "tipica" di un fumetto a 1-2 righe, mai il layout reale (che resta auto-height). */
 const ALTEZZA_ANNOTAZIONE_STIMATA = 140;
 
+/** Il tutorial vive solo sulle schermate a ruota e nel wizard: mai altrove (dettagli ricetta, form, ecc.). */
+const ROTTE_TUTORIAL = ["/meal-prep", "/ricettario", "/spesa", "/dispensa"];
+function rottaAmmessa(pathname: string) {
+  return ROTTE_TUTORIAL.includes(pathname) || pathname === "/meal-prep/genera";
+}
+/** Un modale/sheet aperto è un contesto isolato: l'annotazione non deve mai comparirci sopra. */
+function modaleAperto() {
+  return document.querySelector('[role="dialog"][aria-modal="true"]') !== null;
+}
+
 type Rect = { top: number; left: number; width: number; height: number };
 
 function leggiRect(el: Element | null): Rect | null {
@@ -72,6 +82,7 @@ export function TutorialEngine() {
 
   const beat = BEATS.find((b) => b.id === passoCorrente) ?? null;
   const [rect, setRect] = useState<Rect | null>(null);
+  const [inModale, setInModale] = useState(false);
   const tapTimestamps = useRef<number[]>([]);
 
   // Riposiziona sul bersaglio reale e valuta l'avanzamento "azione" a intervalli
@@ -86,6 +97,7 @@ export function TutorialEngine() {
       const el = beat.target ? document.querySelector(`[data-tutorial="${beat.target}"]`) : null;
       const next = leggiRect(el);
       setRect((prev) => (stessoRect(prev, next) ? prev : next));
+      setInModale(modaleAperto());
 
       if (beat.avanzamento.tipo === "azione") {
         const ctx: ContestoTutorial = {
@@ -126,6 +138,9 @@ export function TutorialEngine() {
   }, [attivo, eraReplay, salta, showToast]);
 
   if (!attivo || !beat) return null;
+  // Fuori dalle schermate previste, o con un modale aperto, il tutorial sta zitto
+  // (resta in pausa sul suo passo, non lo perde). La chiusura finale è l'eccezione.
+  if (!beat.chiusura && (!rottaAmmessa(location.pathname) || inModale)) return null;
 
   if (beat.chiusura) {
     // Chiude il tutorial e porta subito dove si inizia davvero a usare l'app.
@@ -165,6 +180,19 @@ export function TutorialEngine() {
       )}
 
       {rect && <Annotazione beat={beat} rect={rect} />}
+
+      {/* Uscita sempre disponibile: un tutorial che non si può chiudere non deve esistere. */}
+      <button
+        type="button"
+        onClick={() => {
+          salta();
+          showToast("Tutorial saltato — lo ritrovi nel profilo");
+        }}
+        className="pointer-events-auto absolute right-3 z-20 rounded-full bg-marchiatura/90 px-3 py-1.5 text-caption font-semibold text-paper-50 shadow-card"
+        style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
+      >
+        Salta tutorial
+      </button>
     </div>,
     document.body,
   );

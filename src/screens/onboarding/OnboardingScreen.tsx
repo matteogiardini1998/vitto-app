@@ -42,7 +42,9 @@ export function OnboardingScreen() {
       setProfilo({ ...draft, onboardingCompletato: true });
       showToast(`Benvenuto, ${draft.nome || "chef"}!`);
       // Si parte subito col fare: il tutorial si attiva nello stesso istante in cui si entra in app.
-      useTutorialStore.getState().avvia();
+      // Solo alla prima volta: chi ha già completato il tutorial e rifà l'onboarding
+      // non deve vederselo riproporre (il replay è solo dal profilo).
+      if (!useTutorialStore.getState().tutorialCompletato) useTutorialStore.getState().avvia();
       navigate("/meal-prep", { replace: true });
       return;
     }
