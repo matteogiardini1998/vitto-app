@@ -47,7 +47,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "pasta-di-semola",
     nome: "Pasta di semola secca",
-    sinonimi: [
+    sinonimi: ["pasta integrale", "pasta senza glutine", 
       "pasta corta", "pasta mista", "pasta lunga", "spaghetti", "spaghetti integrali", "penne",
       "fusilli", "orecchiette", "rigatoni", "tagliatelle secche", "maccheroni", "linguine", "bucatini",
     ],
@@ -99,14 +99,14 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "fiocchi-davena",
     nome: "Fiocchi d'avena",
-    sinonimi: ["farina d'avena", "avena"],
+    sinonimi: ["fiocchi di grano saraceno", "farina d'avena", "avena"],
     reparto: "dispensa", gruppo: "cereali",
     per100g: { kcal: 379, proteine: 13.5, carboidrati: 58, zuccheri: 1, grassi: 7, fibre: 10 },
   },
   {
     id: "farina",
     nome: "Farina",
-    sinonimi: ["farina 00", "farina di grano tenero"],
+    sinonimi: ["farina di riso", "farina 00", "farina di grano tenero"],
     reparto: "dispensa", gruppo: "cereali",
     per100g: { kcal: 340, proteine: 10, carboidrati: 76, zuccheri: 1.5, grassi: 1, fibre: 2.5 },
     gPerCucchiaio: 8,
@@ -121,7 +121,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "pane-bianco",
     nome: "Pane comune",
-    sinonimi: ["pane casereccio", "pane a lievitazione naturale", "pane raffermo", "panini", "pane bianco", "pane"],
+    sinonimi: ["pane carasau", "piadina", "tortilla di grano", "pane senza glutine", "pane casereccio", "pane a lievitazione naturale", "pane raffermo", "panini", "pane bianco", "pane"],
     reparto: "pane-forno", gruppo: "cereali",
     per100g: { kcal: 275, proteine: 8, carboidrati: 55, zuccheri: 2, grassi: 1, fibre: 2.7 },
     pesoMedioPz: 25,
@@ -190,7 +190,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "fagioli-cannellini",
     nome: "Fagioli cannellini lessati",
-    sinonimi: ["fagioli cannellini", "cannellini"],
+    sinonimi: ["fagioli neri lessati", "fagioli cannellini", "cannellini"],
     reparto: "dispensa", gruppo: "legumi",
     per100g: { kcal: 125, proteine: 8.5, carboidrati: 20, zuccheri: 1, grassi: 0.5, fibre: 6 },
   },
@@ -211,7 +211,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "edamame",
     nome: "Edamame",
-    sinonimi: ["fagioli di soia"],
+    sinonimi: ["edamame surgelati", "fagioli di soia"],
     reparto: "surgelati", gruppo: "legumi",
     per100g: { kcal: 121, proteine: 11, carboidrati: 8, zuccheri: 2, grassi: 5, fibre: 5 },
   },
@@ -249,14 +249,14 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "passata-di-pomodoro",
     nome: "Passata di pomodoro",
-    sinonimi: ["passata pomodoro"],
+    sinonimi: ["concentrato di pomodoro", "passata pomodoro"],
     reparto: "dispensa", gruppo: "verdura",
     per100g: { kcal: 24, proteine: 1.5, carboidrati: 4, zuccheri: 3, grassi: 0.3, fibre: 1.2 },
   },
   {
     id: "cipolla",
     nome: "Cipolla",
-    sinonimi: ["cipolle", "cipolla bianca", "cipolla rossa"],
+    sinonimi: ["cipollotto", "cipolle", "cipolla bianca", "cipolla rossa"],
     reparto: "frutta-verdura", gruppo: "verdura",
     per100g: { kcal: 40, proteine: 1.1, carboidrati: 8.5, zuccheri: 4.5, grassi: 0.1, fibre: 1.7 },
     pesoMedioPz: 100,
@@ -348,7 +348,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "funghi-champignon",
     nome: "Funghi champignon",
-    sinonimi: ["funghi freschi", "champignon"],
+    sinonimi: ["funghi porcini freschi", "funghi freschi", "champignon"],
     reparto: "frutta-verdura", gruppo: "verdura",
     per100g: { kcal: 22, proteine: 3.1, carboidrati: 2.3, zuccheri: 2, grassi: 0.3, fibre: 1 },
   },
@@ -369,7 +369,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "lattuga",
     nome: "Lattuga",
-    sinonimi: ["insalata verde", "insalata"],
+    sinonimi: ["songino", "insalata verde", "insalata"],
     reparto: "frutta-verdura", gruppo: "verdura",
     per100g: { kcal: 15, proteine: 1.4, carboidrati: 1.5, zuccheri: 1, grassi: 0.2, fibre: 1.3 },
   },
@@ -443,7 +443,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "frutti-di-bosco",
     nome: "Frutti di bosco misti",
-    sinonimi: ["mirtilli", "lamponi", "more"],
+    sinonimi: ["frutti di bosco surgelati", "mirtilli", "lamponi", "more"],
     reparto: "frutta-verdura", gruppo: "frutta",
     per100g: { kcal: 43, proteine: 0.8, carboidrati: 8, zuccheri: 6, grassi: 0.4, fibre: 4 },
   },
@@ -473,7 +473,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "limone",
     nome: "Limone",
-    sinonimi: ["succo di limone"],
+    sinonimi: ["lime", "succo di limone"],
     reparto: "frutta-verdura", gruppo: "frutta",
     per100g: { kcal: 29, proteine: 1.1, carboidrati: 9.3, zuccheri: 2.5, grassi: 0.3, fibre: 4.7 },
     pesoMedioPz: 65,
@@ -489,7 +489,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "arancia",
     nome: "Arancia",
-    sinonimi: ["arance"],
+    sinonimi: ["mandarini", "pompelmo", "arance"],
     reparto: "frutta-verdura", gruppo: "frutta",
     per100g: { kcal: 47, proteine: 0.9, carboidrati: 12, zuccheri: 9, grassi: 0.1, fibre: 2.4 },
     pesoMedioPz: 150,
@@ -497,7 +497,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "uva",
     nome: "Uva",
-    sinonimi: [],
+    sinonimi: ["uva da tavola", ],
     reparto: "frutta-verdura", gruppo: "frutta",
     per100g: { kcal: 69, proteine: 0.6, carboidrati: 18, zuccheri: 16, grassi: 0.4, fibre: 0.9 },
   },
@@ -528,14 +528,14 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "controfiletto-manzo",
     nome: "Controfiletto di manzo",
-    sinonimi: ["manzo", "fettine di manzo", "bistecca di manzo"],
+    sinonimi: ["spezzatino di manzo", "manzo", "fettine di manzo", "bistecca di manzo"],
     reparto: "carne-pesce", gruppo: "carne-rossa",
     per100g: { kcal: 190, proteine: 22, carboidrati: 0, zuccheri: 0, grassi: 11, fibre: 0 },
   },
   {
     id: "carne-macinata-mista",
     nome: "Carne macinata mista",
-    sinonimi: ["macinato misto", "carne trita mista"],
+    sinonimi: ["manzo macinato", "macinato misto", "carne trita mista"],
     reparto: "carne-pesce", gruppo: "carne-rossa",
     per100g: { kcal: 254, proteine: 18, carboidrati: 0, zuccheri: 0, grassi: 20, fibre: 0 },
   },
@@ -601,7 +601,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "petto-di-pollo",
     nome: "Petto di pollo",
-    sinonimi: ["pollo a fette", "fettine di pollo", "pollo", "bocconcini di pollo"],
+    sinonimi: ["pollo a pezzi", "pollo a fette", "fettine di pollo", "pollo", "bocconcini di pollo"],
     reparto: "carne-pesce", gruppo: "carne-bianca",
     per100g: { kcal: 113, proteine: 23, carboidrati: 0, zuccheri: 0, grassi: 1.5, fibre: 0 },
     pesoMedioPz: 70,
@@ -616,7 +616,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "coniglio",
     nome: "Coniglio",
-    sinonimi: [],
+    sinonimi: ["coniglio a pezzi", ],
     reparto: "carne-pesce", gruppo: "carne-bianca",
     per100g: { kcal: 136, proteine: 21, carboidrati: 0, zuccheri: 0, grassi: 5.5, fibre: 0 },
   },
@@ -668,7 +668,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "acciughe-sottolio",
     nome: "Acciughe sott'olio",
-    sinonimi: ["acciughe"],
+    sinonimi: ["acciughe sotto sale", "acciughe"],
     reparto: "dispensa", gruppo: "pesce",
     per100g: { kcal: 210, proteine: 25, carboidrati: 0, zuccheri: 0, grassi: 12, fibre: 0 },
     pesoMedioPz: 4,
@@ -676,7 +676,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "gamberi",
     nome: "Gamberi",
-    sinonimi: ["gamberetti", "code di gambero"],
+    sinonimi: ["gamberi surgelati", "gamberetti", "code di gambero"],
     reparto: "carne-pesce", gruppo: "pesce",
     per100g: { kcal: 71, proteine: 17, carboidrati: 0.9, zuccheri: 0, grassi: 0.5, fibre: 0 },
   },
@@ -697,7 +697,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "calamari",
     nome: "Calamari",
-    sinonimi: ["calamaro", "totani"],
+    sinonimi: ["seppie", "calamaro", "totani"],
     reparto: "carne-pesce", gruppo: "pesce",
     per100g: { kcal: 92, proteine: 15.6, carboidrati: 3, zuccheri: 0, grassi: 1.7, fibre: 0 },
   },
@@ -723,7 +723,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "latte",
     nome: "Latte",
-    sinonimi: ["latte intero", "latte parzialmente scremato"],
+    sinonimi: ["latte scremato", "latte intero", "latte parzialmente scremato"],
     reparto: "latticini-uova", gruppo: "latticini",
     per100g: { kcal: 64, proteine: 3.3, carboidrati: 4.9, zuccheri: 4.9, grassi: 3.6, fibre: 0 },
   },
@@ -915,7 +915,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "vino-bianco",
     nome: "Vino bianco",
-    sinonimi: ["vino bianco da cucina"],
+    sinonimi: ["vino rosso", "vino bianco da cucina"],
     reparto: "bevande", gruppo: "grassi-condimenti",
     per100g: { kcal: 82, proteine: 0.1, carboidrati: 2.6, zuccheri: 0.8, grassi: 0, fibre: 0 },
   },
@@ -971,7 +971,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "granola",
     nome: "Granola",
-    sinonimi: ["muesli croccante"],
+    sinonimi: ["muesli", "muesli croccante"],
     reparto: "dispensa", gruppo: "grassi-condimenti",
     per100g: { kcal: 471, proteine: 10, carboidrati: 64, zuccheri: 20, grassi: 20, fibre: 7 },
   },
@@ -1014,7 +1014,7 @@ export const INGREDIENTI: IngredienteBase[] = [
   {
     id: "brodo-vegetale",
     nome: "Brodo vegetale",
-    sinonimi: ["brodo di verdure", "brodo"],
+    sinonimi: ["brodo di carne", "brodo di verdure", "brodo"],
     reparto: "dispensa", gruppo: "altro",
     per100g: { kcal: 3, proteine: 0.3, carboidrati: 0.5, zuccheri: 0.3, grassi: 0.1, fibre: 0 },
   },
@@ -1024,10 +1024,274 @@ export const INGREDIENTI: IngredienteBase[] = [
     sinonimi: [
       "sale", "pepe", "peperoncino", "peperoncino fresco", "basilico", "basilico fresco",
       "prezzemolo", "rosmarino", "salvia", "alloro", "cannella", "cumino", "curry in polvere",
-      "lievito per dolci", "noce moscata", "origano", "timo", "paprika", "zafferano",
+      "lievito per dolci", "noce moscata", "origano", "origano secco", "timo", "timo fresco", "paprika", "zafferano", "pepe nero", "peperoncino essiccato", "curcuma", "aceto balsamico", "senape", "rosmarino fresco", "salvia fresca", "zenzero fresco", "menta fresca", "coriandolo fresco", "caffè macinato",
       "vaniglia", "aneto", "erba cipollina", "maggiorana", "zenzero", "menta", "aceto", "acqua",
     ],
     reparto: "condimenti-spezie", gruppo: "altro",
     per100g: { kcal: 0, proteine: 0, carboidrati: 0, zuccheri: 0, grassi: 0, fibre: 0 },
+  },
+  // ---- AGGIUNTE FASE R1: nuovi ingredienti del database canonico ----
+  {
+    id: "fagiolini", nome: "Fagiolini", sinonimi: [],
+    reparto: "frutta-verdura", gruppo: "verdura",
+    per100g: { kcal: 31, proteine: 1.8, carboidrati: 7, zuccheri: 3, grassi: 0.2, fibre: 3.4 },
+  },
+  {
+    id: "pesca", nome: "Pesche", sinonimi: ["pesca"],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 39, proteine: 0.9, carboidrati: 9, zuccheri: 8.4, grassi: 0.1, fibre: 1.6 },
+    pesoMedioPz: 150,
+  },
+  {
+    id: "albicocca", nome: "Albicocche", sinonimi: ["albicocca"],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 28, proteine: 0.9, carboidrati: 6.3, zuccheri: 6, grassi: 0.1, fibre: 1.4 },
+    pesoMedioPz: 40,
+  },
+  {
+    id: "anguria", nome: "Anguria", sinonimi: [],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 30, proteine: 0.6, carboidrati: 7, zuccheri: 6, grassi: 0.2, fibre: 0.4 },
+  },
+  {
+    id: "melone", nome: "Melone", sinonimi: [],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 33, proteine: 0.8, carboidrati: 7.5, zuccheri: 7, grassi: 0.2, fibre: 0.9 },
+  },
+  {
+    id: "ciliegia", nome: "Ciliegie", sinonimi: ["ciliegia"],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 63, proteine: 1, carboidrati: 14.6, zuccheri: 13, grassi: 0.2, fibre: 1.6 },
+  },
+  {
+    id: "prugna", nome: "Prugne", sinonimi: ["prugna"],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 46, proteine: 0.5, carboidrati: 11, zuccheri: 10, grassi: 0.2, fibre: 1.6 },
+    pesoMedioPz: 60,
+  },
+  {
+    id: "cavolo-verza", nome: "Verza", sinonimi: ["cavolo verza"],
+    reparto: "frutta-verdura", gruppo: "verdura",
+    per100g: { kcal: 27, proteine: 1.4, carboidrati: 4.3, zuccheri: 2.3, grassi: 0.2, fibre: 3.1 },
+  },
+  {
+    id: "cavolo-nero", nome: "Cavolo nero", sinonimi: [],
+    reparto: "frutta-verdura", gruppo: "verdura",
+    per100g: { kcal: 30, proteine: 2.9, carboidrati: 3.5, zuccheri: 1, grassi: 0.5, fibre: 3.5 },
+  },
+  {
+    id: "topinambur", nome: "Topinambur", sinonimi: [],
+    reparto: "frutta-verdura", gruppo: "verdura",
+    per100g: { kcal: 73, proteine: 2, carboidrati: 17, zuccheri: 9, grassi: 0.1, fibre: 1.6 },
+  },
+  {
+    id: "asparago", nome: "Asparagi", sinonimi: ["asparago"],
+    reparto: "frutta-verdura", gruppo: "verdura",
+    per100g: { kcal: 20, proteine: 2.2, carboidrati: 3.1, zuccheri: 1.9, grassi: 0.1, fibre: 2.1 },
+  },
+  {
+    id: "carciofo", nome: "Carciofi", sinonimi: ["carciofo"],
+    reparto: "frutta-verdura", gruppo: "verdura",
+    per100g: { kcal: 22, proteine: 2.7, carboidrati: 2.5, zuccheri: 1, grassi: 0.2, fibre: 5.5 },
+    pesoMedioPz: 120,
+  },
+  {
+    id: "fragola", nome: "Fragole", sinonimi: ["fragola"],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 32, proteine: 0.7, carboidrati: 7, zuccheri: 6, grassi: 0.3, fibre: 1.6 },
+  },
+  {
+    id: "ravanello", nome: "Ravanelli", sinonimi: ["ravanello"],
+    reparto: "frutta-verdura", gruppo: "verdura",
+    per100g: { kcal: 16, proteine: 0.7, carboidrati: 3.4, zuccheri: 1.9, grassi: 0.1, fibre: 1.6 },
+  },
+  {
+    id: "castagna", nome: "Castagne", sinonimi: ["castagna"],
+    reparto: "frutta-verdura", gruppo: "altro",
+    per100g: { kcal: 187, proteine: 2.9, carboidrati: 41, zuccheri: 11, grassi: 1.7, fibre: 8 },
+  },
+  {
+    id: "melagrana", nome: "Melagrana", sinonimi: [],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 68, proteine: 1.7, carboidrati: 14, zuccheri: 14, grassi: 1.2, fibre: 4 },
+  },
+  {
+    id: "patata-dolce", nome: "Patate dolci", sinonimi: ["patata dolce"],
+    reparto: "frutta-verdura", gruppo: "verdura",
+    per100g: { kcal: 86, proteine: 1.6, carboidrati: 20, zuccheri: 4.2, grassi: 0.1, fibre: 3 },
+  },
+  {
+    id: "ananas", nome: "Ananas", sinonimi: [],
+    reparto: "frutta-verdura", gruppo: "frutta",
+    per100g: { kcal: 50, proteine: 0.5, carboidrati: 12, zuccheri: 10, grassi: 0.1, fibre: 1.4 },
+  },
+  {
+    id: "coscia-di-pollo", nome: "Coscia di pollo", sinonimi: [],
+    reparto: "carne-pesce", gruppo: "carne-bianca",
+    per100g: { kcal: 197, proteine: 18, carboidrati: 0, zuccheri: 0, grassi: 13, fibre: 0 },
+  },
+  {
+    id: "agnello", nome: "Agnello a pezzi", sinonimi: ["agnello"],
+    reparto: "carne-pesce", gruppo: "carne-rossa",
+    per100g: { kcal: 220, proteine: 18, carboidrati: 0, zuccheri: 0, grassi: 16, fibre: 0 },
+  },
+  {
+    id: "guanciale", nome: "Guanciale", sinonimi: [],
+    reparto: "carne-pesce", gruppo: "carne-rossa",
+    per100g: { kcal: 656, proteine: 8, carboidrati: 0, zuccheri: 0, grassi: 69, fibre: 0 },
+  },
+  {
+    id: "tonno-fresco", nome: "Tonno fresco", sinonimi: [],
+    reparto: "carne-pesce", gruppo: "pesce",
+    per100g: { kcal: 144, proteine: 23, carboidrati: 0, zuccheri: 0, grassi: 5, fibre: 0 },
+  },
+  {
+    id: "sgombro", nome: "Sgombro", sinonimi: [],
+    reparto: "carne-pesce", gruppo: "pesce",
+    per100g: { kcal: 205, proteine: 19, carboidrati: 0, zuccheri: 0, grassi: 14, fibre: 0 },
+  },
+  {
+    id: "misto-mare-surgelato", nome: "Misto mare surgelato", sinonimi: [],
+    reparto: "surgelati", gruppo: "pesce",
+    per100g: { kcal: 85, proteine: 15, carboidrati: 1, zuccheri: 0, grassi: 2, fibre: 0 },
+  },
+  {
+    id: "yogurt-vegetale", nome: "Yogurt vegetale (soia o cocco)", sinonimi: ["yogurt vegetale"],
+    reparto: "latticini-uova", gruppo: "latticini",
+    per100g: { kcal: 55, proteine: 3, carboidrati: 4, zuccheri: 3, grassi: 3, fibre: 0.5 },
+  },
+  {
+    id: "pecorino", nome: "Pecorino", sinonimi: [],
+    reparto: "latticini-uova", gruppo: "latticini",
+    per100g: { kcal: 387, proteine: 26, carboidrati: 0, zuccheri: 0, grassi: 32, fibre: 0 },
+  },
+  {
+    id: "panna-da-cucina", nome: "Panna da cucina", sinonimi: [],
+    reparto: "latticini-uova", gruppo: "latticini",
+    per100g: { kcal: 340, proteine: 2.3, carboidrati: 3.4, zuccheri: 3.4, grassi: 35, fibre: 0 },
+  },
+  {
+    id: "gnocchi-di-patate", nome: "Gnocchi di patate", sinonimi: [],
+    reparto: "dispensa", gruppo: "cereali",
+    per100g: { kcal: 150, proteine: 3.2, carboidrati: 31, zuccheri: 1, grassi: 0.9, fibre: 1.5 },
+  },
+  {
+    id: "gallette-di-riso", nome: "Gallette di riso", sinonimi: [],
+    reparto: "dispensa", gruppo: "cereali",
+    per100g: { kcal: 387, proteine: 8, carboidrati: 82, zuccheri: 0.5, grassi: 2.8, fibre: 3 },
+  },
+  {
+    id: "farina-di-mandorle", nome: "Farina di mandorle", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 604, proteine: 21, carboidrati: 9, zuccheri: 4, grassi: 54, fibre: 11 },
+  },
+  {
+    id: "ceci-secchi", nome: "Ceci secchi", sinonimi: [],
+    reparto: "dispensa", gruppo: "legumi",
+    per100g: { kcal: 364, proteine: 19, carboidrati: 61, zuccheri: 11, grassi: 6, fibre: 17 },
+  },
+  {
+    id: "fagioli-borlotti-secchi", nome: "Fagioli borlotti secchi", sinonimi: [],
+    reparto: "dispensa", gruppo: "legumi",
+    per100g: { kcal: 314, proteine: 23, carboidrati: 52, zuccheri: 3, grassi: 1.2, fibre: 17 },
+  },
+  {
+    id: "tempeh", nome: "Tempeh", sinonimi: [],
+    reparto: "dispensa", gruppo: "legumi",
+    per100g: { kcal: 190, proteine: 19, carboidrati: 9, zuccheri: 0, grassi: 11, fibre: 6 },
+  },
+  {
+    id: "seitan", nome: "Seitan", sinonimi: [],
+    reparto: "dispensa", gruppo: "legumi",
+    per100g: { kcal: 130, proteine: 25, carboidrati: 4, zuccheri: 0, grassi: 1.5, fibre: 0.6 },
+  },
+  {
+    id: "pinoli", nome: "Pinoli", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 575, proteine: 14, carboidrati: 13, zuccheri: 4, grassi: 47, fibre: 4 },
+  },
+  {
+    id: "nocciole", nome: "Nocciole", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 628, proteine: 15, carboidrati: 17, zuccheri: 4, grassi: 61, fibre: 9.7 },
+  },
+  {
+    id: "arachidi", nome: "Arachidi", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 567, proteine: 26, carboidrati: 16, zuccheri: 4, grassi: 49, fibre: 8.5 },
+  },
+  {
+    id: "burro-di-arachidi", nome: "Burro di arachidi", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 588, proteine: 25, carboidrati: 20, zuccheri: 9, grassi: 50, fibre: 6 },
+    gPerCucchiaio: 16,
+  },
+  {
+    id: "crema-di-mandorle", nome: "Crema di mandorle", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 614, proteine: 21, carboidrati: 19, zuccheri: 5, grassi: 56, fibre: 10 },
+    gPerCucchiaio: 16,
+  },
+  {
+    id: "semi-di-girasole", nome: "Semi di girasole", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 584, proteine: 21, carboidrati: 20, zuccheri: 3, grassi: 51, fibre: 8.6 },
+  },
+  {
+    id: "cioccolato-fondente", nome: "Cioccolato fondente", sinonimi: ["gocce di cioccolato fondente"],
+    reparto: "dispensa", gruppo: "zuccheri-dolci",
+    per100g: { kcal: 546, proteine: 5, carboidrati: 46, zuccheri: 40, grassi: 38, fibre: 7 },
+  },
+  {
+    id: "cacao-amaro", nome: "Cacao amaro in polvere", sinonimi: [],
+    reparto: "dispensa", gruppo: "zuccheri-dolci",
+    per100g: { kcal: 228, proteine: 20, carboidrati: 12, zuccheri: 2, grassi: 14, fibre: 33 },
+    gPerCucchiaio: 8,
+  },
+  {
+    id: "tahina", nome: "Tahina", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 595, proteine: 17, carboidrati: 21, zuccheri: 0.5, grassi: 54, fibre: 9 },
+    gPerCucchiaio: 15,
+  },
+  {
+    id: "hummus", nome: "Hummus di ceci", sinonimi: ["hummus"],
+    reparto: "dispensa", gruppo: "legumi",
+    per100g: { kcal: 166, proteine: 8, carboidrati: 14, zuccheri: 0.3, grassi: 9.6, fibre: 6 },
+  },
+  {
+    id: "mais-dolce", nome: "Mais dolce", sinonimi: ["mais"],
+    reparto: "dispensa", gruppo: "verdura",
+    per100g: { kcal: 86, proteine: 3.3, carboidrati: 19, zuccheri: 6.3, grassi: 1.2, fibre: 2.7 },
+  },
+  {
+    id: "popcorn", nome: "Popcorn al naturale", sinonimi: [],
+    reparto: "dispensa", gruppo: "cereali",
+    per100g: { kcal: 387, proteine: 13, carboidrati: 78, zuccheri: 1, grassi: 4.5, fibre: 15 },
+  },
+  {
+    id: "farina-di-cocco", nome: "Farina di cocco rapé", sinonimi: [],
+    reparto: "dispensa", gruppo: "grassi-condimenti",
+    per100g: { kcal: 660, proteine: 7, carboidrati: 24, zuccheri: 7, grassi: 65, fibre: 16 },
+  },
+  {
+    id: "kimchi", nome: "Kimchi", sinonimi: [],
+    reparto: "dispensa", gruppo: "verdura",
+    per100g: { kcal: 15, proteine: 1.1, carboidrati: 2.4, zuccheri: 1.1, grassi: 0.5, fibre: 1.6 },
+  },
+  {
+    id: "harissa", nome: "Harissa", sinonimi: [],
+    reparto: "dispensa", gruppo: "altro",
+    per100g: { kcal: 85, proteine: 2, carboidrati: 8, zuccheri: 4, grassi: 5, fibre: 3 },
+  },
+  {
+    id: "wurstel", nome: "Würstel", sinonimi: [],
+    reparto: "dispensa", gruppo: "carne-rossa",
+    per100g: { kcal: 280, proteine: 12, carboidrati: 2, zuccheri: 1, grassi: 25, fibre: 0 },
+  },
+  {
+    id: "verdure-grigliate-surgelate", nome: "Verdure grigliate surgelate", sinonimi: [],
+    reparto: "surgelati", gruppo: "verdura",
+    per100g: { kcal: 40, proteine: 1.5, carboidrati: 5, zuccheri: 3, grassi: 1.5, fibre: 2.5 },
   },
 ];

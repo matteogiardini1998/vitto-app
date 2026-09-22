@@ -12,12 +12,17 @@ import { calcolaNutrizione, mostraComeStima } from "./nutrizione";
 const RANGE_ATTESI: Record<string, [number, number]> = {
   "Spaghetti aglio, olio e peperoncino": [400, 650],
   "Pasta al pomodoro fresco e basilico": [300, 550],
-  "Lasagne alla bolognese": [450, 750],
+  // Range alzato in Fase R1: dosi di carne/pasta corrette per rientrare nei
+  // grammi-per-porzione richiesti dallo schema (120-180g carne, 70-100g
+  // pasta) — una lasagna dosata davvero così cala più delle vecchie 500g di
+  // carne su 6 porzioni.
+  "Lasagne alla bolognese": [450, 1000],
   "Pollo al curry con riso basmati": [450, 750],
   "Salmone al forno con patate": [300, 600],
   "Tagliata di manzo con rucola e grana": [300, 600],
   "Crema di zucca con semi tostati": [80, 350],
-  "Zuppa di lenticchie e verdure": [150, 400],
+  // Rinominata in Fase R1 (aggiunto cavolo nero per la stagionalità invernale).
+  "Zuppa di lenticchie e cavolo nero": [150, 400],
   "Minestrone di verdure di stagione": [80, 300],
   "Petto di pollo alla griglia con verdure": [200, 450],
 };
