@@ -17,6 +17,8 @@ import {
   Camera,
   Sparkles,
   GraduationCap,
+  MapPin,
+  ChefHat,
 } from "lucide-react";
 import { SettingsSection } from "../../components/SettingsSection";
 import { SettingsRow } from "../../components/SettingsRow";
@@ -38,6 +40,8 @@ import { DietaStep } from "../onboarding/steps/DietaStep";
 import { EsclusioniStep } from "../onboarding/steps/EsclusioniStep";
 import { PreferenzeStep } from "../onboarding/steps/PreferenzeStep";
 import { SupermercatoStep } from "../onboarding/steps/SupermercatoStep";
+import { AreaStep } from "../onboarding/steps/AreaStep";
+import { MealPrepImpostazioniStep } from "./MealPrepImpostazioniStep";
 import { downloadBackup, importBackupFromFile, resetAllData } from "../../lib/backup";
 import { elaboraFotoAvatar } from "../../lib/avatarPhoto";
 import { APP_NAME } from "../../config/app";
@@ -50,6 +54,8 @@ type Sezione =
   | "esclusioni"
   | "preferenze"
   | "supermercato"
+  | "area"
+  | "mealprep"
   | null;
 
 const TITOLI: Record<Exclude<Sezione, null>, string> = {
@@ -60,6 +66,17 @@ const TITOLI: Record<Exclude<Sezione, null>, string> = {
   esclusioni: "Allergie e intolleranze",
   preferenze: "Preferenze",
   supermercato: "Supermercato abituale",
+  area: "La tua zona",
+  mealprep: "Impostazioni meal prep",
+};
+
+const AREA_LABEL: Record<Profilo["area"], string> = {
+  nord: "Nord",
+  centro: "Centro",
+  sud: "Sud",
+  isole: "Isole",
+  nazionale: "Non impostata",
+  internazionale: "Non impostata",
 };
 
 const TIPO_LABEL: Record<Profilo["nucleo"]["tipo"], string> = {
@@ -222,6 +239,18 @@ export function ProfiloScreen() {
             icon={<Salad size={20} className="text-primary-600" />}
             onClick={() => openSheet("dieta")}
           />
+          <SettingsRow
+            label="La tua zona"
+            value={AREA_LABEL[profilo.area]}
+            icon={<MapPin size={20} className="text-primary-600" />}
+            onClick={() => openSheet("area")}
+          />
+          <SettingsRow
+            label="Impostazioni meal prep"
+            value="Tempo nel weekend, pranzi fuori casa, giorno di preparazione"
+            icon={<ChefHat size={20} className="text-primary-600" />}
+            onClick={() => openSheet("mealprep")}
+          />
         </SettingsSection>
 
         <SettingsSection title="Esigenze alimentari">
@@ -319,6 +348,8 @@ export function ProfiloScreen() {
         {editing === "esclusioni" && <EsclusioniStep draft={draft} onChange={(p) => setDraft((d) => ({ ...d, ...p }))} />}
         {editing === "preferenze" && <PreferenzeStep draft={draft} onChange={(p) => setDraft((d) => ({ ...d, ...p }))} />}
         {editing === "supermercato" && <SupermercatoStep draft={draft} onChange={(p) => setDraft((d) => ({ ...d, ...p }))} />}
+        {editing === "area" && <AreaStep draft={draft} onChange={(p) => setDraft((d) => ({ ...d, ...p }))} />}
+        {editing === "mealprep" && <MealPrepImpostazioniStep draft={draft} onChange={(p) => setDraft((d) => ({ ...d, ...p }))} />}
         {editing && (
           <div className="pt-5">
             <Button fullWidth size="lg" onClick={salva}>

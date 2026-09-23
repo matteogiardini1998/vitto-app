@@ -18,6 +18,15 @@ const DIETA_LABEL: Record<Profilo["dieta"], string> = {
   crudista: "Crudista",
 };
 
+const AREA_LABEL: Record<Profilo["area"], string> = {
+  nord: "Nord",
+  centro: "Centro",
+  sud: "Sud",
+  isole: "Isole",
+  nazionale: "Non impostata",
+  internazionale: "Non impostata",
+};
+
 type RiepilogoStepProps = {
   draft: Profilo;
   onEdit: (step: number) => void;
@@ -78,6 +87,7 @@ export function RiepilogoStep({ draft, onEdit }: RiepilogoStepProps) {
         value={draft.supermercatoPreferito.length ? draft.supermercatoPreferito.join(", ") : "Non impostato"}
         onEdit={() => onEdit(7)}
       />
+      <RiepilogoRow label="Zona" value={AREA_LABEL[draft.area]} onEdit={() => onEdit(8)} />
     </div>
   );
 }

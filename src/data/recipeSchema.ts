@@ -17,33 +17,22 @@
  * calma senza che questa fase debba toccarlo.
  */
 
-import type { DietaRicetta, Ingrediente, Pasto, Reparto as RepartoLegacy, Ricetta } from "../types.ts";
+import type {
+  Area,
+  DietaCalcolata,
+  DietaRicetta,
+  Ingrediente,
+  Pasto,
+  Portata,
+  ProteinaPrincipale,
+  Reparto as RepartoLegacy,
+  Ricetta,
+} from "../types.ts";
 import { getIngredient, type Ingredient } from "./ingredients.ts";
 
+export type { Area, DietaCalcolata, Portata, ProteinaPrincipale } from "../types.ts";
+
 export type MealSlot = "colazione" | "pranzo" | "cena" | "spuntino";
-
-export type Portata =
-  | "colazione_dolce"
-  | "colazione_salata"
-  | "piatto_unico"
-  | "primo"
-  | "secondo"
-  | "contorno"
-  | "insalatona"
-  | "zuppa"
-  | "spuntino";
-
-export type Area = "nord" | "centro" | "sud" | "isole" | "nazionale" | "internazionale";
-
-export type ProteinaPrincipale =
-  | "legumi"
-  | "pesce"
-  | "carne_bianca"
-  | "carne_rossa"
-  | "uova"
-  | "latticini"
-  | "tofu_tempeh"
-  | "nessuna";
 
 export type IngredienteRicetta = {
   ingredientId: string;
@@ -75,9 +64,6 @@ export type Recipe = {
   descrizione: string;
   costoStimatoPorzione: number;
 };
-
-/** Le 6 diete richieste dalla Fase R1. "onnivora" è sempre vera (nessuna restrizione). */
-export type DietaCalcolata = "onnivora" | "vegetariana" | "vegana" | "pescetariana" | "senza_glutine" | "senza_lattosio";
 
 function ingredientiVincolanti(recipe: Recipe): Ingredient[] {
   // Un ingrediente opzionale (facoltativo, si può omettere) non vincola né la
@@ -137,6 +123,43 @@ export function eSempreDisponibile(recipe: Recipe): boolean {
   return ingredientiVincolanti(recipe).every((i) => !i.mesiStagione || i.mesiStagione.length === 0);
 }
 
+/** Nomi degli ingredienti stagionali che determinano `getMesiStagione` — per spiegare "Perché questo piatto" in R2. */
+export function nomiIngredientiStagionali(recipe: Recipe): string[] {
+  return ingredientiVincolanti(recipe)
+    .filter((i) => i.mesiStagione && i.mesiStagione.length > 0)
+    .map((i) => i.nome);
+}
+
+/**
+ * Fase R2 — Sud e Isole anticipano le primizie di circa un mese e le
+ * prolungano di circa un mese rispetto al calendario nazionale: qui in
+ * un'unica costante, così si può ritoccare senza cercare nel codice.
+ */
+export const OFFSET_MESI_SUD_ISOLE = 1;
+
+function meseSuccessivo(mese: number, delta: number): number {
+  return ((mese - 1 + delta + 12) % 12) + 1;
+}
+
+/**
+ * Applica lo scostamento di stagionalità per area a un elenco di mesi già
+ * calcolato da `getMesiStagione`: per Sud/Isole allarga la finestra di un
+ * mese su entrambi i lati (chi era di stagione a marzo lo è già a febbraio
+ * e ancora ad aprile). Nazionale, Nord, Centro e Internazionale restano
+ * invariati. Non tocca "tutto l'anno" (12 mesi): non c'è nulla da allargare.
+ */
+export function mesiStagioneConArea(mesiNazionali: number[], area: Area): number[] {
+  if (mesiNazionali.length === 12 || mesiNazionali.length === 0) return mesiNazionali;
+  if (area !== "sud" && area !== "isole") return mesiNazionali;
+  const allargati = new Set<number>();
+  for (const mese of mesiNazionali) {
+    for (let d = -OFFSET_MESI_SUD_ISOLE; d <= OFFSET_MESI_SUD_ISOLE; d++) {
+      allargati.add(meseSuccessivo(mese, d));
+    }
+  }
+  return Array.from(allargati).sort((a, b) => a - b);
+}
+
 const REPARTO_LEGACY: Record<Ingredient["reparto"], RepartoLegacy> = {
   ortofrutta: "frutta-verdura",
   carne: "carne-pesce",
@@ -182,10 +205,10 @@ function dietaLegacy(recipe: Recipe): DietaRicetta {
   const diete = getDiete(recipe);
   if (diete.includes("vegana")) return "vegana";
   if (diete.includes("vegetariana")) return "vegetariana";
-  // Le ricette a base di solo pesce restano "onnivora" nel campo legacy a 3
-  // valori: è lo stesso comportamento (con lo stesso limite, noto e non
-  // toccato in questa fase) già presente in dietaCompatibile() per il
-  // profilo "pescetariana" — vedi report di audit.
+  // Il campo legacy a 3 valori non ha una casella "pescetariana": resta
+  // "onnivora" qui (serve solo per badge/filtri di visualizzazione). Il
+  // filtro vero del generatore, da Fase R2, usa `dieteCalcolate` qui sotto,
+  // che distingue correttamente il pesce dalla carne.
   return "onnivora";
 }
 
@@ -214,7 +237,7 @@ function tagsLegacy(recipe: Recipe): string[] {
   return tags;
 }
 
-/** Traduce una ricetta nel nuovo schema nel tipo `Ricetta` che l'algoritmo attuale (generator.ts) e la UI si aspettano. */
+/** Traduce una ricetta nel nuovo schema nel tipo `Ricetta` che l'algoritmo (generator.ts) e la UI si aspettano. */
 export function toRicetta(recipe: Recipe): Omit<Ricetta, "rating" | "preferita" | "sfavorita" | "fissata" | "custom"> {
   return {
     id: recipe.id,
@@ -229,5 +252,16 @@ export function toRicetta(recipe: Recipe): Omit<Ricetta, "rating" | "preferita" 
     dieta: dietaLegacy(recipe),
     ingredienti: ingredientiLegacy(recipe),
     passi: recipe.passaggi,
+    // --- Fase R2 ---
+    dieteCalcolate: getDiete(recipe),
+    portata: recipe.portata,
+    pesantezza: recipe.pesantezza,
+    proteinaPrincipale: recipe.proteinaPrincipale,
+    conservabilitaGiorni: recipe.conservabilitaGiorni,
+    congelabile: recipe.congelabile,
+    trasportabile: recipe.trasportabile,
+    area: recipe.area,
+    mesiStagione: getMesiStagione(recipe),
+    ingredientiStagionali: nomiIngredientiStagionali(recipe),
   };
 }

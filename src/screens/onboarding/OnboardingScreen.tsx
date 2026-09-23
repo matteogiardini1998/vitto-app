@@ -9,13 +9,14 @@ import { DietaStep } from "./steps/DietaStep";
 import { EsclusioniStep } from "./steps/EsclusioniStep";
 import { PreferenzeStep } from "./steps/PreferenzeStep";
 import { SupermercatoStep } from "./steps/SupermercatoStep";
+import { AreaStep } from "./steps/AreaStep";
 import { RiepilogoStep } from "./steps/RiepilogoStep";
 import { useProfileStore } from "../../store/profileStore";
 import type { Profilo } from "../../types";
 import { useToastStore } from "../../store/toastStore";
 import { useTutorialStore } from "../../store/tutorialStore";
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 export function OnboardingScreen() {
   const profilo = useProfileStore((s) => s.profilo);
@@ -61,7 +62,8 @@ export function OnboardingScreen() {
     5: { title: "Esigenze assolute", subtitle: "Allergie e intolleranze." },
     6: { title: "Preferenze", subtitle: "Cosa preferisci evitare?" },
     7: { title: "Supermercato abituale", subtitle: "Solo per comodità, potrai cambiarlo quando vuoi." },
-    8: { title: "Riepilogo", subtitle: "Controlla tutto prima di iniziare." },
+    8: { title: "La tua zona", subtitle: "Facoltativo: aiuta a proporti piatti di stagione e tipici. Puoi saltare." },
+    9: { title: "Riepilogo", subtitle: "Controlla tutto prima di iniziare." },
   };
 
   const continueLabel =
@@ -86,7 +88,8 @@ export function OnboardingScreen() {
       {step === 5 && <EsclusioniStep draft={draft} onChange={updateDraft} />}
       {step === 6 && <PreferenzeStep draft={draft} onChange={updateDraft} />}
       {step === 7 && <SupermercatoStep draft={draft} onChange={updateDraft} />}
-      {step === 8 && <RiepilogoStep draft={draft} onEdit={setStep} />}
+      {step === 8 && <AreaStep draft={draft} onChange={updateDraft} />}
+      {step === 9 && <RiepilogoStep draft={draft} onEdit={setStep} />}
     </OnboardingShell>
   );
 }

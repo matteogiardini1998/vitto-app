@@ -40,10 +40,30 @@ export function GeneraWizardScreen() {
   });
   const [slotSelezionati, setSlotSelezionati] = useState<string[]>([]);
   const [risultato, setRisultato] = useState<RisultatoGenerazione | null>(null);
+  // undefined = seed deterministico (stessa settimana e stessi input → stesso piano); "Rigenera" ne sceglie uno nuovo ogni volta.
+  const [seed, setSeed] = useState<number | undefined>(undefined);
 
-  const genera = () => {
-    const r = generaPiano({ ricette, profilo, pianoAttuale, preferenze, slotSelezionati, dispensa: dispensaAttiva });
+  const genera = (nuovoSeed?: number) => {
+    const r = generaPiano({ ricette, profilo, pianoAttuale, preferenze, slotSelezionati, dispensa: dispensaAttiva, seed: nuovoSeed ?? seed });
     setRisultato(r);
+  };
+
+  const rigenera = () => {
+    const nuovoSeed = Math.floor(Math.random() * 2 ** 31);
+    setSeed(nuovoSeed);
+    genera(nuovoSeed);
+  };
+
+  const scegliPerSlot = (chiave: string, ricettaId: string) => {
+    setRisultato((r) => {
+      if (!r) return r;
+      const { [chiave]: _rimosso, ...restoAperti } = r.slotsAperti;
+      return {
+        ...r,
+        piano: { ...r.piano, [chiave]: { ricettaId, porzioni: Math.max(1, profilo.nucleo.persone), lockata: false } },
+        slotsAperti: restoAperti,
+      };
+    });
   };
 
   const goNext = () => {
@@ -101,7 +121,7 @@ export function GeneraWizardScreen() {
       footer={
         step === 6 ? (
           <div className="flex gap-2">
-            <Button variant="secondary" fullWidth onClick={genera} className="gap-2">
+            <Button variant="secondary" fullWidth onClick={rigenera} className="gap-2">
               <RefreshCw size={18} /> Rigenera
             </Button>
             <Button fullWidth onClick={accetta} className="gap-2" data-tutorial="wizard-accetta">
@@ -154,6 +174,8 @@ export function GeneraWizardScreen() {
           spesaStimata={risultato.spesaStimata}
           risparmioDispensa={risultato.risparmioDispensa}
           budgetTarget={preferenze.budgetTotale}
+          slotsAperti={risultato.slotsAperti}
+          onScegli={scegliPerSlot}
         />
       )}
     </OnboardingShell>

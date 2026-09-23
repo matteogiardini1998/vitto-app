@@ -17,6 +17,38 @@ export type Dieta =
 
 export type DietaRicetta = "onnivora" | "vegetariana" | "vegana";
 
+/**
+ * Le 6 diete "vere" calcolate dagli ingredienti (Fase R1: `getDiete()` in
+ * `data/recipeSchema.ts`). Sostituisce, per il filtro del generatore, il
+ * `DietaRicetta` a 3 valori qui sopra — che non distingue una ricetta a base
+ * di solo pesce da una con carne, ed è per questo che un profilo
+ * "pescetariana" poteva ricevere carne (bug noto, corretto in Fase R2).
+ */
+export type DietaCalcolata = "onnivora" | "vegetariana" | "vegana" | "pescetariana" | "senza_glutine" | "senza_lattosio";
+
+export type Portata =
+  | "colazione_dolce"
+  | "colazione_salata"
+  | "piatto_unico"
+  | "primo"
+  | "secondo"
+  | "contorno"
+  | "insalatona"
+  | "zuppa"
+  | "spuntino";
+
+export type Area = "nord" | "centro" | "sud" | "isole" | "nazionale" | "internazionale";
+
+export type ProteinaPrincipale =
+  | "legumi"
+  | "pesce"
+  | "carne_bianca"
+  | "carne_rossa"
+  | "uova"
+  | "latticini"
+  | "tofu_tempeh"
+  | "nessuna";
+
 export type Pasto = "colazione" | "pranzo" | "cena";
 
 export type Reparto =
@@ -62,6 +94,14 @@ export type Profilo = {
   incisivitaVoti: IncisivitaVoti;
   incisivitaVotiMinimo: number;
   onboardingCompletato: boolean;
+  /** Fase R2. Default "nazionale": nessun bonus/penalità di area, stagionalità sui mesi standard. */
+  area: Area;
+  /** Fase R2. Se assente, il weekend usa lo stesso `tempoMaxCucina` del feriale. */
+  tempoMaxCucinaWeekend?: TempoMaxCucina;
+  /** Fase R2. Giorni in cui il pranzo si mangia fuori casa: quello slot deve essere trasportabile. */
+  pranzoFuoriCasa: Giorno[];
+  /** Fase R2. Giorno della sessione di meal prep settimanale, per il controllo di conservabilità. `null` = nessuna sessione fissa (nessun controllo). */
+  giornoMealPrep: Giorno | null;
 };
 
 export type Ingrediente = {
@@ -89,12 +129,30 @@ export type Ricetta = {
   sfavorita: boolean;
   fissata: boolean;
   custom: boolean;
+  // --- Fase R2: metadata per l'algoritmo di generazione (vedi data/recipeSchema.ts) ---
+  /** Diete compatibili, calcolate dagli ingredienti (sostituisce `dieta` per il filtro del generatore). */
+  dieteCalcolate: DietaCalcolata[];
+  portata: Portata;
+  pesantezza: "leggera" | "media" | "sostanziosa";
+  proteinaPrincipale: ProteinaPrincipale;
+  conservabilitaGiorni: number;
+  congelabile: boolean;
+  trasportabile: boolean;
+  area: Area;
+  /** Mesi (1-12) in cui la ricetta è pienamente di stagione a livello nazionale, prima di ogni scostamento per area. */
+  mesiStagione: number[];
+  /** Nomi degli ingredienti stagionali che determinano `mesiStagione` (vuoto se sempre disponibile): usati per spiegare "Perché questo piatto". */
+  ingredientiStagionali: string[];
 };
 
 export type SlotPasto = {
   ricettaId: string;
   porzioni: number;
   lockata: boolean;
+  /** Fase R2: perché il generatore ha scelto questa ricetta (assente per gli slot assegnati a mano). */
+  motivo?: string;
+  /** Fase R2: vero se la ricetta era pienamente di stagione nel mese di generazione, per il badge "Di stagione". */
+  diStagione?: boolean;
 };
 
 export type Piano = Record<string, SlotPasto>;

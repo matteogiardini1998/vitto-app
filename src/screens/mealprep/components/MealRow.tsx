@@ -1,4 +1,4 @@
-import { ChevronRight, Lock, Plus } from "lucide-react";
+import { ChevronRight, Lock, Plus, Sprout } from "lucide-react";
 import { usePlanStore } from "../../../store/planStore";
 import { useRecipeStore } from "../../../store/recipeStore";
 import { chiaveSlot, type Giorno, type Pasto } from "../../../types";
@@ -28,10 +28,14 @@ export function MealRow({ giorno, pasto, onTap }: MealRowProps) {
         <div className="text-caption text-paper-500">{PASTO_LABEL[pasto]}</div>
         {slot && ricetta ? (
           <>
-            <div className="text-body-md font-semibold text-paper-900 break-words">{ricetta.nome}</div>
+            <div className="text-body-md font-semibold text-paper-900 break-words flex items-center gap-1.5">
+              {ricetta.nome}
+              {slot.diStagione && <Sprout size={13} className="text-primary-600 dark:text-primary-300 shrink-0" />}
+            </div>
             <div className="text-caption text-paper-500 mt-0.5">
               {slot.porzioni} {slot.porzioni === 1 ? "porzione" : "porzioni"}
             </div>
+            {slot.motivo && <div className="text-caption text-paper-400 mt-0.5 truncate">{slot.motivo}</div>}
           </>
         ) : (
           <div className="text-body-md text-paper-400 flex items-center gap-1.5 mt-0.5">
