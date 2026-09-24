@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Link2, Camera, PenLine } from "lucide-react";
+import { Link2, ClipboardPaste, PenLine } from "lucide-react";
 import { BottomSheet } from "../../../components/BottomSheet";
 
 type AggiungiRicettaSheetProps = {
@@ -9,7 +9,7 @@ type AggiungiRicettaSheetProps = {
 
 const OPZIONI = [
   { to: "/ricettario/importa/link", icon: Link2, label: "Incolla link", descrizione: "Da un sito, TikTok, Instagram o YouTube" },
-  { to: "/ricettario/importa/foto", icon: Camera, label: "Da foto", descrizione: "Un libro, uno screenshot, un foglio scritto a mano" },
+  { to: "/ricettario/importa/testo", icon: ClipboardPaste, label: "Incolla testo", descrizione: "Da una foto (con Testo Attivo / Google Lens), un libro, un messaggio" },
   { to: "/ricettario/nuova", icon: PenLine, label: "Scrivi a mano", descrizione: "Parti da zero" },
 ] as const;
 

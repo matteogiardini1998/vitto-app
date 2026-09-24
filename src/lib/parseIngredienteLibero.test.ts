@@ -10,10 +10,12 @@ describe("parsaIngredienteLibero", () => {
 
   it("quantità e unità in coda (formato GialloZafferano/Cookaround)", () => {
     expect(parsaIngredienteLibero("Riso Carnaroli 320 g")).toMatchObject({ nome: "Riso Carnaroli", qta: 320, unita: "g" });
+    // Il qualificatore fra parentesi va nella nota, non nel nome (Step 3, Fase R3b).
     expect(parsaIngredienteLibero("Zafferano (2 bustine da 0,15 g cad) 0,3 g")).toMatchObject({
-      nome: "Zafferano (2 bustine da 0,15 g cad)",
+      nome: "Zafferano",
       qta: 0.3,
       unita: "g",
+      nota: "2 bustine da 0,15 g cad",
     });
     expect(parsaIngredienteLibero("Scalogno 1")).toMatchObject({ nome: "Scalogno", qta: 1, unita: "pz" });
   });
@@ -32,5 +34,22 @@ describe("parsaIngredienteLibero", () => {
 
   it("numeri in parola", () => {
     expect(parsaIngredienteLibero("una cipolla")).toMatchObject({ nome: "cipolla", qta: 1, unita: "pz" });
+    expect(parsaIngredienteLibero("mezza cipolla")).toMatchObject({ nome: "cipolla", qta: 0.5, unita: "pz" });
+    expect(parsaIngredienteLibero("mezzo cucchiaino di sale")).toMatchObject({ nome: "sale", qta: 0.5, unita: "cucchiaini" });
+  });
+
+  it("nuove unità italiane (Fase R3b): bicchiere, mazzetto", () => {
+    expect(parsaIngredienteLibero("1 bicchiere di latte")).toMatchObject({ nome: "latte", qta: 1, unita: "bicchiere" });
+    expect(parsaIngredienteLibero("un mazzetto di prezzemolo")).toMatchObject({ nome: "prezzemolo", qta: 1, unita: "mazzetto", daVerificare: false });
+  });
+
+  it("prefissi decorativi (trattini, pallini, emoji) vengono rimossi prima del parsing", () => {
+    expect(parsaIngredienteLibero("- 200 g farina")).toMatchObject({ nome: "farina", qta: 200, unita: "g" });
+    expect(parsaIngredienteLibero("• 2 uova")).toMatchObject({ nome: "uova", qta: 2, unita: "pz" });
+    expect(parsaIngredienteLibero("🍅 400 g pomodori")).toMatchObject({ nome: "pomodori", qta: 400, unita: "g" });
+  });
+
+  it("qualificatore fra parentesi va nella nota, non nel nome", () => {
+    expect(parsaIngredienteLibero("guanciale (o pancetta) 100 g")).toMatchObject({ nome: "guanciale", qta: 100, unita: "g", nota: "o pancetta" });
   });
 });

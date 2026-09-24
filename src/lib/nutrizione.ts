@@ -109,6 +109,14 @@ export function quantitaInGrammi(qta: number | null, unita: string, ing: Ingredi
     // Una tazza standard da cucina è circa 240 ml.
     return { calcolabile: true, grammi: qta * 240 * (ing.densita ?? 1) };
   }
+  if (u === "bicchiere" || u === "bicchieri") {
+    // Un bicchiere da cucina è circa 200 ml, un po' meno di una tazza.
+    return { calcolabile: true, grammi: qta * 200 * (ing.densita ?? 1) };
+  }
+  if (u === "mazzetto" || u === "pizzico") {
+    // Quantità troppo vaghe per una stima in grammi affidabile: mai un numero indovinato.
+    return { calcolabile: false };
+  }
   if (UNITA_A_PEZZO.has(u)) {
     if (ing.pesoMedioPz == null) return { calcolabile: false };
     return { calcolabile: true, grammi: qta * ing.pesoMedioPz };

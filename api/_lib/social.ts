@@ -4,7 +4,9 @@
  * TODO Fase R4: se la didascalia non basta, offrire la trascrizione audio
  * del video come alternativa allo screenshot manuale).
  */
+import { decodificaEntita } from "../../src/lib/htmlExtract";
 
+export { decodificaEntita };
 export type Piattaforma = "tiktok" | "instagram" | "youtube" | null;
 
 export function riconoscePiattaformaSicura(url: URL): Piattaforma {
@@ -29,18 +31,6 @@ async function fetchTesto(url: string, timeoutMs = 8000): Promise<string | null>
   } finally {
     clearTimeout(timeout);
   }
-}
-
-/** Le `content` dei meta tag arrivano con entità HTML (numeriche comprese) non decodificate dalla regex: vanno decodificate a mano. */
-export function decodificaEntita(s: string): string {
-  return s
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, "&")
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)));
 }
 
 function estraiMetaContent(html: string, proprieta: string): string | null {

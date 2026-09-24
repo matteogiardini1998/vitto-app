@@ -1,10 +1,10 @@
 # MealPrep
 
-App di meal prep in italiano: pianifica la settimana, scopri ricette, genera automaticamente il piano pasti e la lista della spesa. Web app installabile (PWA), completamente offline — tutti i dati dell'utente vivono sul dispositivo. L'unica eccezione è l'importazione ricette da link/foto (Fase R3), che passa da una funzione serverless per proteggere la chiave dell'API di estrazione: senza quella funzione distribuita, il resto dell'app continua a funzionare offline esattamente come prima.
+App di meal prep in italiano: pianifica la settimana, scopri ricette, genera automaticamente il piano pasti e la lista della spesa. Web app installabile (PWA), completamente offline — tutti i dati dell'utente vivono sul dispositivo. Vitto non usa nessuna API AI a pagamento: l'importazione ricette da link (Fase R3b) è del tutto deterministica (JSON-LD/microdata/parser di testo), a costo zero.
 
 ## Stack
 
-Vite + React 18 + TypeScript, Tailwind CSS v4, Zustand (con `persist` su localStorage), React Router, Framer Motion, vite-plugin-pwa. Funzione serverless in `api/` (Vercel, Node) per l'importazione ricette con Claude (Anthropic).
+Vite + React 18 + TypeScript, Tailwind CSS v4, Zustand (con `persist` su localStorage), React Router, Framer Motion, vite-plugin-pwa. Una piccola funzione serverless in `api/` (Vercel, Node) fa solo da proxy di lettura per il link importato (il browser non può scaricare pagine esterne per via del CORS) — nessuna chiave API, nessun costo per richiesta.
 
 ## Sviluppo
 
@@ -62,14 +62,11 @@ netlify deploy --prod --dir=dist
 
 Nota: essendo una SPA con React Router, se il tuo host non gestisce automaticamente il fallback a `index.html` per le route lato client (Vercel e Netlify lo fanno di default per progetti Vite), aggiungi una regola di redirect `/* -> /index.html` (200).
 
-### Importazione ricette (Fase R3) — solo su Vercel
+### Importazione ricette da link — solo su Vercel
 
-L'endpoint `api/import-recipe.ts` viene rilevato e distribuito automaticamente da Vercel come funzione serverless (zero configurazione: basta che la cartella `api/` sia nel repository). Perché funzioni:
+L'endpoint `api/import-link.ts` viene rilevato e distribuito automaticamente da Vercel come funzione serverless (zero configurazione: basta che la cartella `api/` sia nel repository). Nessuna variabile d'ambiente da configurare, nessuna chiave: la funzione scarica la pagina esterna (necessario lato server per via del CORS) e prova a leggerci una ricetta con JSON-LD o microdata; se non li trova, torna il testo pulito della pagina, che il client analizza in locale con lo stesso parser deterministico di "Incolla testo".
 
-1. Nel progetto Vercel, in **Settings → Environment Variables**, aggiungi `ANTHROPIC_API_KEY` con una chiave valida da [console.anthropic.com](https://console.anthropic.com).
-2. Rideploya.
-
-Senza questa variabile l'endpoint risponde con un errore chiaro (mai un crash) e il resto dell'app resta invariato. Su un host diverso da Vercel (Netlify, ecc.) l'importazione da link/foto semplicemente non è disponibile finché non si porta `api/import-recipe.ts` sull'equivalente serverless di quella piattaforma — "Scrivi a mano" resta sempre disponibile.
+Su un host diverso da Vercel (Netlify, ecc.) l'importazione da link semplicemente non è disponibile finché non si porta `api/import-link.ts` sull'equivalente serverless di quella piattaforma — "Incolla testo" e "Scrivi a mano" restano sempre disponibili ovunque, perché girano interamente nel browser.
 
 ## Installare la PWA sul telefono
 

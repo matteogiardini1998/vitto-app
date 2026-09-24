@@ -40,6 +40,11 @@ export function RicettaFormScreen() {
   const isEdit = Boolean(id && ricettaEsistente);
   const confidenza = importState?.confidenza;
   const daVerificare = (campo: CampoConfidenza) => (confidenza?.[campo] ?? 1) < SOGLIA_DA_VERIFICARE;
+  // Step 5 (Fase R3b): meno di 3 ingredienti o nessun passaggio -> il parser ha capito solo una parte,
+  // ma l'anteprima si mostra comunque: l'utente completa, non riparte da zero.
+  const importIncompleto = Boolean(
+    importState?.importDraft && (importState.importDraft.ingredienti.length < 3 || importState.importDraft.passi.length === 0),
+  );
 
   const [form, setForm] = useState<FormState>(() => {
     if (ricettaEsistente) {
@@ -115,9 +120,10 @@ export function RicettaFormScreen() {
 
       <div className="px-5 flex flex-col gap-6">
         {importState?.importDraft && (
-          <Callout icon={Link2} tone="info">
-            Controlla che sia tutto giusto prima di salvare
-            {confidenza && Object.values(confidenza).some((v) => v < SOGLIA_DA_VERIFICARE) ? ": i campi segnati \"Da controllare\" sono quelli meno sicuri." : "."}
+          <Callout icon={Link2} tone={importIncompleto ? "warning" : "info"}>
+            {importIncompleto
+              ? "Ho capito solo una parte. Completa quello che manca qui sotto."
+              : `Controlla che sia tutto giusto prima di salvare${confidenza && Object.values(confidenza).some((v) => v < SOGLIA_DA_VERIFICARE) ? ": i campi segnati \"Da controllare\" sono quelli meno sicuri." : "."}`}
           </Callout>
         )}
 

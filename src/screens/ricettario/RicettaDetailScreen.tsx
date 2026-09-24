@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, Clock3, Copy, Edit3, Euro, Heart, Pin, ThumbsDown, Trash2, Link2, Camera } from "lucide-react";
+import { ChevronLeft, Clock3, Copy, Edit3, Euro, Heart, Pin, ThumbsDown, Trash2, Link2, ClipboardPaste } from "lucide-react";
 import { useRecipeStore } from "../../store/recipeStore";
 import { useToastStore } from "../../store/toastStore";
 import { StarRating } from "../../components/StarRating";
@@ -118,9 +118,9 @@ export function RicettaDetailScreen() {
             <Link2 size={13} /> Importata da {new URL(ricetta.fonteUrl).hostname.replace(/^www\./, "")}
           </a>
         )}
-        {ricetta.fonte === "import_foto" && (
+        {ricetta.fonte === "import_testo" && (
           <p className="inline-flex items-center gap-1.5 text-caption text-paper-400 mt-2">
-            <Camera size={13} /> Importata da foto
+            <ClipboardPaste size={13} /> Importata da testo incollato
           </p>
         )}
 

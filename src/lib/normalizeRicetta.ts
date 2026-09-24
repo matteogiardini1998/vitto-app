@@ -1,7 +1,7 @@
-import { risolviIngrediente } from "../../src/lib/nutrizione";
-import type { DietaCalcolata, DietaRicetta, Ingrediente, Pasto, ProteinaPrincipale, Reparto } from "../../src/types";
+import { risolviIngrediente } from "./nutrizione";
 import { parsaIngredienteLibero } from "./parseIngredienteLibero";
-import type { CampoConfidenza, RicettaImportata } from "./types";
+import type { CampoConfidenza, RicettaImportata } from "./ricettaImportata";
+import type { DietaCalcolata, DietaRicetta, Ingrediente, Pasto, ProteinaPrincipale, Reparto } from "../types";
 
 const MAPPA_UNITA: Record<string, string> = {
   g: "g",
@@ -55,7 +55,7 @@ export function normalizzaIngredienti(grezzi: IngredienteGrezzo[]): Ingrediente[
     });
 }
 
-/** Ingredienti dal testo grezzo di una riga JSON-LD/microdata ("200 g di farina 00"), poi normalizzati come sopra. */
+/** Ingredienti dal testo grezzo di una riga JSON-LD/microdata/testo incollato ("200 g di farina 00"), poi normalizzati come sopra. */
 export function normalizzaRigheLibere(righe: string[]): Ingrediente[] {
   return normalizzaIngredienti(righe.map(parsaIngredienteLibero));
 }
@@ -160,7 +160,7 @@ export type InputNormalizzazione = {
   pasto?: Pasto[];
   ingredienti: Ingrediente[];
   passi: string[];
-  fonte: "import_link" | "import_foto";
+  fonte: "import_link" | "import_testo";
   fonteUrl?: string;
   confidenzaIngresso?: Partial<Record<CampoConfidenza, number>>;
 };

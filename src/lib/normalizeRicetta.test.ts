@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizzaIngredienti, normalizzaRigheLibere, stimaDieta, stimaProteinaPrincipale, stimaTrasportabile } from "./normalize";
+import { normalizzaIngredienti, normalizzaRigheLibere, stimaDieta, stimaProteinaPrincipale, stimaTrasportabile } from "./normalizeRicetta";
 
 describe("normalizzaRigheLibere", () => {
   it("risolve gli ingredienti riconosciuti e segnala quelli sconosciuti", () => {

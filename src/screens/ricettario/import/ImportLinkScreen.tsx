@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, Clipboard, Camera, AlertCircle } from "lucide-react";
+import { ChevronLeft, Clipboard, ClipboardPaste, AlertCircle } from "lucide-react";
 import { TextField } from "../../../components/TextField";
 import { Button } from "../../../components/Button";
 import { Callout } from "../../../components/Callout";
-import { importaDaLink, urlDagliAppunti, type ImportResponse } from "../../../lib/importRecipe";
+import { importaDaLink, urlDagliAppunti, type ImportLinkResponse } from "../../../lib/importRecipe";
+import { parseRecipeText } from "../../../lib/parseRecipeText";
+import { componiRicettaImportata } from "../../../lib/normalizeRicetta";
 
 const MICROCOPY_CARICAMENTO = [
   "Sto leggendo la ricetta…",
@@ -20,7 +22,7 @@ export function ImportLinkScreen() {
   const [suggerito, setSuggerito] = useState<string | null>(null);
   const [caricamento, setCaricamento] = useState(false);
   const [microcopyIdx, setMicrocopyIdx] = useState(0);
-  const [esito, setEsito] = useState<Extract<ImportResponse, { ok: false }> | null>(null);
+  const [esito, setEsito] = useState<Extract<ImportLinkResponse, { ok: false }> | null>(null);
 
   useEffect(() => {
     // Se arriviamo già con un link (condivisione da Android), lo si importa subito, senza un tap in più.
@@ -46,11 +48,19 @@ export function ImportLinkScreen() {
     setEsito(null);
     const risultato = await importaDaLink(link.trim());
     setCaricamento(false);
-    if (risultato.ok) {
-      navigate("/ricettario/nuova", { state: { importDraft: risultato.ricetta, confidenza: risultato.confidenza } });
-    } else {
+    if (!risultato.ok) {
       setEsito(risultato);
+      return;
     }
+    if (risultato.tipo === "strutturato") {
+      navigate("/ricettario/nuova", { state: { importDraft: risultato.ricetta, confidenza: risultato.confidenza } });
+      return;
+    }
+    // JSON-LD/microdata non c'erano: il server ha dato il testo pulito della pagina,
+    // lo si passa allo stesso parser deterministico di "Incolla testo" — tutto qui, senza rete.
+    const bozza = parseRecipeText(risultato.testo);
+    const { ricetta, confidenza } = componiRicettaImportata({ ...bozza, fonte: "import_link", fonteUrl: risultato.fonteUrl });
+    navigate("/ricettario/nuova", { state: { importDraft: ricetta, confidenza } });
   };
 
   return (
@@ -99,13 +109,13 @@ export function ImportLinkScreen() {
             />
 
             {esito && (
-              <Callout icon={esito.code === "solo_didascalia_video" ? Camera : AlertCircle} tone="warning">
+              <Callout icon={esito.code === "solo_didascalia_video" ? ClipboardPaste : AlertCircle} tone="warning">
                 {esito.error}
               </Callout>
             )}
-            {esito?.code === "solo_didascalia_video" && (
-              <Button variant="secondary" fullWidth onClick={() => navigate("/ricettario/importa/foto")}>
-                Vai a "Da foto"
+            {(esito?.code === "solo_didascalia_video" || esito?.code === "fetch_fallito") && (
+              <Button variant="secondary" fullWidth onClick={() => navigate("/ricettario/importa/testo")}>
+                Vai a "Incolla testo"
               </Button>
             )}
 

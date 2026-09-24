@@ -1,24 +1,11 @@
-const USER_AGENT =
-  "Mozilla/5.0 (compatible; VittoBot/1.0; +https://vitto.app) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36";
-
-export type PaginaScaricata = { html: string; urlFinale: string };
-
-export async function scaricaHtml(url: string, timeoutMs = 12000): Promise<PaginaScaricata> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const risposta = await fetch(url, {
-      headers: { "user-agent": USER_AGENT, accept: "text/html,application/xhtml+xml" },
-      redirect: "follow",
-      signal: controller.signal,
-    });
-    if (!risposta.ok) throw new Error(`HTTP ${risposta.status}`);
-    const html = await risposta.text();
-    return { html, urlFinale: risposta.url };
-  } finally {
-    clearTimeout(timeout);
-  }
-}
+/**
+ * Estrazione pura (nessuna chiamata di rete qui dentro) dei dati di una
+ * ricetta dall'HTML di una pagina: JSON-LD schema.org/Recipe, poi microdata,
+ * poi il solo testo leggibile per il parser deterministico di
+ * `parseRecipeText.ts`. Vive in `src/lib/` (non in `api/`) perché è la
+ * stessa identica logica usata sia lato server (sul link) sia — per il
+ * testo incollato a mano — lato client.
+ */
 
 /** Ricetta grezza estratta da JSON-LD/microdata: stringhe libere, la normalizzazione arriva dopo. */
 export type RicettaGrezza = {
@@ -122,7 +109,7 @@ function listaPassi(v: unknown): string[] {
   return passi;
 }
 
-/** Step 1.1: JSON-LD schema.org/Recipe — nessuna AI necessaria. */
+/** Step 1.1: JSON-LD schema.org/Recipe — nessuna AI necessaria, il percorso principale. */
 export function estraiRecipeJsonLd(html: string): RicettaGrezza | null {
   for (const blocco of estraiTestoJsonLd(html)) {
     const nodo = trovaNodoRecipe(blocco);
@@ -146,8 +133,8 @@ export function estraiRecipeJsonLd(html: string): RicettaGrezza | null {
 /**
  * Step 1.2: microdata (itemtype schema.org/Recipe) — copertura volutamente
  * parziale via regex (niente DOM parser, per restare senza dipendenze
- * pesanti): cerca gli itemprop più comuni. Se non basta, si passa comunque
- * al fallback AI sul testo della pagina.
+ * pesanti): cerca gli itemprop più comuni. Se non basta, si passa al
+ * parser di testo deterministico sul testo leggibile della pagina.
  */
 export function estraiRecipeMicrodata(html: string): RicettaGrezza | null {
   if (!/itemtype=["'][^"']*schema\.org\/Recipe["']/i.test(html)) return null;
@@ -179,21 +166,43 @@ export function estraiRecipeMicrodata(html: string): RicettaGrezza | null {
 
 const TAG_DA_RIMUOVERE = ["script", "style", "nav", "header", "footer", "noscript", "svg", "form", "iframe"];
 
-/** Testo principale della pagina per il fallback AI: via i tag di navigazione/pubblicità/script, resto come testo semplice. */
+const ENTITA_NOMINATE: Record<string, string> = {
+  agrave: "à", egrave: "è", igrave: "ì", ograve: "ò", ugrave: "ù",
+  aacute: "á", eacute: "é", iacute: "í", oacute: "ó", uacute: "ú",
+  rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“", ndash: "–", mdash: "—", hellip: "…",
+};
+
+/** Entità HTML nominate e numeriche (anche esadecimali) — molti siti (soprattutto generati da CMS più vecchi) le usano al posto dei caratteri accentati diretti. */
+export function decodificaEntita(s: string): string {
+  return s
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&([a-z]+);/gi, (m, nome) => ENTITA_NOMINATE[String(nome).toLowerCase()] ?? m)
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)));
+}
+
+// Tag "in linea": vanno tolti senza spezzare la riga, altrimenti un ingrediente come
+// "250 g di <a>uova</a> (circa 5)" — comunissimo, ogni ingrediente linkato al suo
+// approfondimento — si spezzerebbe su 3 righe diverse e il parser di riga non lo
+// riconoscerebbe più (scoperto testando su una pagina reale, non ipotetico).
+const TAG_IN_LINEA = new Set(["a", "span", "b", "i", "strong", "em", "small", "sup", "sub", "u", "mark"]);
+
+/** Testo principale della pagina per il parser di testo deterministico: via i tag di navigazione/pubblicità/script, resto come testo semplice. */
 export function estraiTestoPrincipale(html: string, maxCaratteri = 6000): string {
   let pulito = html;
   for (const tag of TAG_DA_RIMUOVERE) {
     pulito = pulito.replace(new RegExp(`<${tag}[^>]*>[\\s\\S]*?</${tag}>`, "gi"), " ");
   }
   pulito = pulito.replace(/<!--[\s\S]*?-->/g, " ");
-  pulito = pulito.replace(/<[^>]+>/g, "\n");
-  pulito = pulito
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
+  pulito = pulito.replace(/<\/?([a-z0-9]+)[^>]*>/gi, (_tagCompleto, nomeTag) =>
+    TAG_IN_LINEA.has(String(nomeTag).toLowerCase()) ? "" : "\n",
+  );
+  pulito = decodificaEntita(pulito);
   pulito = pulito
     .split("\n")
     .map((r) => r.trim())

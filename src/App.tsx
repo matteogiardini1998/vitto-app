@@ -8,7 +8,7 @@ import { OnboardingLayout } from "./layouts/OnboardingLayout";
 import { RicettaDetailScreen } from "./screens/ricettario/RicettaDetailScreen";
 import { RicettaFormScreen } from "./screens/ricettario/RicettaFormScreen";
 import { ImportLinkScreen } from "./screens/ricettario/import/ImportLinkScreen";
-import { ImportFotoScreen } from "./screens/ricettario/import/ImportFotoScreen";
+import { ImportTestoScreen } from "./screens/ricettario/import/ImportTestoScreen";
 import { CondividiScreen } from "./screens/ricettario/import/CondividiScreen";
 import { GeneraWizardScreen } from "./screens/mealprep/genera/GeneraWizardScreen";
 import { useProfileStore } from "./store/profileStore";
@@ -51,7 +51,7 @@ export function App() {
             <Route path="/onboarding" element={<OnboardingScreen />} />
             <Route path="/ricettario/nuova" element={<RicettaFormScreen />} />
             <Route path="/ricettario/importa/link" element={<ImportLinkScreen />} />
-            <Route path="/ricettario/importa/foto" element={<ImportFotoScreen />} />
+            <Route path="/ricettario/importa/testo" element={<ImportTestoScreen />} />
             <Route path="/condividi" element={<CondividiScreen />} />
             <Route path="/ricettario/:id" element={<RicettaDetailScreen />} />
             <Route path="/ricettario/:id/modifica" element={<RicettaFormScreen />} />

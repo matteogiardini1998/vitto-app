@@ -149,7 +149,7 @@ export type Ricetta = {
   ingredientiStagionali: string[];
   // --- Fase R3: provenienza, per le ricette importate ---
   /** Assente per le ricette scritte a mano o del seed. */
-  fonte?: "utente" | "import_link" | "import_foto";
+  fonte?: "utente" | "import_link" | "import_testo";
   /** Presente solo per `fonte === "import_link"`. */
   fonteUrl?: string;
 };
