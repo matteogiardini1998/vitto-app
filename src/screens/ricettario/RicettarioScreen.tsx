@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { BookOpen, Plus, SlidersHorizontal, Star } from "lucide-react";
+import { AggiungiRicettaSheet } from "./components/AggiungiRicettaSheet";
 import { PageHeader } from "../../components/PageHeader";
 import { PAGE_ACCENT, PAGE_BLOB } from "../../components/WheelNav";
 import { EmptyState } from "../../components/EmptyState";
@@ -25,6 +25,7 @@ export function RicettarioScreen() {
   const [ordinamento, setOrdinamento] = useState<Ordinamento>("consigliati");
   const [filtriAperti, setFiltriAperti] = useState(false);
   const [incisivitaAperta, setIncisivitaAperta] = useState(false);
+  const [aggiungiAperto, setAggiungiAperto] = useState(false);
 
   const risultati = useMemo(
     () => filtraEOrdinaRicette(ricette, ricerca, filtri, ordinamento),
@@ -50,13 +51,13 @@ export function RicettarioScreen() {
             onChange={setRicerca}
             placeholder="Cerca ricette o tag..."
           />
-          <Link
-            to="/ricettario/nuova"
-            aria-label="Nuova ricetta"
+          <button
+            onClick={() => setAggiungiAperto(true)}
+            aria-label="Aggiungi ricetta"
             className="h-11 w-11 shrink-0 rounded-full bg-primary-700 text-paper-50 flex items-center justify-center active:bg-primary-800"
           >
             <Plus size={20} />
-          </Link>
+          </button>
         </div>
         <div className="flex items-center gap-2">
           <Chip icon={<SlidersHorizontal size={14} />} onClick={() => setFiltriAperti(true)} selected={filtriAttivi > 0}>
@@ -114,6 +115,8 @@ export function RicettarioScreen() {
           updateProfilo({ incisivitaVoti, incisivitaVotiMinimo })
         }
       />
+
+      <AggiungiRicettaSheet open={aggiungiAperto} onClose={() => setAggiungiAperto(false)} />
     </div>
   );
 }

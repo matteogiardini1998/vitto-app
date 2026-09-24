@@ -100,6 +100,15 @@ export function quantitaInGrammi(qta: number | null, unita: string, ing: Ingredi
     if (ing.gPerCucchiaio == null) return { calcolabile: false };
     return { calcolabile: true, grammi: qta * ing.gPerCucchiaio };
   }
+  if (u === "cucchiaini" || u === "cucchiaino") {
+    // Un cucchiaino è circa un terzo di un cucchiaio da tavola.
+    if (ing.gPerCucchiaio == null) return { calcolabile: false };
+    return { calcolabile: true, grammi: (qta * ing.gPerCucchiaio) / 3 };
+  }
+  if (u === "tazza" || u === "tazze") {
+    // Una tazza standard da cucina è circa 240 ml.
+    return { calcolabile: true, grammi: qta * 240 * (ing.densita ?? 1) };
+  }
   if (UNITA_A_PEZZO.has(u)) {
     if (ing.pesoMedioPz == null) return { calcolabile: false };
     return { calcolabile: true, grammi: qta * ing.pesoMedioPz };

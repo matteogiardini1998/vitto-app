@@ -42,6 +42,16 @@ export default defineConfig({
           { src: APP_ICONS.iconMaskable192, sizes: "192x192", type: "image/png", purpose: "maskable" },
           { src: APP_ICONS.iconMaskable512, sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
+        // Fase R3: su Android, comparire nel menu "Condividi" di TikTok/Instagram/Chrome
+        // — chi condivide un link o un post lo manda qui invece di copiarlo a mano.
+        // Su iOS Safari non supporta ancora share_target per le PWA: lì resta il
+        // flusso copia link -> apri Vitto -> il link viene proposto dagli appunti
+        // (vedi `urlDagliAppunti` in `src/lib/importRecipe.ts`).
+        share_target: {
+          action: "/condividi",
+          method: "GET",
+          params: { title: "titolo", text: "testo", url: "url" },
+        },
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff,woff2}"],

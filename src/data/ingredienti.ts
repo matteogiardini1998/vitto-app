@@ -1161,7 +1161,7 @@ export const INGREDIENTI: IngredienteBase[] = [
     per100g: { kcal: 55, proteine: 3, carboidrati: 4, zuccheri: 3, grassi: 3, fibre: 0.5 },
   },
   {
-    id: "pecorino", nome: "Pecorino", sinonimi: [],
+    id: "pecorino", nome: "Pecorino", sinonimi: ["pecorino romano"],
     reparto: "latticini-uova", gruppo: "latticini",
     per100g: { kcal: 387, proteine: 26, carboidrati: 0, zuccheri: 0, grassi: 32, fibre: 0 },
   },

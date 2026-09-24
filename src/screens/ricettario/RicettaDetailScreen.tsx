@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, Clock3, Copy, Edit3, Euro, Heart, Pin, ThumbsDown, Trash2 } from "lucide-react";
+import { ChevronLeft, Clock3, Copy, Edit3, Euro, Heart, Pin, ThumbsDown, Trash2, Link2, Camera } from "lucide-react";
 import { useRecipeStore } from "../../store/recipeStore";
 import { useToastStore } from "../../store/toastStore";
 import { StarRating } from "../../components/StarRating";
@@ -107,6 +107,22 @@ export function RicettaDetailScreen() {
       <div className="px-5">
         <h1 className="text-display-sm font-display font-semibold text-paper-900">{ricetta.nome}</h1>
         <p className="text-body-md text-paper-500 mt-1.5">{ricetta.descrizione}</p>
+
+        {ricetta.fonte === "import_link" && ricetta.fonteUrl && (
+          <a
+            href={ricetta.fonteUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-caption text-primary-700 dark:text-primary-300 mt-2"
+          >
+            <Link2 size={13} /> Importata da {new URL(ricetta.fonteUrl).hostname.replace(/^www\./, "")}
+          </a>
+        )}
+        {ricetta.fonte === "import_foto" && (
+          <p className="inline-flex items-center gap-1.5 text-caption text-paper-400 mt-2">
+            <Camera size={13} /> Importata da foto
+          </p>
+        )}
 
         <div className="flex flex-wrap gap-2 mt-4">
           <Chip>{DIETA_RICETTA_LABEL[ricetta.dieta]}</Chip>

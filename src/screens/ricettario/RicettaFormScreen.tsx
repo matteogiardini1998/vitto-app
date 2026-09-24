@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, Plus, Trash2, GripVertical } from "lucide-react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { ChevronLeft, Plus, Trash2, GripVertical, Link2 } from "lucide-react";
 import { useRecipeStore, RICETTA_VUOTA } from "../../store/recipeStore";
 import { useToastStore } from "../../store/toastStore";
 import { TextField } from "../../components/TextField";
@@ -8,9 +8,11 @@ import { Stepper } from "../../components/Stepper";
 import { Chip } from "../../components/Chip";
 import { TagInput } from "../../components/TagInput";
 import { Button } from "../../components/Button";
+import { Callout } from "../../components/Callout";
 import { PASTI, type Ingrediente, type Pasto, type Ricetta, type DietaRicetta } from "../../types";
 import { DIETA_RICETTA_LABEL, PASTO_LABEL } from "../../lib/recipeDisplay";
 import { IngredienteRow } from "./components/IngredienteRow";
+import type { CampoConfidenza, RicettaImportata } from "../../lib/importRecipe";
 
 type FormState = Omit<Ricetta, "id">;
 
@@ -18,21 +20,33 @@ function nuovoIngrediente(): Ingrediente {
   return { nome: "", qta: null, unita: "pz", reparto: "altro" };
 }
 
+/** Il draft che arriva da un'importazione non ha tutti i campi di `Ricetta` (rating, dieteCalcolate stimate...): si compone sopra i valori neutri di sempre. */
+function daImportDraft(draft: RicettaImportata): FormState {
+  return { ...RICETTA_VUOTA, ...draft };
+}
+
+const SOGLIA_DA_VERIFICARE = 0.6;
+
 export function RicettaFormScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const importState = location.state as { importDraft?: RicettaImportata; confidenza?: Partial<Record<CampoConfidenza, number>> } | null;
   const ricettaEsistente = useRecipeStore((s) => (id ? s.ricette.find((r) => r.id === id) : undefined));
   const addRicetta = useRecipeStore((s) => s.addRicetta);
   const updateRicetta = useRecipeStore((s) => s.updateRicetta);
   const showToast = useToastStore((s) => s.show);
 
   const isEdit = Boolean(id && ricettaEsistente);
+  const confidenza = importState?.confidenza;
+  const daVerificare = (campo: CampoConfidenza) => (confidenza?.[campo] ?? 1) < SOGLIA_DA_VERIFICARE;
 
   const [form, setForm] = useState<FormState>(() => {
     if (ricettaEsistente) {
       const { id: _omit, ...resto } = ricettaEsistente;
       return resto;
     }
+    if (importState?.importDraft) return daImportDraft(importState.importDraft);
     return { ...RICETTA_VUOTA };
   });
 
@@ -81,6 +95,9 @@ export function RicettaFormScreen() {
     }
   };
 
+  const AvvisoVerifica = ({ campo }: { campo: CampoConfidenza }) =>
+    daVerificare(campo) ? <p className="text-caption text-accent-600 dark:text-accent-300 -mt-1">Da controllare</p> : null;
+
   return (
     <div className="pb-10">
       <div className="safe-top px-4 pt-5 pb-3 flex items-center gap-2">
@@ -92,12 +109,22 @@ export function RicettaFormScreen() {
           <ChevronLeft size={22} />
         </button>
         <h1 className="text-title-lg font-display font-semibold text-paper-900">
-          {isEdit ? "Modifica ricetta" : "Nuova ricetta"}
+          {isEdit ? "Modifica ricetta" : importState?.importDraft ? "Rivedi la ricetta importata" : "Nuova ricetta"}
         </h1>
       </div>
 
       <div className="px-5 flex flex-col gap-6">
-        <TextField label="Nome della ricetta" value={form.nome} onChange={(e) => patch({ nome: e.target.value })} placeholder="Es. Risotto ai funghi" />
+        {importState?.importDraft && (
+          <Callout icon={Link2} tone="info">
+            Controlla che sia tutto giusto prima di salvare
+            {confidenza && Object.values(confidenza).some((v) => v < SOGLIA_DA_VERIFICARE) ? ": i campi segnati \"Da controllare\" sono quelli meno sicuri." : "."}
+          </Callout>
+        )}
+
+        <div>
+          <TextField label="Nome della ricetta" value={form.nome} onChange={(e) => patch({ nome: e.target.value })} placeholder="Es. Risotto ai funghi" />
+          <AvvisoVerifica campo="nome" />
+        </div>
         <TextField
           label="Descrizione (una riga)"
           value={form.descrizione}
@@ -105,18 +132,24 @@ export function RicettaFormScreen() {
           placeholder="Una riga in tono da menù"
         />
 
-        <div className="flex justify-center">
-          <Stepper value={form.porzioniBase} min={1} max={12} label="porzioni base" onChange={(porzioniBase) => patch({ porzioniBase })} />
+        <div>
+          <div className="flex justify-center">
+            <Stepper value={form.porzioniBase} min={1} max={12} label="porzioni base" onChange={(porzioniBase) => patch({ porzioniBase })} />
+          </div>
+          {daVerificare("porzioniBase") && <p className="text-caption text-accent-600 dark:text-accent-300 text-center mt-1">Da controllare</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <TextField
-            label="Tempo (minuti)"
-            type="number"
-            inputMode="numeric"
-            value={form.tempoMin || ""}
-            onChange={(e) => patch({ tempoMin: Number(e.target.value) || 0 })}
-          />
+          <div>
+            <TextField
+              label="Tempo (minuti)"
+              type="number"
+              inputMode="numeric"
+              value={form.tempoMin || ""}
+              onChange={(e) => patch({ tempoMin: Number(e.target.value) || 0 })}
+            />
+            <AvvisoVerifica campo="tempoMin" />
+          </div>
           <TextField
             label="Costo a porzione (€)"
             type="number"
@@ -136,6 +169,7 @@ export function RicettaFormScreen() {
               </Chip>
             ))}
           </div>
+          <AvvisoVerifica campo="pasto" />
         </div>
 
         <div>
@@ -200,6 +234,7 @@ export function RicettaFormScreen() {
               <Plus size={16} /> Aggiungi
             </button>
           </div>
+          <AvvisoVerifica campo="passi" />
           <div className="flex flex-col gap-2">
             {form.passi.map((passo, i) => (
               <div key={i} className="flex items-start gap-2">

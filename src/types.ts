@@ -109,6 +109,10 @@ export type Ingrediente = {
   qta: number | null;
   unita: string;
   reparto: Reparto;
+  /** Fase R3: dicitura originale quando la conversione in grammi è solo approssimata (es. "un pizzico", "1 tazza"). */
+  nota?: string;
+  /** Fase R3: ingrediente non riconosciuto nel database canonico durante un'importazione — resta testo libero, va controllato. */
+  daVerificare?: boolean;
 };
 
 export type Ricetta = {
@@ -143,6 +147,11 @@ export type Ricetta = {
   mesiStagione: number[];
   /** Nomi degli ingredienti stagionali che determinano `mesiStagione` (vuoto se sempre disponibile): usati per spiegare "Perché questo piatto". */
   ingredientiStagionali: string[];
+  // --- Fase R3: provenienza, per le ricette importate ---
+  /** Assente per le ricette scritte a mano o del seed. */
+  fonte?: "utente" | "import_link" | "import_foto";
+  /** Presente solo per `fonte === "import_link"`. */
+  fonteUrl?: string;
 };
 
 export type SlotPasto = {

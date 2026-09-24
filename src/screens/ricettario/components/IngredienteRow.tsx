@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, AlertCircle } from "lucide-react";
 import { REPARTI, type Ingrediente } from "../../../types";
 
 const UNITA_OPZIONI = [
@@ -31,7 +31,17 @@ export function IngredienteRow({ ingrediente, onChange, onRimuovi }: Ingrediente
   );
 
   return (
-    <div className="flex items-center gap-2 bg-paper-0 border border-paper-200 rounded-md p-2">
+    <div
+      className={
+        ingrediente.daVerificare
+          ? "flex flex-col gap-1 bg-accent-50 border border-accent-200 rounded-md p-2 dark:bg-accent-900/20 dark:border-accent-800"
+          : "flex flex-col gap-1 bg-paper-0 border border-paper-200 rounded-md p-2"
+      }
+    >
+    <div className="flex items-center gap-2">
+      {ingrediente.daVerificare && (
+        <AlertCircle size={15} className="text-accent-600 dark:text-accent-300 shrink-0" aria-label="Da verificare" />
+      )}
       <input
         value={ingrediente.nome}
         onChange={(e) => onChange({ nome: e.target.value })}
@@ -91,6 +101,10 @@ export function IngredienteRow({ ingrediente, onChange, onRimuovi }: Ingrediente
       <button onClick={onRimuovi} aria-label="Rimuovi ingrediente" className="text-paper-400 shrink-0">
         <Trash2 size={16} />
       </button>
+    </div>
+    {ingrediente.nota && (
+      <p className="text-caption text-paper-400 pl-1">Originale: {ingrediente.nota}</p>
+    )}
     </div>
   );
 }
