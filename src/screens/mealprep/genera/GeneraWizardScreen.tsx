@@ -17,7 +17,14 @@ import { useDispensaStore } from "../../../store/dispensaStore";
 import { useToastStore } from "../../../store/toastStore";
 import { useTutorialStore } from "../../../store/tutorialStore";
 import { creaPianoDimostrativo } from "../../../tutorial/pianoDimostrativo";
-import { generaPiano, type PreferenzeGenerazione, type RisultatoGenerazione } from "../../../lib/generator";
+import { generaPiano, stimaSpesaPiano, type PreferenzeGenerazione, type RisultatoGenerazione } from "../../../lib/generator";
+import { useCambioPasto } from "../../../hooks/useCambioPasto";
+import { CambiaPastoSheet } from "../components/CambiaPastoSheet";
+import { AssignRecipeSheet } from "../components/AssignRecipeSheet";
+import { ComandoPiano } from "../../../components/ComandoPiano";
+import { GIORNO_LABEL_FULL } from "../../../lib/date";
+import { PASTO_LABEL } from "../../../lib/recipeDisplay";
+import type { Giorno, Pasto, Piano } from "../../../types";
 
 const TOTAL_STEPS = 7;
 
@@ -44,8 +51,45 @@ export function GeneraWizardScreen() {
   const [seed, setSeed] = useState<number | undefined>(undefined);
 
   const genera = (nuovoSeed?: number) => {
-    const r = generaPiano({ ricette, profilo, pianoAttuale, preferenze, slotSelezionati, dispensa: dispensaAttiva, seed: nuovoSeed ?? seed });
+    // I pasti messi "fissi" nel risultato (lucchetto) sopravvivono a «Rigenera»:
+    // entrano come già assegnati e bloccati, il resto si rigenera.
+    const fissi = risultato
+      ? Object.fromEntries(Object.entries(risultato.piano).filter(([, slot]) => slot.lockata))
+      : {};
+    const base: Piano = { ...pianoAttuale, ...fissi };
+    const r = generaPiano({ ricette, profilo, pianoAttuale: base, preferenze, slotSelezionati, dispensa: dispensaAttiva, seed: nuovoSeed ?? seed });
     setRisultato(r);
+  };
+
+  const [slotInModifica, setSlotInModifica] = useState<string | null>(null);
+  const [sceltaManuale, setSceltaManuale] = useState(false);
+
+  const aggiornaPianoRisultato = (piano: Piano) => {
+    setRisultato((r) => {
+      if (!r) return r;
+      const slotsAperti = Object.fromEntries(Object.entries(r.slotsAperti).filter(([k]) => !piano[k]));
+      const { spesa, risparmio } = stimaSpesaPiano(piano, ricette, dispensaAttiva);
+      return { ...r, piano, slotsAperti, spesaStimata: spesa, risparmioDispensa: risparmio };
+    });
+  };
+  const cambio = useCambioPasto(risultato?.piano ?? {}, aggiornaPianoRisultato, preferenze);
+
+  const apriSlot = (chiave: string) => {
+    cambio.azzeraAvviso();
+    setSlotInModifica(chiave);
+  };
+
+  const toggleFisso = (chiave: string) => {
+    if (!risultato?.piano[chiave]) return;
+    const slot = risultato.piano[chiave];
+    aggiornaPianoRisultato({ ...risultato.piano, [chiave]: { ...slot, lockata: !slot.lockata } });
+  };
+
+  const togliSlot = (chiave: string) => {
+    if (!risultato) return;
+    const { [chiave]: _tolto, ...resto } = risultato.piano;
+    aggiornaPianoRisultato(resto);
+    setSlotInModifica(null);
   };
 
   const rigenera = () => {
@@ -91,7 +135,7 @@ export function GeneraWizardScreen() {
     // un piano dimostrativo così la guida può proseguire.
     const tutorialAttivo = useTutorialStore.getState().attivo;
     const pianoVuoto = Object.keys(risultato.piano).length === 0;
-    applyPiano(tutorialAttivo && pianoVuoto ? creaPianoDimostrativo(profilo.nucleo.persone) : risultato.piano);
+    applyPiano(tutorialAttivo && pianoVuoto ? creaPianoDimostrativo(profilo.nucleo.persone) : risultato.piano, preferenze);
     navigate("/meal-prep", { replace: true });
     showToast("Fatto! Il tuo piano è pronto 🎉");
   };
@@ -176,8 +220,44 @@ export function GeneraWizardScreen() {
           budgetTarget={preferenze.budgetTotale}
           slotsAperti={risultato.slotsAperti}
           onScegli={scegliPerSlot}
+          onTapSlot={apriSlot}
+          comando={<ComandoPiano onComando={cambio.comando} />}
         />
       )}
+      {step === 6 && risultato && slotInModifica && (() => {
+        const [giorno, pasto] = slotInModifica.split("|") as [Giorno, Pasto];
+        const slot = risultato.piano[slotInModifica];
+        return (
+          <>
+            <CambiaPastoSheet
+              open={!sceltaManuale}
+              onClose={() => setSlotInModifica(null)}
+              titolo={`${GIORNO_LABEL_FULL[giorno]} · ${PASTO_LABEL[pasto]}`}
+              ricetta={slot ? ricette.find((r) => r.id === slot.ricettaId) : undefined}
+              motivo={slot?.motivo}
+              lockata={slot?.lockata}
+              avviso={cambio.avviso}
+              onCambia={(o) => cambio.cambia(slotInModifica, o.vincolo)}
+              onToggleLock={slot ? () => toggleFisso(slotInModifica) : undefined}
+              onScegliDalRicettario={() => setSceltaManuale(true)}
+              onTogli={() => togliSlot(slotInModifica)}
+            />
+            <AssignRecipeSheet
+              open={sceltaManuale}
+              onClose={() => setSceltaManuale(false)}
+              giorno={giorno}
+              pasto={pasto}
+              onAssegna={(ricettaId) => {
+                aggiornaPianoRisultato({
+                  ...risultato.piano,
+                  [slotInModifica]: { ricettaId, porzioni: slot?.porzioni ?? Math.max(1, profilo.nucleo.persone), lockata: false },
+                });
+                setSceltaManuale(false);
+              }}
+            />
+          </>
+        );
+      })()}
     </OnboardingShell>
     </div>
   );

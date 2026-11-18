@@ -82,6 +82,75 @@ export type RisultatoGenerazione = {
   slotsAperti: Record<string, SlotAperto>;
 };
 
+/**
+ * Categorie "di sostanza" di un piatto, riconosciute sia nelle richieste del
+ * wizard ("poco carne") sia nei comandi a voce ("aggiungi un po' di pesce").
+ * Si basano sui metadati della ricetta (proteina principale, diete calcolate),
+ * non sul nome: "carne" deve trovare il coniglio alla ligure anche se nel
+ * titolo la parola carne non c'è.
+ */
+export type CategoriaPiatto =
+  | "carne"
+  | "carne_rossa"
+  | "carne_bianca"
+  | "pesce"
+  | "legumi"
+  | "uova"
+  | "latticini"
+  | "tofu_tempeh"
+  | "vegetariana"
+  | "vegana";
+
+export type StileRichiesto = "veloce" | "leggera" | "sostanziosa";
+
+/** Richiesta su un singolo slot: rigenera solo quello, con eventuali condizioni in più. */
+export type VincoloSlot = {
+  /** Ricette da non riproporre (quella attuale e le già scartate). */
+  escludiRicette?: string[];
+  vuole?: CategoriaPiatto;
+  evita?: CategoriaPiatto;
+  stile?: StileRichiesto;
+};
+
+export function ricettaInCategoria(ricetta: Ricetta, categoria: CategoriaPiatto): boolean {
+  switch (categoria) {
+    case "carne":
+      return ricetta.proteinaPrincipale === "carne_bianca" || ricetta.proteinaPrincipale === "carne_rossa";
+    case "vegetariana":
+      return ricetta.dieteCalcolate.includes("vegetariana");
+    case "vegana":
+      return ricetta.dieteCalcolate.includes("vegana");
+    default:
+      return ricetta.proteinaPrincipale === categoria;
+  }
+}
+
+export function ricettaHaStile(ricetta: Ricetta, stile: StileRichiesto): boolean {
+  if (stile === "veloce") return ricetta.tempoMin <= 25;
+  if (stile === "leggera") return ricetta.pesantezza === "leggera";
+  return ricetta.pesantezza === "sostanziosa";
+}
+
+/** Parole → categoria. L'ordine conta: "carne rossa" va riconosciuta prima di "carne". */
+const PAROLE_CATEGORIA: { re: RegExp; categoria: CategoriaPiatto }[] = [
+  { re: /carne rossa|manzo|maiale|agnello|vitello|salsicc|guanciale/, categoria: "carne_rossa" },
+  { re: /carne bianca|pollo|tacchino|coniglio/, categoria: "carne_bianca" },
+  { re: /\bcarn[ei]\b/, categoria: "carne" },
+  { re: /\bpesc[ei]\b|frutti di mare|salmone|tonno|merluzzo/, categoria: "pesce" },
+  { re: /legum|ceci|lenticchi|fagiol/, categoria: "legumi" },
+  { re: /\buov[oa]\b/, categoria: "uova" },
+  { re: /formagg|latticin/, categoria: "latticini" },
+  { re: /tofu|tempeh|seitan/, categoria: "tofu_tempeh" },
+  { re: /vegan/, categoria: "vegana" },
+  { re: /vegetarian/, categoria: "vegetariana" },
+];
+
+export function categoriaDaTesto(testo: string): CategoriaPiatto | null {
+  const q = testo.trim().toLowerCase();
+  if (!q) return null;
+  return PAROLE_CATEGORIA.find((p) => p.re.test(q))?.categoria ?? null;
+}
+
 const WEEKEND = new Set<Giorno>(["Sab", "Dom"]);
 /** Gruppi alimentari considerati "freschi" per il bonus di riuso ingredienti in settimana. */
 const GRUPPI_FRESCHI = new Set(["verdura", "frutta", "carne-rossa", "carne-bianca", "pesce"]);
@@ -91,7 +160,10 @@ const SEQUENZA_PRINCIPALI: string[] = GIORNI.flatMap((g) => [chiaveSlot(g, "pran
 function testoCorrisponde(ricetta: Ricetta, testo: string): boolean {
   const q = testo.trim().toLowerCase();
   if (!q) return false;
-  return ricetta.nome.toLowerCase().includes(q) || ricetta.tags.some((t) => t.toLowerCase().includes(q));
+  if (ricetta.nome.toLowerCase().includes(q) || ricetta.tags.some((t) => t.toLowerCase().includes(q))) return true;
+  // "carne", "pesce", "legumi"...: si guarda la sostanza del piatto, non solo il nome.
+  const categoria = categoriaDaTesto(q);
+  return categoria !== null && ricettaInCategoria(ricetta, categoria);
 }
 
 function tempoDisponibile(giorno: Giorno, profilo: Profilo): number {
@@ -165,6 +237,7 @@ type ContestoGenerazione = {
   conteggiVincoli: Map<string, number>;
   spesaAccumulata: number;
   risparmioAccumulato: number;
+  vincoliSlot: Record<string, VincoloSlot>;
 };
 
 /**
@@ -208,6 +281,14 @@ function ricettaEleggibile(
   );
   if (violaEsclusione) return false;
 
+  const vincoloSlot = ctx.vincoliSlot[chiaveSlot(giorno, pasto)];
+  if (vincoloSlot) {
+    if (vincoloSlot.escludiRicette?.includes(ricetta.id)) return false;
+    if (vincoloSlot.vuole && !ricettaInCategoria(ricetta, vincoloSlot.vuole)) return false;
+    if (vincoloSlot.evita && ricettaInCategoria(ricetta, vincoloSlot.evita)) return false;
+    if (vincoloSlot.stile && !ricettaHaStile(ricetta, vincoloSlot.stile)) return false;
+  }
+
   return true;
 }
 
@@ -225,7 +306,7 @@ function punteggioPreferenze(ricetta: Ricetta, preferenze: PreferenzeGenerazione
   for (const v of preferenze.vincoli) {
     if (!testoCorrisponde(ricetta, v.testo)) continue;
     if (v.tipo === "molto") s += 3;
-    if (v.tipo === "poco") s -= 3;
+    // "poco" si gestisce in punteggioVincoliPoco: dipende da quante volte c'è già.
   }
   // Le preferenze negative del profilo (non le esclusioni assolute) sono un
   // disincentivo morbido, non un filtro: raccolte in onboarding ma finora
@@ -349,6 +430,7 @@ function calcolaPunteggio(
     }
   }
 
+  s += punteggioVincoliPoco(ricetta, ctx);
   s += punteggioBilanciamento(ricetta, pasto, ctx.statoRegole);
 
   const { punteggio: pRiuso, ingredienteRiuso, ingredienteDispensa } = punteggioRiuso(ricetta, ctx.dispensa, ctx.ingredientiFreschiSettimana);
@@ -365,6 +447,22 @@ function calcolaPunteggio(
   s = Math.max(0, Math.min(100, s));
 
   return { ricetta, punteggio: s, pienamenteDiStagione, ingredienteRiuso, ingredienteDispensa };
+}
+
+/**
+ * "Poco X" vuol dire "un po' di X, senza esagerare" — non "niente X" (per
+ * quello c'è l'esclusione). Quindi: spinta finché X non compare nemmeno una
+ * volta, neutro alla seconda, freno deciso dalla terza in poi.
+ */
+function punteggioVincoliPoco(ricetta: Ricetta, ctx: ContestoGenerazione): number {
+  let s = 0;
+  for (const v of ctx.preferenze.vincoli) {
+    if (v.tipo !== "poco" || !testoCorrisponde(ricetta, v.testo)) continue;
+    const attuale = ctx.conteggiVincoli.get(v.id) ?? 0;
+    if (attuale === 0) s += 10;
+    else if (attuale >= 2) s -= 10;
+  }
+  return s;
 }
 
 /** "Perché questo piatto": un'unica frase breve, dal fattore di punteggio più rilevante per QUESTA scelta. */
@@ -503,6 +601,8 @@ export function generaPiano(params: {
   mese?: number;
   /** Seed per il sorteggio fra le migliori candidate: di default deterministico su settimana+input, "Rigenera" ne passa uno nuovo. */
   seed?: number;
+  /** Condizioni in più per singoli slot (rigenera solo questo pasto, più veloce, con carne...). */
+  vincoliSlot?: Record<string, VincoloSlot>;
 }): RisultatoGenerazione {
   const { ricette, profilo, pianoAttuale, preferenze, slotSelezionati, dispensa } = params;
   const mese = params.mese ?? new Date().getMonth() + 1;
@@ -535,6 +635,7 @@ export function generaPiano(params: {
     conteggiVincoli: new Map(),
     spesaAccumulata: 0,
     risparmioAccumulato: 0,
+    vincoliSlot: params.vincoliSlot ?? {},
   };
   const slotsAperti: Record<string, SlotAperto> = {};
 
@@ -574,8 +675,7 @@ export function generaPiano(params: {
       const scored = candidati.map((r) => calcolaPunteggio(r, slotInfo.chiave, slotInfo.giorno, slotInfo.pasto, ctx));
       const esito = scegliSopraSoglia(scored, rng) ?? scored.sort((a, b) => b.punteggio - a.punteggio)[0];
       assegna(slotInfo.chiave, slotInfo.pasto, esito.ricetta, generaMotivo(esito, slotInfo.giorno, profilo), esito.pienamenteDiStagione);
-      attuale++;
-      ctx.conteggiVincoli.set(v.id, attuale);
+      attuale = ctx.conteggiVincoli.get(v.id) ?? attuale + 1;
     }
   }
 
@@ -650,12 +750,9 @@ export function generaPiano(params: {
     );
     const esito = scegliSopraSoglia(scored, rng);
     if (esito) {
+      // Il conteggio dei vincoli lo aggiorna già registraAssegnazione (prima qui
+      // si contavano due volte i "massimo", che quindi scattavano a metà).
       assegna(slotInfo.chiave, slotInfo.pasto, esito.ricetta, generaMotivo(esito, slotInfo.giorno, profilo), esito.pienamenteDiStagione);
-      for (const v of preferenze.vincoli) {
-        if (v.tipo === "massimo" && testoCorrisponde(esito.ricetta, v.testo)) {
-          ctx.conteggiVincoli.set(v.id, (ctx.conteggiVincoli.get(v.id) ?? 0) + 1);
-        }
-      }
     } else {
       // Regola d'oro: mai forzare. Lo slot resta aperto con le 3 migliori candidate e il perché non sono perfette.
       scored.sort((a, b) => b.punteggio - a.punteggio);
@@ -674,4 +771,73 @@ export function generaPiano(params: {
     risparmioDispensa: ctx.risparmioAccumulato,
     slotsAperti,
   };
+}
+
+export type EsitoRigeneraSlot = {
+  piano: Piano;
+  /** Ricetta messa nello slot, o null se nessuna soddisfa la richiesta (dieta, tempo, esclusioni...). */
+  ricettaId: string | null;
+  /** Vero se nessuna ricetta superava la soglia di qualità ed è stata usata la più vicina. */
+  ripiego: boolean;
+  spesaStimata: number;
+};
+
+/**
+ * Rigenera UN solo pasto lasciando com'è il resto del piano. Il resto conta
+ * comunque come contesto (varietà, bilancio proteico, budget), quindi la
+ * proposta resta coerente con la settimana. Se nessuna ricetta supera la
+ * soglia, qui si accetta la migliore disponibile: è l'utente che ha chiesto
+ * esplicitamente di cambiare questo slot, lasciarlo vuoto sarebbe peggio.
+ */
+export function rigeneraSlot(params: {
+  ricette: Ricetta[];
+  profilo: Profilo;
+  piano: Piano;
+  preferenze: PreferenzeGenerazione;
+  chiave: string;
+  vincolo: VincoloSlot;
+  dispensa?: Dispensa;
+  mese?: number;
+  seed?: number;
+}): EsitoRigeneraSlot {
+  const { piano, chiave } = params;
+  const attuale = piano[chiave];
+  const base: Piano = { ...piano };
+  if (attuale) base[chiave] = { ...attuale, lockata: false };
+  const r = generaPiano({
+    ricette: params.ricette,
+    profilo: params.profilo,
+    pianoAttuale: base,
+    preferenze: params.preferenze,
+    slotSelezionati: [chiave],
+    dispensa: params.dispensa,
+    mese: params.mese,
+    seed: params.seed ?? Math.floor(Math.random() * 2 ** 31),
+    vincoliSlot: { [chiave]: params.vincolo },
+  });
+  let nuovo = r.piano[chiave];
+  let ripiego = false;
+  if (!nuovo) {
+    const migliore = r.slotsAperti[chiave]?.candidati[0];
+    if (!migliore) return { piano, ricettaId: null, ripiego: false, spesaStimata: r.spesaStimata };
+    nuovo = { ricettaId: migliore.ricettaId, porzioni: 1, lockata: false, motivo: migliore.motivo };
+    ripiego = true;
+  }
+  // Le porzioni scelte a mano dall'utente restano quelle.
+  const porzioni = attuale?.porzioni ?? nuovo.porzioni ?? Math.max(1, params.profilo.nucleo.persone);
+  const pianoNuovo: Piano = { ...piano, [chiave]: { ...nuovo, porzioni, lockata: false } };
+  return { piano: pianoNuovo, ricettaId: nuovo.ricettaId, ripiego, spesaStimata: r.spesaStimata };
+}
+
+/** Spesa stimata di un piano qualsiasi (stessa stima del generatore, al netto della dispensa). */
+export function stimaSpesaPiano(piano: Piano, ricette: Ricetta[], dispensa?: Dispensa): { spesa: number; risparmio: number } {
+  let lordo = 0;
+  let risparmio = 0;
+  for (const slot of Object.values(piano)) {
+    const r = ricette.find((x) => x.id === slot.ricettaId);
+    if (!r) continue;
+    lordo += r.costoStimatoPorzione * slot.porzioni;
+    risparmio += risparmioRicetta(r, slot.porzioni, dispensa);
+  }
+  return { spesa: Math.max(0, lordo - risparmio), risparmio };
 }

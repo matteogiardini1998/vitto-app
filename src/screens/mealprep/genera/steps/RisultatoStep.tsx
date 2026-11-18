@@ -1,4 +1,5 @@
-import { Lock, Sprout, HelpCircle } from "lucide-react";
+import { Lock, Sprout, HelpCircle, ChevronRight } from "lucide-react";
+import type { ReactNode } from "react";
 import { Card } from "../../../../components/Card";
 import { GIORNI, PASTI, chiaveSlot, type Piano, type Ricetta } from "../../../../types";
 import { GIORNO_LABEL_FULL } from "../../../../lib/date";
@@ -14,9 +15,13 @@ type RisultatoStepProps = {
   budgetTarget: number;
   slotsAperti: Record<string, SlotAperto>;
   onScegli: (chiave: string, ricettaId: string) => void;
+  /** Tocco su un pasto: apre il pannello per cambiare solo quello. */
+  onTapSlot: (chiave: string) => void;
+  /** Barra "dimmi cosa cambiare", sopra la lista dei giorni. */
+  comando?: ReactNode;
 };
 
-export function RisultatoStep({ piano, ricette, spesaStimata, risparmioDispensa, budgetTarget, slotsAperti, onScegli }: RisultatoStepProps) {
+export function RisultatoStep({ piano, ricette, spesaStimata, risparmioDispensa, budgetTarget, slotsAperti, onScegli, onTapSlot, comando }: RisultatoStepProps) {
   const entroBudget = spesaStimata <= budgetTarget;
   const pct = Math.min(100, (spesaStimata / budgetTarget) * 100);
   const slotsVuoti = GIORNI.flatMap((g) => PASTI.map((p) => chiaveSlot(g, p))).filter((c) => !piano[c]).length;
@@ -44,7 +49,7 @@ export function RisultatoStep({ piano, ricette, spesaStimata, risparmioDispensa,
         )}
         {!entroBudget && (
           <p className="text-caption text-danger-500 mt-2">
-            La spesa stimata supera il budget richiesto. Prova a rigenerare o ad alzare il budget.
+            La spesa stimata supera il budget richiesto. Cambia i piatti più costosi o alza il budget.
           </p>
         )}
         {slotsVuoti > 0 && (
@@ -54,6 +59,12 @@ export function RisultatoStep({ piano, ricette, spesaStimata, risparmioDispensa,
           </p>
         )}
       </Card>
+
+      {comando}
+
+      <p className="text-caption text-paper-500 px-1 -mt-2">
+        Tocca un pasto per cambiare solo quello. Quelli con il lucchetto restano fissi se premi «Rigenera».
+      </p>
 
       {GIORNI.map((giorno) => (
         <div key={giorno}>
@@ -67,20 +78,27 @@ export function RisultatoStep({ piano, ricette, spesaStimata, risparmioDispensa,
               const ricetta = slot ? ricette.find((r) => r.id === slot.ricettaId) : undefined;
               const aperto = slotsAperti[chiave];
               return (
-                <div key={pasto} className="flex flex-col gap-1.5 px-4 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-caption text-paper-400 w-20 shrink-0">{PASTO_LABEL[pasto]}</span>
-                    <span className={cn("text-body-sm flex-1 min-w-0 truncate", ricetta ? "text-paper-800 font-medium" : "text-paper-300")}>
-                      {ricetta ? ricetta.nome : aperto ? "Scegli tu" : "—"}
+                <div key={pasto} className="flex flex-col gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => onTapSlot(chiave)}
+                    className="flex flex-col gap-1.5 px-4 py-2.5 text-left active:bg-paper-100 transition-colors"
+                  >
+                    <span className="flex items-center gap-2 w-full">
+                      <span className="text-caption text-paper-400 w-20 shrink-0">{PASTO_LABEL[pasto]}</span>
+                      <span className={cn("text-body-sm flex-1 min-w-0 truncate", ricetta ? "text-paper-800 font-medium" : "text-paper-300")}>
+                        {ricetta ? ricetta.nome : aperto ? "Scegli tu" : "—"}
+                      </span>
+                      {slot?.diStagione && <Sprout size={13} className="text-primary-600 dark:text-primary-300 shrink-0" />}
+                      {slot?.lockata && <Lock size={13} className="text-accent-500 shrink-0" />}
+                      <ChevronRight size={15} className="text-paper-300 shrink-0" />
                     </span>
-                    {slot?.diStagione && <Sprout size={13} className="text-primary-600 dark:text-primary-300 shrink-0" />}
-                    {slot?.lockata && <Lock size={13} className="text-accent-500 shrink-0" />}
-                  </div>
-                  {ricetta && slot?.motivo && (
-                    <p className="text-caption text-paper-500 pl-[5.5rem] -mt-1">{slot.motivo}</p>
-                  )}
+                    {ricetta && slot?.motivo && (
+                      <span className="block text-caption text-paper-500 pl-[5.5rem] -mt-1">{slot.motivo}</span>
+                    )}
+                  </button>
                   {!ricetta && aperto && (
-                    <div className="pl-[5.5rem] flex flex-col gap-1.5 -mt-0.5">
+                    <div className="pl-[6.5rem] pr-4 pb-2.5 flex flex-col gap-1.5 -mt-1">
                       {aperto.candidati.map((c) => {
                         const candidata = ricette.find((r) => r.id === c.ricettaId);
                         if (!candidata) return null;

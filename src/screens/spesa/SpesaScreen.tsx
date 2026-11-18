@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw, ShoppingBasket, Plus, Trash2 } from "lucide-react";
+import { RotateCcw, ShoppingBasket, Plus, Trash2, ChevronDown, Home } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
 import { PAGE_ACCENT, PAGE_BLOB } from "../../components/WheelNav";
 import { EmptyState } from "../../components/EmptyState";
@@ -12,7 +12,7 @@ import { REPARTI, type Reparto, type VoceSpesa } from "../../types";
 import { risolviCategoria, impareCategoria, indizioCategoria, ORDINE_SCAFFALI } from "../../lib/smistamento";
 import { trovaCorrispondenzaDispensa } from "../../lib/dispensaMatch";
 import { SCAN_BUTTON_CLEARANCE } from "../../components/barcode/BarcodeScanButton";
-import { VoceRow } from "./components/VoceRow";
+import { VoceRow, type StatoVoce } from "./components/VoceRow";
 import { UsataDaSheet } from "./components/UsataDaSheet";
 import { EditVoceSheet } from "./components/EditVoceSheet";
 import { PerPastoView } from "./components/PerPastoView";
@@ -29,6 +29,9 @@ export function SpesaScreen() {
   const aggiungiManuale = useShoppingStore((s) => s.aggiungiManuale);
   const azzeraSpunte = useShoppingStore((s) => s.azzeraSpunte);
   const svuotaTutto = useShoppingStore((s) => s.svuotaTutto);
+  const impostaStato = useShoppingStore((s) => s.impostaStato);
+  const rimuoviVoce = useShoppingStore((s) => s.rimuoviVoce);
+  const aggiungiVoceDispensa = useDispensaStore((s) => s.aggiungiVoce);
   const dispensaAttiva = useDispensaStore((s) => s.dispense.find((d) => d.id === s.dispensaAttivaId) ?? s.dispense[0]);
   const showToast = useToastStore((s) => s.show);
 
@@ -39,9 +42,26 @@ export function SpesaScreen() {
   const [voceModifica, setVoceModifica] = useState<VoceSpesa | null>(null);
   const [vista, setVista] = useState<Vista>("reparto");
   const [confermaSvuota, setConfermaSvuota] = useState(false);
+  const [rigaAperta, setRigaAperta] = useState<string | null>(null);
+  const [inCasaAperto, setInCasaAperto] = useState(false);
 
-  const prese = voci.filter((v) => v.presa).length;
-  const completata = voci.length > 0 && prese === voci.length;
+  /** Stato effettivo di ogni voce: la tua scelta, oppure (se non hai scelto) quello che dice la dispensa. */
+  const statoDi = useMemo(() => {
+    const m = new Map<string, { stato: StatoVoce; daDispensa: boolean }>();
+    for (const v of voci) {
+      if (v.presa) m.set(v.id, { stato: "carrello", daDispensa: false });
+      else if (v.giaInCasa === true) m.set(v.id, { stato: "in-casa", daDispensa: false });
+      else if (v.giaInCasa === undefined && !v.giaInDispensaIgnorato && trovaCorrispondenzaDispensa(v.nome, dispensaAttiva))
+        m.set(v.id, { stato: "in-casa", daDispensa: true });
+      else m.set(v.id, { stato: "da-comprare", daDispensa: false });
+    }
+    return m;
+  }, [voci, dispensaAttiva]);
+
+  const conteggio = { "da-comprare": 0, carrello: 0, "in-casa": 0 } as Record<StatoVoce, number>;
+  for (const { stato } of statoDi.values()) conteggio[stato]++;
+  const prese = conteggio.carrello;
+  const completata = voci.length > 0 && conteggio["da-comprare"] === 0 && prese > 0;
   const eraCompletataRef = useRef(completata);
 
   useEffect(() => {
@@ -65,10 +85,41 @@ export function SpesaScreen() {
     return REPARTI.map((r) => ({
       reparto: r,
       voci: voci
-        .filter((v) => v.reparto === r.value)
+        .filter((v) => v.reparto === r.value && statoDi.get(v.id)?.stato !== "in-casa")
         .sort((a, b) => Number(a.presa) - Number(b.presa)),
     })).filter((g) => g.voci.length > 0);
-  }, [voci]);
+  }, [voci, statoDi]);
+  const vociInCasa = voci.filter((v) => statoDi.get(v.id)?.stato === "in-casa");
+
+  // Reparti "da scorta": se dici che ce l'hai, lo segno anche in dispensa,
+  // così le prossime liste lo sanno da sole (olio, sale, pasta...). Frutta,
+  // verdura, carne e latticini no: si finiscono, la dispensa resterebbe falsa.
+  const REPARTI_SCORTA = new Set(["dispensa", "condimenti-spezie", "bevande", "surgelati"]);
+
+  const cambiaStato = (voce: VoceSpesa, stato: StatoVoce) => {
+    impostaStato(voce.id, stato);
+    if (stato === "in-casa" && REPARTI_SCORTA.has(voce.reparto) && dispensaAttiva && !trovaCorrispondenzaDispensa(voce.nome, dispensaAttiva)) {
+      aggiungiVoceDispensa(dispensaAttiva.id, { nome: voce.nome, categoria: voce.reparto });
+      showToast(`${voce.nome}: ce l'hai, segnato anche in dispensa`);
+    }
+  };
+
+  const riga = (voce: VoceSpesa) => {
+    const info = statoDi.get(voce.id) ?? { stato: "da-comprare" as StatoVoce, daDispensa: false };
+    return (
+      <VoceRow
+        key={voce.id}
+        voce={voce}
+        stato={info.stato}
+        daDispensa={info.daDispensa}
+        aperta={rigaAperta === voce.id}
+        onApri={(aperta) => setRigaAperta(aperta ? voce.id : null)}
+        onTapTesto={() => handleTapTesto(voce)}
+        onCambiaStato={(stato) => cambiaStato(voce, stato)}
+        onElimina={voce.manuale ? () => rimuoviVoce(voce.id) : undefined}
+      />
+    );
+  };
 
   const handleAggiungi = () => {
     const nome = nuovaVoce.trim();
@@ -162,7 +213,7 @@ export function SpesaScreen() {
           </div>
           {voci.length > 0 && (
             <span className="text-body-sm text-paper-500 truncate">
-              {prese} di {voci.length} prese
+              {conteggio["da-comprare"] > 0 ? `${conteggio["da-comprare"]} da comprare` : `${prese} nel carrello`}
             </span>
           )}
         </div>
@@ -186,24 +237,43 @@ export function SpesaScreen() {
           description="Aggiorna la lista dal piano pasti o aggiungi una voce manuale per iniziare."
         />
       ) : (
-        <div className="px-4 flex flex-col gap-5 mt-5">
+        <div className="px-4 flex flex-col gap-5 mt-4">
+          <p className="text-caption text-paper-500 px-1 -mb-2">
+            Scorri una voce verso sinistra: <strong className="font-semibold">Ce l'ho già</strong> oppure{" "}
+            <strong className="font-semibold">Nel carrello</strong>.
+          </p>
           {gruppi.map(({ reparto, voci: vociReparto }) => (
             <div key={reparto.value}>
               <h3 className="text-body-sm font-semibold text-paper-500 uppercase tracking-wide px-1 mb-1.5">
                 {reparto.label}
               </h3>
               <Card padded={false} className="divide-y divide-paper-100 overflow-hidden">
-                {vociReparto.map((voce) => (
-                  <VoceRow
-                    key={voce.id}
-                    voce={voce}
-                    onTapTesto={() => handleTapTesto(voce)}
-                    corrispondenza={trovaCorrispondenzaDispensa(voce.nome, dispensaAttiva)}
-                  />
-                ))}
+                {vociReparto.map(riga)}
               </Card>
             </div>
           ))}
+          {gruppi.length === 0 && vociInCasa.length > 0 && (
+            <p className="text-body-md text-paper-600 text-center py-6">Hai già tutto in casa: niente da comprare 🎉</p>
+          )}
+          {vociInCasa.length > 0 && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setInCasaAperto((v) => !v)}
+                className="w-full flex items-center justify-between px-1 mb-1.5 text-body-sm font-semibold text-paper-500 uppercase tracking-wide"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Home size={14} /> Già in casa · {vociInCasa.length}
+                </span>
+                <ChevronDown size={16} className={cn("transition-transform", inCasaAperto && "rotate-180")} />
+              </button>
+              {inCasaAperto && (
+                <Card padded={false} className="divide-y divide-paper-100 overflow-hidden">
+                  {vociInCasa.map(riga)}
+                </Card>
+              )}
+            </div>
+          )}
         </div>
       )}
 

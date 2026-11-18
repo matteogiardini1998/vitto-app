@@ -177,6 +177,12 @@ export type VoceSpesa = {
   usataDa?: { ricettaNome: string; chiaveSlot: string }[];
   /** L'utente ha scelto "Compro comunque" sul badge "già in dispensa": non riproporglielo per questa voce. */
   giaInDispensaIgnorato?: boolean;
+  /**
+   * "Ce l'ho già" (swipe). `true` = l'ho in casa, non va comprata; `false` =
+   * va comprata anche se la dispensa dice di averla; assente = decide la
+   * dispensa (se c'è una voce corrispondente, conta come già in casa).
+   */
+  giaInCasa?: boolean;
 };
 
 export type IconaDispensa = "credenza" | "frigo" | "casa" | "valigia" | "ufficio";

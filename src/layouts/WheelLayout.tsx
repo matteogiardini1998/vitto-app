@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, useTransform, useMotionValue, type MotionValue } from "framer-motion";
 import { CalendarDays, BookOpen, ShoppingBasket, Archive } from "lucide-react";
@@ -66,11 +66,19 @@ export function WheelLayout() {
   const lastScrollTops = useRef<number[]>(PAGES.map(() => 0));
   const scrollRefs = useRef<(HTMLDivElement | null)[]>(PAGES.map(() => null));
 
-  // Un gesto verticale iniziato sulla ruota (vedi WheelNav) scorre la pagina
-  // davvero attiva, esattamente come farebbe uno scroll nativo.
-  const handleVerticalPan = (deltaY: number) => {
-    scrollRefs.current[activeIndex]?.scrollBy({ top: deltaY });
-  };
+  // Le 4 pagine si creano una volta sola: così quando la ruota si mostra o si
+  // nasconde (a ogni cambio di verso dello scroll) React non ridisegna da capo
+  // tutte le pagine — il Ricettario da solo sono centinaia di schede, ed era
+  // questo a far "impallare" lo scroll.
+  const schermate = useMemo(() => SCREENS.map((Screen) => <Screen />), []);
+
+  // Nella PWA installata il documento non deve mai scorrere: scorrono solo le
+  // pagine. Altrimenti iOS lascia l'intera app "spostata in alto" dopo un
+  // gesto partito da un punto senza scroll (la ruota, il bottone centrale).
+  useEffect(() => {
+    document.documentElement.classList.add("app-bloccata");
+    return () => document.documentElement.classList.remove("app-bloccata");
+  }, []);
 
   const [scannerAperto, setScannerAperto] = useState(false);
   const paginaConScanner = location.pathname === "/dispensa" || location.pathname === "/spesa";
@@ -280,7 +288,7 @@ export function WheelLayout() {
       </button>
 
       <div className="flex-1 overflow-hidden relative" style={{ paddingBottom: WHEEL_CONTAINER_HEIGHT }} ref={trackWidth}>
-        {SCREENS.map((Screen, i) => (
+        {SCREENS.map((_, i) => (
           <PageSlot
             key={PAGES[i].path}
             index={i}
@@ -293,7 +301,7 @@ export function WheelLayout() {
               scrollRefs.current[i] = el;
             }}
           >
-            <Screen />
+            {schermate[i]}
           </PageSlot>
         ))}
       </div>
@@ -318,7 +326,6 @@ export function WheelLayout() {
         onSettle={handleSettle}
         onHubTap={() => navigate("/meal-prep/genera")}
         hidden={wheelHidden}
-        onVerticalPan={handleVerticalPan}
       />
     </div>
   );
@@ -333,7 +340,7 @@ export function WheelLayout() {
  * schermo vuoto dopo un giro completo. La pagina resta sempre la stessa
  * istanza: si sposta, non si smonta mai.
  */
-function PageSlot({
+const PageSlot = memo(function PageSlot({
   index,
   count,
   angle,
@@ -362,7 +369,7 @@ function PageSlot({
     <motion.div className="absolute inset-0 transform-gpu" style={{ x, willChange: "transform" }} aria-hidden={ariaHidden}>
       <div
         ref={scrollRef}
-        className="h-full overflow-y-auto no-scrollbar"
+        className="h-full overflow-y-auto no-scrollbar overscroll-contain"
         style={{ WebkitOverflowScrolling: "touch" }}
         onScroll={(e) => onScroll(index, e.currentTarget.scrollTop)}
       >
@@ -370,4 +377,4 @@ function PageSlot({
       </div>
     </motion.div>
   );
-}
+});

@@ -233,6 +233,18 @@
   #root {
     min-height: 100dvh;
   }
+  /* App aperta (pagine con la ruota): il documento è fermo, scorrono solo le pagine. */
+  html.app-bloccata,
+  html.app-bloccata body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  html.app-bloccata body {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+  }
 }
 
 @layer utilities {
@@ -250,6 +262,10 @@
     width: min(460px, calc(100vw - var(--shell-margin-x) * 2));
     height: calc(100dvh - var(--shell-margin-top) - var(--shell-margin-bottom));
     margin: var(--shell-margin-top) auto var(--shell-margin-bottom);
+  }
+  .recipe-card-lazy {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 104px;
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;

@@ -78,8 +78,6 @@ type WheelNavProps = {
   onHubTap: () => void;
   /** Vero mentre l'utente scorre la pagina verso il basso: la ruota si fa da parte. */
   hidden: boolean;
-  /** Un gesto iniziato sulla ruota si è rivelato verticale: qui si passa il delta Y allo scroll della pagina attiva. */
-  onVerticalPan?: (deltaY: number) => void;
 };
 
 /**
@@ -93,7 +91,7 @@ type WheelNavProps = {
  * ruota, comportamento invariato) o verticale (si passa il delta allo scroll
  * della pagina sottostante via `onVerticalPan`, e la ruota resta ferma).
  */
-export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden, onVerticalPan }: WheelNavProps) {
+export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden }: WheelNavProps) {
   // Le icone avanzano con "index*STEP - angle" (vedi WheelItem): al crescere
   // di `angle` la loro posizione sul cerchio arretra. Il tagliere deve girare
   // nello stesso verso percepito dalle icone, quindi la sua rotazione è
@@ -123,10 +121,10 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden
       modoGesto.current = Math.abs(info.offset.x) >= Math.abs(info.offset.y) ? "orizzontale" : "verticale";
     }
 
-    if (modoGesto.current === "verticale") {
-      onVerticalPan?.(-info.delta.y);
-      return;
-    }
+    // Un gesto verticale sulla ruota non fa nulla: prima scorreva la pagina
+    // sotto, ma lo scroll nascondeva la ruota mentre il dito era ancora
+    // sopra e il gesto restava "appeso", con lo schermo bloccato in alto.
+    if (modoGesto.current === "verticale") return;
 
     const deltaDeg = (info.delta.x / WHEEL_RADIUS) * (180 / Math.PI);
     angle.set(angle.get() - deltaDeg);
@@ -149,7 +147,7 @@ export function WheelNav({ pages, angle, activeIndex, onSettle, onHubTap, hidden
     <motion.div
       data-tutorial="wheel-nav"
       className="absolute inset-x-0 bottom-0 z-30"
-      style={{ height: WHEEL_CONTAINER_HEIGHT, pointerEvents: hidden ? "none" : "auto" }}
+      style={{ height: WHEEL_CONTAINER_HEIGHT, pointerEvents: hidden ? "none" : "auto", touchAction: "none" }}
       animate={{ y: hidden ? WHEEL_CONTAINER_HEIGHT * 0.65 : 0, opacity: hidden ? 0 : 1 }}
       transition={{ duration: 0.26, ease: [0.4, 0, 0.2, 1] }}
     >
@@ -220,7 +218,7 @@ function HubButton({ onClick }: { onClick: () => void }) {
       whileTap={{ scale: 0.92 }}
       aria-label="Pianifica pasti"
       data-tutorial="hub"
-      className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden border-[3px] border-paper-0 shadow-[0_3px_4px_rgb(20_12_8_/_0.4),0_16px_26px_-6px_rgb(20_12_8_/_0.55)]"
+      className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden touch-none select-none border-[3px] border-paper-0 shadow-[0_3px_4px_rgb(20_12_8_/_0.4),0_16px_26px_-6px_rgb(20_12_8_/_0.55)]"
       style={{ top: HUB_TOP, width: HUB_SIZE, height: HUB_SIZE }}
     >
       <img src={iconHubWood} alt="" className="h-full w-full object-cover" draggable={false} />

@@ -1,17 +1,24 @@
 import { Link } from "react-router-dom";
 import { Clock3, Euro, Heart, Pin } from "lucide-react";
-import { motion } from "framer-motion";
+import { memo, useMemo } from "react";
 import type { Ricetta } from "../../../types";
 import { Card } from "../../../components/Card";
 import { StarRating } from "../../../components/StarRating";
 import { PastoIcon } from "../../../components/PastoIcon";
 import { calcolaNutrizione, mostraComeStima } from "../../../lib/nutrizione";
 
-export function RecipeCard({ ricetta }: { ricetta: Ricetta }) {
-  const nutrizione = calcolaNutrizione(ricetta);
+/**
+ * Memo + nutrizione calcolata una volta per ricetta: nel Ricettario ce ne
+ * sono centinaia, e ridisegnarle tutte a ogni render (con il calcolo
+ * nutrizionale rifatto ingrediente per ingrediente) bloccava lo scroll.
+ * `recipe-card-lazy` fa saltare al browser il disegno delle schede fuori
+ * schermo (content-visibility).
+ */
+export const RecipeCard = memo(function RecipeCard({ ricetta }: { ricetta: Ricetta }) {
+  const nutrizione = useMemo(() => calcolaNutrizione(ricetta), [ricetta]);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
+    <div className="recipe-card-lazy">
       <Link to={`/ricettario/${ricetta.id}`}>
         <Card className="flex gap-3 relative active:bg-paper-100 transition-colors">
           <div className="h-14 w-14 shrink-0 rounded-md bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 flex items-center justify-center">
@@ -43,6 +50,6 @@ export function RecipeCard({ ricetta }: { ricetta: Ricetta }) {
           </div>
         </Card>
       </Link>
-    </motion.div>
+    </div>
   );
-}
+});

@@ -16,6 +16,8 @@ import { chiaveSlot, GIORNI, type Giorno, type Pasto } from "../../types";
 import { PASTO_LABEL } from "../../lib/recipeDisplay";
 import { giornoOggi } from "../../lib/date";
 import { generaVociAutomatiche } from "../../lib/shoppingList";
+import { ComandoPiano } from "../../components/ComandoPiano";
+import { useCambioPasto } from "../../hooks/useCambioPasto";
 
 type SheetAperto = "assegna" | "azioni" | "sposta" | null;
 
@@ -26,6 +28,9 @@ export function MealPrepScreen() {
   const ricette = useRecipeStore((s) => s.ricette);
   const generaAutomatiche = useShoppingStore((s) => s.generaAutomatiche);
   const showToast = useToastStore((s) => s.show);
+  const applyPiano = usePlanStore((s) => s.applyPiano);
+  const preferenze = usePlanStore((s) => s.preferenze);
+  const cambio = useCambioPasto(piano, (p) => applyPiano(p), preferenze);
 
   const [sheetAperto, setSheetAperto] = useState<SheetAperto>(null);
   const [target, setTarget] = useState<{ giorno: Giorno; pasto: Pasto } | null>(null);
@@ -97,6 +102,8 @@ export function MealPrepScreen() {
           </button>
         </div>
       )}
+
+      {!pianoVuoto && <ComandoPiano onComando={cambio.comando} className="mx-4 mb-2" />}
 
       <div className="px-4 mt-4" data-tutorial="meal-list">
         {GIORNI.map((giorno) => (

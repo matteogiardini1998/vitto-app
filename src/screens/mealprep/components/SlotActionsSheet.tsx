@@ -7,6 +7,8 @@ import { useRecipeStore } from "../../../store/recipeStore";
 import { useToastStore } from "../../../store/toastStore";
 import type { Giorno, Pasto } from "../../../types";
 import { PASTO_LABEL } from "../../../lib/recipeDisplay";
+import { useCambioPasto } from "../../../hooks/useCambioPasto";
+import { OPZIONI_CAMBIO } from "./opzioniCambio";
 
 type SlotActionsSheetProps = {
   open: boolean;
@@ -33,6 +35,10 @@ export function SlotActionsSheet({
   const removeSlot = usePlanStore((s) => s.removeSlot);
   const ricetta = useRecipeStore((s) => s.ricette.find((r) => r.id === slot?.ricettaId));
   const showToast = useToastStore((s) => s.show);
+  const piano = usePlanStore((s) => s.piano);
+  const applyPiano = usePlanStore((s) => s.applyPiano);
+  const preferenze = usePlanStore((s) => s.preferenze);
+  const cambio = useCambioPasto(piano, (p) => applyPiano(p), preferenze);
 
   if (!slot || !ricetta) return null;
 
@@ -48,6 +54,27 @@ export function SlotActionsSheet({
         <div>
           <h3 className="text-title-md font-display font-semibold text-paper-900">{ricetta.nome}</h3>
           <p className="text-body-sm text-paper-500 mt-0.5">{ricetta.descrizione}</p>
+          {cambio.avviso && <p className="text-body-sm text-danger-500 mt-2">{cambio.avviso}</p>}
+        </div>
+
+        <div>
+          <p className="text-caption text-paper-500 uppercase tracking-wide font-semibold mb-2">Cambia al volo</p>
+          <div className="flex flex-wrap gap-2">
+            {OPZIONI_CAMBIO.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => cambio.cambia(chiave, o.vincolo)}
+                className={
+                  o.id === "altra"
+                    ? "flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary-700 text-paper-50 text-body-sm font-medium active:bg-primary-800"
+                    : "flex items-center gap-1.5 h-9 px-3 rounded-full bg-paper-100 text-paper-700 text-body-sm font-medium active:bg-paper-200"
+                }
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex justify-center">

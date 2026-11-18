@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Piano } from "../types";
+import type { PreferenzeGenerazione } from "../lib/generator";
 
 type PlanState = {
   piano: Piano;
@@ -8,7 +9,9 @@ type PlanState = {
   removeSlot: (chiave: string) => void;
   setPorzioni: (chiave: string, porzioni: number) => void;
   toggleLock: (chiave: string) => void;
-  applyPiano: (piano: Piano) => void;
+  /** Preferenze dell'ultima generazione: servono per cambiare un pasto dopo, con le stesse regole. */
+  preferenze?: PreferenzeGenerazione;
+  applyPiano: (piano: Piano, preferenze?: PreferenzeGenerazione) => void;
   svuotaPiano: () => void;
 };
 
@@ -37,7 +40,7 @@ export const usePlanStore = create<PlanState>()(
           if (!slot) return s;
           return { piano: { ...s.piano, [chiave]: { ...slot, lockata: !slot.lockata } } };
         }),
-      applyPiano: (piano) => set({ piano }),
+      applyPiano: (piano, preferenze) => set((s) => ({ piano, preferenze: preferenze ?? s.preferenze })),
       svuotaPiano: () => set({ piano: {} }),
     }),
     { name: "mealprep-piano" },
