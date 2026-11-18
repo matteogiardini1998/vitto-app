@@ -11,10 +11,14 @@ import { RICETTE_COLAZIONE } from "./recipes/colazione";
 import { RICETTE_PRANZO } from "./recipes/pranzo";
 import { RICETTE_CENA } from "./recipes/cena";
 import { RICETTE_SPUNTINO } from "./recipes/spuntino";
+import { RICETTE_EXTRA_COLAZIONE, RICETTE_EXTRA_PRANZO, RICETTE_EXTRA_CENA, RICETTE_EXTRA_SPUNTINO } from "./recipes/espansione2026";
 import { toRicetta } from "./recipeSchema";
 import type { Ricetta } from "../types";
 
-const TUTTE_LE_RICETTE = [...RICETTE_COLAZIONE, ...RICETTE_PRANZO, ...RICETTE_CENA, ...RICETTE_SPUNTINO];
+const TUTTE_LE_RICETTE = [
+  ...RICETTE_COLAZIONE, ...RICETTE_PRANZO, ...RICETTE_CENA, ...RICETTE_SPUNTINO,
+  ...RICETTE_EXTRA_COLAZIONE, ...RICETTE_EXTRA_PRANZO, ...RICETTE_EXTRA_CENA, ...RICETTE_EXTRA_SPUNTINO,
+];
 
 export const SEED_RECIPES: Ricetta[] = TUTTE_LE_RICETTE.map((r) => ({
   ...toRicetta(r),

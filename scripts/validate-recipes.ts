@@ -8,10 +8,12 @@ import { RICETTE_COLAZIONE } from "../src/data/recipes/colazione.ts";
 import { RICETTE_PRANZO } from "../src/data/recipes/pranzo.ts";
 import { RICETTE_CENA } from "../src/data/recipes/cena.ts";
 import { RICETTE_SPUNTINO } from "../src/data/recipes/spuntino.ts";
+import { RICETTE_EXTRA_COLAZIONE, RICETTE_EXTRA_PRANZO, RICETTE_EXTRA_CENA, RICETTE_EXTRA_SPUNTINO } from "../src/data/recipes/espansione2026.ts";
 import { ingredientEsiste } from "../src/data/ingredients.ts";
 import { getDiete, getMesiStagione, ePienamenteDiStagione, eSempreDisponibile, type Recipe, type DietaCalcolata, type MealSlot } from "../src/data/recipeSchema.ts";
 
-const TUTTE: Recipe[] = [...RICETTE_COLAZIONE, ...RICETTE_PRANZO, ...RICETTE_CENA, ...RICETTE_SPUNTINO];
+const EXTRA: Recipe[] = [...RICETTE_EXTRA_COLAZIONE, ...RICETTE_EXTRA_PRANZO, ...RICETTE_EXTRA_CENA, ...RICETTE_EXTRA_SPUNTINO];
+const TUTTE: Recipe[] = [...RICETTE_COLAZIONE, ...RICETTE_PRANZO, ...RICETTE_CENA, ...RICETTE_SPUNTINO, ...EXTRA];
 
 const errori: string[] = [];
 const avvisi: string[] = [];
@@ -185,7 +187,7 @@ console.log(`\nRicette pranzo+cena "tutto l'anno" (nessun ingrediente stagionale
 if (pctSempre > 35) avvisi.push(`ricette "tutto l'anno" al ${pctSempre.toFixed(0)}%, sopra il tetto del 35%`);
 
 // ---- Riepilogo ----
-console.log(`\n=== Totale ricette: ${TUTTE.length} (colazione ${RICETTE_COLAZIONE.length}, pranzo ${RICETTE_PRANZO.length}, cena ${RICETTE_CENA.length}, spuntino ${RICETTE_SPUNTINO.length}) ===`);
+console.log(`\n=== Totale ricette: ${TUTTE.length} (colazione ${RICETTE_COLAZIONE.length}, pranzo ${RICETTE_PRANZO.length}, cena ${RICETTE_CENA.length}, spuntino ${RICETTE_SPUNTINO.length}, espansione 2026 ${EXTRA.length}) ===`);
 
 if (avvisi.length) {
   console.log(`\n--- ${avvisi.length} avvisi (non bloccanti) ---`);
